@@ -32,6 +32,11 @@
             text-align: center;
             margin-bottom: 40px;
         }
+        .description {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+        }
         h2 {
             color: #34495e;
             border-bottom: 2px solid #3498db;
@@ -198,11 +203,11 @@
 </head>
 <body>
     <div class="container">
-        <a href="index.html" class="back-link">← Back to API Demo</a>
+        <a href="index.html" class="back-link">← Back to Homepage</a>
         
-        <h1>🔄 Paytrail Payment Flow Demo</h1>
-        <p style="text-align: center; color: #7f8c8d; margin-bottom: 30px;">
-            Create a payment and test the actual payment flow with real Finnish payment providers
+        <h1>💳 Paytrail Payment Flow Demo</h1>
+        <p class="description">
+            Create a payment and test the actual payment flow with Paytrail payment providers
         </p>
 
         <!-- Payment Creation Form -->
@@ -260,9 +265,9 @@
         <div id="payment-response-section" style="display: none;">
             <h2>✅ Payment Created Successfully</h2>
             
-            <div class="transaction-info">
+            <div class="payment-info">
                 <strong>Transaction ID:</strong> <span id="transaction-id"></span><br>
-                <strong>Payment URL:</strong> <a id="payment-url" href="#" target="_blank">Open Payment Page</a>
+                <button id="hosted-payment-btn" class="btn" style="margin-top: 15px;" onclick="openHostedPaymentPage()">Go to Hosted Payment Page</button>
             </div>
 
             <h2>🏦 Select Payment Method</h2>
@@ -349,9 +354,9 @@
 
             // Update transaction info
             document.getElementById('transaction-id').textContent = paymentData.transactionId;
-            const paymentUrlLink = document.getElementById('payment-url');
-            paymentUrlLink.href = paymentData.href;
-            paymentUrlLink.textContent = paymentData.href;
+            
+            // Store the payment URL for the hosted payment page button
+            currentPaymentUrl = paymentData.href;
 
             // Show providers
             displayProviders(paymentData.providers);
@@ -454,6 +459,17 @@
             document.getElementById('payment-form-section').style.display = 'block';
             document.getElementById('payment-response-section').style.display = 'none';
             currentPaymentData = null;
+        }
+
+        // Store the current payment URL for the hosted payment page button
+        let currentPaymentUrl = null;
+
+        function openHostedPaymentPage() {
+            if (currentPaymentUrl) {
+                window.open(currentPaymentUrl, '_blank');
+            } else {
+                alert('No payment URL available. Please create a payment first.');
+            }
         }
     </script>
 </body>
