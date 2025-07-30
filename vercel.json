@@ -16,7 +16,27 @@
       "dest": "/server.js"
     },
     {
-      "src": "/(.*\\.(js|css|png|jpg|jpeg|gif|svg|ico|html))",
+      "src": "/payment-flow.html",
+      "dest": "/payment-flow.html"
+    },
+    {
+      "src": "/payment-success.html",
+      "dest": "/payment-success.html"
+    },
+    {
+      "src": "/payment-cancel.html",
+      "dest": "/payment-cancel.html"
+    },
+    {
+      "src": "/favicon.svg",
+      "dest": "/favicon.svg"
+    },
+    {
+      "src": "/favicon.png",
+      "dest": "/favicon.png"
+    },
+    {
+      "src": "/(.*\\.(js|css|png|jpg|jpeg|gif|svg|ico))",
       "dest": "/$1"
     },
     {
