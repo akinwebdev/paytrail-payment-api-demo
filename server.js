@@ -14,8 +14,6 @@ app.use(helmet({
 }));
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.static(__dirname)); // Serve files from project root
 
 // Paytrail API configuration
 const PAYTRAIL_API_URL = process.env.PAYTRAIL_API_URL || 'https://services.paytrail.com';
@@ -96,11 +94,6 @@ async function makePaytrailRequest(method, endpoint, body = null) {
         throw error;
     }
 }
-
-// Serve the main HTML file
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
 
 // GET /merchants/payment-providers
 app.get('/api/merchants/payment-providers', async (req, res) => {
@@ -190,6 +183,9 @@ app.post('/api/payments', async (req, res) => {
         res.status(error.response?.status || 500).json(errorResponse);
     }
 });
+
+// Serve static files (including payment-flow.html, etc.)
+app.use(express.static(__dirname));
 
 // Serve main page
 app.get('/', (req, res) => {
