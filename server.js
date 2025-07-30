@@ -187,6 +187,9 @@ app.post('/api/payments', async (req, res) => {
 // Serve static files (including payment-flow.html, etc.)
 app.use(express.static(__dirname));
 
+// Serve static files (HTML, CSS, JS, images, etc.)
+app.use(express.static(__dirname));
+
 // Serve main page
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
