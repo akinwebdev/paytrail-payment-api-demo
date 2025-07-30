@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Flow Demo - Paytrail API</title>
+    <!-- Favicon for different browsers and devices -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png?t=1753910000">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?t=1753910000">
+    <link rel="shortcut icon" href="/favicon.png?t=1753910000">
+    <!-- Apple touch icon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png?t=1753910000">
+    <!-- Meta theme color -->
+    <meta name="theme-color" content="#0066cc">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        h2 {
+            color: #34495e;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+        .btn {
+            background: #3498db;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #2980b9;
+        }
+        .btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+        }
+        .btn-create {
+            background: #27ae60;
+            width: 100%;
+            margin-top: 20px;
+        }
+        .btn-create:hover {
+            background: #219a52;
+        }
+        .payment-info {
+            background: #e8f4fd;
+            border: 1px solid #bee5eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .payment-providers {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .provider-form {
+            margin: 0;
+            padding: 0;
+        }
+
+        .provider-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            background: white;
+            text-decoration: none;
+            color: #2c3e50;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            width: 100%;
+            font-family: inherit;
+            font-size: inherit;
+        }
+
+        .provider-card:hover {
+            border-color: #3498db;
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .provider-icon {
+            width: 60px;
+            height: 40px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+
+        .provider-name {
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+
+        .provider-group {
+            font-size: 12px;
+            color: #7f8c8d;
+            text-transform: capitalize;
+        }
+        .group-section {
+            margin-bottom: 30px;
+        }
+        .group-header {
+            background: #34495e;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #3498db;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .transaction-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to API Demo</a>
+        
+        <h1>🔄 Paytrail Payment Flow Demo</h1>
+        <p style="text-align: center; color: #7f8c8d; margin-bottom: 30px;">
+            Create a payment and test the actual payment flow with real Finnish payment providers
+        </p>
+
+        <!-- Payment Creation Form -->
+        <div id="payment-form-section">
+            <h2>📝 Create Payment</h2>
+            <form id="payment-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="amount">Amount (cents)</label>
+                        <input type="number" id="amount" value="1590" min="100" required>
+                        <small style="color: #7f8c8d;">€15.90 = 1590 cents</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="currency">Currency</label>
+                        <select id="currency" required>
+                            <option value="EUR">EUR</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email">Customer Email</label>
+                        <input type="email" id="email" value="customer@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Customer Phone</label>
+                        <input type="tel" id="phone" value="+358441234567" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="firstName">First Name</label>
+                        <input type="text" id="firstName" value="John" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name</label>
+                        <input type="text" id="lastName" value="Doe" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Product Description</label>
+                    <input type="text" id="description" value="Demo Product" required>
+                </div>
+
+                <button type="submit" class="btn btn-create" id="create-btn">
+                    💳 Create Payment & Show Providers
+                </button>
+            </form>
+        </div>
+
+        <!-- Payment Response Section -->
+        <div id="payment-response-section" style="display: none;">
+            <h2>✅ Payment Created Successfully</h2>
+            
+            <div class="transaction-info">
+                <strong>Transaction ID:</strong> <span id="transaction-id"></span><br>
+                <strong>Payment URL:</strong> <a id="payment-url" href="#" target="_blank">Open Payment Page</a>
+            </div>
+
+            <h2>🏦 Select Payment Method</h2>
+            <p style="color: #7f8c8d;">Choose a payment provider to complete the payment:</p>
+            
+            <div id="providers-container">
+                <div class="loading">Loading payment providers...</div>
+            </div>
+
+            <button class="btn" onclick="createNewPayment()" style="margin-top: 20px;">
+                🔄 Create New Payment
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let currentPaymentData = null;
+
+        document.getElementById('payment-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            await createPayment();
+        });
+
+        async function createPayment() {
+            const createBtn = document.getElementById('create-btn');
+            createBtn.disabled = true;
+            createBtn.textContent = '⏳ Creating Payment...';
+
+            try {
+                const paymentData = {
+                    stamp: `payment-flow-${Date.now()}`,
+                    reference: `ref-${Date.now()}`,
+                    amount: parseInt(document.getElementById('amount').value),
+                    currency: document.getElementById('currency').value,
+                    language: 'FI',
+                    items: [{
+                        unitPrice: parseInt(document.getElementById('amount').value),
+                        units: 1,
+                        vatPercentage: 24,
+                        productCode: 'demo-flow',
+                        description: document.getElementById('description').value
+                    }],
+                    customer: {
+                        email: document.getElementById('email').value,
+                        firstName: document.getElementById('firstName').value,
+                        lastName: document.getElementById('lastName').value,
+                        phone: document.getElementById('phone').value
+                    },
+                    redirectUrls: {
+                        success: window.location.origin + '/payment-success.html',
+                        cancel: window.location.origin + '/payment-cancel.html'
+                    }
+                };
+
+                const response = await fetch('/api/payments', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(paymentData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    currentPaymentData = data;
+                    showPaymentResponse(data);
+                } else {
+                    throw new Error(data.error || 'Payment creation failed');
+                }
+            } catch (error) {
+                console.error('Error creating payment:', error);
+                alert('Error creating payment: ' + error.message);
+            } finally {
+                createBtn.disabled = false;
+                createBtn.textContent = '💳 Create Payment & Show Providers';
+            }
+        }
+
+        function showPaymentResponse(paymentData) {
+            // Hide form, show response
+            document.getElementById('payment-form-section').style.display = 'none';
+            document.getElementById('payment-response-section').style.display = 'block';
+
+            // Update transaction info
+            document.getElementById('transaction-id').textContent = paymentData.transactionId;
+            const paymentUrlLink = document.getElementById('payment-url');
+            paymentUrlLink.href = paymentData.href;
+            paymentUrlLink.textContent = paymentData.href;
+
+            // Show providers
+            displayProviders(paymentData.providers);
+        }
+
+        function displayProviders(providers) {
+            const container = document.getElementById('providers-container');
+            
+            if (!providers || providers.length === 0) {
+                container.innerHTML = '<div class="error">No payment providers available</div>';
+                return;
+            }
+
+            // Group providers by their group
+            const groupedProviders = providers.reduce((groups, provider) => {
+                const group = provider.group || 'other';
+                if (!groups[group]) {
+                    groups[group] = [];
+                }
+                groups[group].push(provider);
+                return groups;
+            }, {});
+
+            // Group name translations
+            const groupNames = {
+                'bank': '🏦 Bank Payments (Pankkimaksutavat)',
+                'mobile': '📱 Mobile Payments (Mobiilimaksutavat)',
+                'creditcard': '💳 Card Payments (Korttimaksutavat)',
+                'credit': '📄 Invoice & Installment (Lasku- ja osamaksutavat)',
+                'other': '🔧 Other Payment Methods'
+            };
+
+            let html = '';
+            for (const [groupKey, groupProviders] of Object.entries(groupedProviders)) {
+                const groupName = groupNames[groupKey] || `${groupKey.charAt(0).toUpperCase() + groupKey.slice(1)} Payments`;
+                
+                html += `
+                    <div class="group-section">
+                        <div class="group-header">${groupName}</div>
+                        <div class="payment-providers">
+                `;
+                
+                groupProviders.forEach(provider => {
+                    // Generate hidden input fields for provider parameters
+                    let hiddenInputs = '';
+                    if (provider.parameters && Array.isArray(provider.parameters)) {
+                        provider.parameters.forEach(param => {
+                            // Escape HTML entities in values to prevent XSS
+                            const escapedValue = String(param.value || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                            hiddenInputs += `<input type="hidden" name="${param.name}" value="${escapedValue}">`;
+                        });
+                    }
+                    
+                    html += `
+                        <form method="POST" action="${provider.url}" target="_blank" class="provider-form">
+                            ${hiddenInputs}
+                            <button type="submit" class="provider-card" onclick="trackProviderClick('${provider.id}', '${provider.name}')">
+                                <img src="${provider.icon}" alt="${provider.name}" class="provider-icon" 
+                                     onerror="this.style.display='none'">
+                                <div class="provider-name">${provider.name}</div>
+                                <div class="provider-group">${provider.group}</div>
+                            </button>
+                        </form>
+                    `;
+                });
+                
+                html += `
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function trackProviderClick(providerId, providerName) {
+            console.log(`🔄 User selected payment provider: ${providerName} (${providerId})`);
+            
+            // Show a brief notification
+            const notification = document.createElement('div');
+            notification.className = 'success';
+            notification.textContent = `Redirecting to ${providerName}...`;
+            notification.style.position = 'fixed';
+            notification.style.top = '20px';
+            notification.style.right = '20px';
+            notification.style.zIndex = '1000';
+            notification.style.minWidth = '300px';
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (document.body.contains(notification)) {
+                    document.body.removeChild(notification);
+                }
+            }, 3000);
+        }
+
+        function createNewPayment() {
+            // Reset form
+            document.getElementById('payment-form-section').style.display = 'block';
+            document.getElementById('payment-response-section').style.display = 'none';
+            currentPaymentData = null;
+        }
+    </script>
+</body>
+</html> 

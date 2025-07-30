@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Successful - Paytrail API</title>
+    <!-- Favicon for different browsers and devices -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png?t=1753910000">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?t=1753910000">
+    <link rel="shortcut icon" href="/favicon.png?t=1753910000">
+    <!-- Apple touch icon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png?t=1753910000">
+    <!-- Meta theme color -->
+    <meta name="theme-color" content="#0066cc">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background-color: #f5f5f5;
+            text-align: center;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .success-icon {
+            font-size: 80px;
+            color: #27ae60;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #27ae60;
+            margin-bottom: 20px;
+        }
+        p {
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        .btn {
+            background: #3498db;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #2980b9;
+        }
+        .btn-success {
+            background: #27ae60;
+        }
+        .btn-success:hover {
+            background: #219a52;
+        }
+        .payment-details {
+            background: #e8f5e8;
+            border: 1px solid #4caf50;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="success-icon">✅</div>
+        <h1>Payment Successful!</h1>
+        <p>Your payment has been processed successfully. Thank you for testing the Paytrail payment flow!</p>
+        
+        <div class="payment-details">
+            <h3>Payment Information:</h3>
+            <p><strong>Status:</strong> Payment completed successfully</p>
+            <p><strong>Transaction ID:</strong> <span id="transaction-id">-</span></p>
+            <p><strong>Timestamp:</strong> <span id="timestamp">-</span></p>
+        </div>
+        
+        <div>
+            <a href="payment-flow.html" class="btn btn-success">🔄 Create New Payment</a>
+            <a href="index.html" class="btn">📋 Back to API Demo</a>
+        </div>
+    </div>
+
+    <script>
+        // Extract query parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const transactionId = urlParams.get('checkout-transaction-id') || 'Not provided';
+        
+        // Update page with transaction details
+        document.getElementById('transaction-id').textContent = transactionId;
+        document.getElementById('timestamp').textContent = new Date().toLocaleString();
+        
+        // Log success for debugging
+        console.log('✅ Payment success page loaded with transaction ID:', transactionId);
+        console.log('Full URL parameters:', Object.fromEntries(urlParams));
+    </script>
+</body>
+</html> 
