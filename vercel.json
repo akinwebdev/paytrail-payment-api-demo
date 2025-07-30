@@ -4,6 +4,18 @@
     {
       "src": "server.js",
       "use": "@vercel/node"
+    },
+    {
+      "src": "*.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "*.svg",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "*.png",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
@@ -14,30 +26,6 @@
     {
       "src": "/health",
       "dest": "/server.js"
-    },
-    {
-      "src": "/payment-flow.html",
-      "dest": "/payment-flow.html"
-    },
-    {
-      "src": "/payment-success.html",
-      "dest": "/payment-success.html"
-    },
-    {
-      "src": "/payment-cancel.html",
-      "dest": "/payment-cancel.html"
-    },
-    {
-      "src": "/favicon.svg",
-      "dest": "/favicon.svg"
-    },
-    {
-      "src": "/favicon.png",
-      "dest": "/favicon.png"
-    },
-    {
-      "src": "/(.*\\.(js|css|png|jpg|jpeg|gif|svg|ico))",
-      "dest": "/$1"
     },
     {
       "src": "/",
