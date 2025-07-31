@@ -25,11 +25,17 @@
             padding: 30px;
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
         }
         h1 {
             color: #2c3e50;
             text-align: center;
             margin-bottom: 40px;
+        }
+        h2 {
+            color: #34495e;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
         }
         .button-section {
             display: flex;
@@ -99,16 +105,15 @@
             border-radius: 8px;
             padding: 20px;
             margin-bottom: 15px;
-            position: relative;
         }
         .result-item.success {
-            border-left: 4px solid #27ae60;
+            border-left: 5px solid #28a745;
         }
         .result-item.error {
-            border-left: 4px solid #e74c3c;
+            border-left: 5px solid #dc3545;
         }
         .result-item.loading {
-            border-left: 4px solid #f39c12;
+            border-left: 5px solid #f39c12;
         }
         .result-header {
             display: flex;
@@ -117,35 +122,35 @@
             margin-bottom: 10px;
         }
         .result-method {
-            font-weight: 600;
-            color: #2c3e50;
+            font-weight: bold;
+            color: #495057;
         }
         .result-status {
-            padding: 4px 8px;
-            border-radius: 4px;
+            padding: 4px 12px;
+            border-radius: 15px;
             font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
+            font-weight: bold;
         }
-        .status-success {
+        .result-status.success {
             background: #d4edda;
             color: #155724;
         }
-        .status-error {
+        .result-status.error {
             background: #f8d7da;
             color: #721c24;
         }
-        .status-loading {
+        .result-status.loading {
             background: #fff3cd;
             color: #856404;
         }
         .result-body {
-            background: white;
+            background: #ffffff;
             border: 1px solid #dee2e6;
             border-radius: 5px;
             padding: 15px;
             font-family: 'Courier New', monospace;
             font-size: 14px;
+            line-height: 1.4;
             max-height: 600px;
             overflow-y: auto;
             white-space: pre-wrap;
@@ -187,6 +192,190 @@
             border-radius: 5px;
             font-family: 'Courier New', monospace;
         }
+        .summary-box {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 5px solid #17a2b8;
+        }
+        .summary-box h4 {
+            margin: 0 0 10px 0;
+            color: #0c5460;
+        }
+        .summary-item {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        .summary-item strong {
+            color: #495057;
+        }
+        
+        /* Payment Flow Styles */
+        .payment-flow-section {
+            background: #f0f8ff;
+            border: 2px solid #3498db;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 30px 0;
+        }
+        .payment-flow-section h2 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+            border: none;
+            padding: 0;
+        }
+        .description {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .form-row .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+        }
+        .btn {
+            background: #3498db;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #2980b9;
+        }
+        .btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+        }
+        .btn-create {
+            background: #27ae60;
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+        }
+        .btn-create:hover {
+            background: #219a52;
+        }
+        .payment-info {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .payment-providers {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .provider-form {
+            margin: 0;
+        }
+        .provider-card {
+            width: 100%;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-family: inherit;
+        }
+        .provider-card:hover {
+            border-color: #3498db;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .provider-icon {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+        .provider-name {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        .provider-group {
+            font-size: 12px;
+            color: #7f8c8d;
+            text-transform: capitalize;
+        }
+        .group-section {
+            margin-bottom: 30px;
+        }
+        .group-header {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            background: #ecf0f1;
+            border-radius: 5px;
+            border-left: 4px solid #3498db;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .loading {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 15px 0;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -204,6 +393,7 @@
             </ul>
         </div>
 
+        <h2>🔧 API Testing Interface</h2>
         <div class="button-section">
             <button class="api-button btn-providers" onclick="callPaymentProviders()">
                 📋 Get Payment Providers
@@ -216,15 +406,6 @@
             </button>
         </div>
 
-        <div style="text-align: center; margin: 30px 0; padding: 20px; background: #e8f5e8; border: 1px solid #4caf50; border-radius: 8px;">
-            <h3 style="margin-top: 0; color: #2e7d32;">🔄 Test Complete Payment Flow</h3>
-            <p style="color: #555; margin-bottom: 20px;">Try the full payment experience with real Finnish payment providers!</p>
-            <a href="payment-flow.html" style="background: #27ae60; color: white; padding: 12px 24px; border-radius: 5px; text-decoration: none; font-weight: bold; display: inline-block; transition: background 0.3s;" 
-               onmouseover="this.style.background='#219a52'" onmouseout="this.style.background='#27ae60'">
-                🚀 Launch Payment Flow Demo
-            </a>
-        </div>
-
         <div class="results-section">
             <div class="results-header">
                 <h2 class="results-title">API Results</h2>
@@ -234,8 +415,90 @@
         </div>
     </div>
 
+    <!-- Payment Flow Demo Section -->
+    <div class="container payment-flow-section">
+        <h2>💳 Complete Payment Flow Demo</h2>
+        <p class="description">
+            Create a payment and test the actual payment flow with Paytrail payment providers
+        </p>
+
+        <!-- Payment Creation Form -->
+        <div id="payment-form-section">
+            <h2>📝 Create Payment</h2>
+            <form id="payment-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="amount">Amount (cents)</label>
+                        <input type="number" id="amount" value="1590" min="100" required>
+                        <small style="color: #7f8c8d;">€15.90 = 1590 cents</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="currency">Currency</label>
+                        <select id="currency" required>
+                            <option value="EUR">EUR</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email">Customer Email</label>
+                        <input type="email" id="email" value="customer@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Customer Phone</label>
+                        <input type="tel" id="phone" value="+358441234567" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="firstName">First Name</label>
+                        <input type="text" id="firstName" value="John" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name</label>
+                        <input type="text" id="lastName" value="Doe" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Product Description</label>
+                    <input type="text" id="description" value="Demo Product" required>
+                </div>
+
+                <button type="submit" class="btn btn-create" id="create-btn">
+                    💳 Create Payment & Show Providers
+                </button>
+            </form>
+        </div>
+
+        <!-- Payment Response Section -->
+        <div id="payment-response-section" style="display: none;">
+            <h2>✅ Payment Created Successfully</h2>
+            
+            <div class="payment-info">
+                <strong>Transaction ID:</strong> <span id="transaction-id"></span><br>
+                <button id="hosted-payment-btn" class="btn" style="margin-top: 15px;" onclick="openHostedPaymentPage()">Go to Hosted Payment Page</button>
+            </div>
+
+            <h2>🏦 Select Payment Method</h2>
+            <p style="color: #7f8c8d;">Choose a payment provider to complete the payment:</p>
+            
+            <div id="providers-container">
+                <div class="loading">Loading payment providers...</div>
+            </div>
+
+            <button class="btn" onclick="createNewPayment()" style="margin-top: 20px;">
+                🔄 Create New Payment
+            </button>
+        </div>
+    </div>
+
     <script>
         let resultCounter = 0;
+        let currentPaymentData = null;
+        let currentPaymentUrl = null;
 
         function addResult(method, endpoint, status, data) {
             const resultsDiv = document.getElementById('results');
@@ -248,138 +511,114 @@
                 <div class="result-item ${statusClass}" id="${resultId}">
                     <div class="result-header">
                         <span class="result-method">${method} ${endpoint}</span>
-                        <span class="result-status status-${statusText}">
-                            ${status === 'loading' ? '<span class="loading-spinner"></span>' : ''}${statusText}
-                        </span>
+                        <span class="result-status ${statusClass}">${statusText}</span>
                     </div>
-                    <div class="result-body">${typeof data === 'object' ? JSON.stringify(data, null, 2) : data}</div>
+                    <div class="result-body" id="${resultId}-body">
+                        ${status === 'loading' ? '<div class="loading-spinner"></div>Loading...' : ''}
+                    </div>
                 </div>
             `;
             
             resultsDiv.insertAdjacentHTML('afterbegin', resultHTML);
+            
+            if (status !== 'loading') {
+                updateResult(resultId, data);
+            }
+            
             return resultId;
         }
 
-        function updateResult(resultId, status, data) {
-            const resultDiv = document.getElementById(resultId);
-            if (!resultDiv) return;
-            
-            const statusClass = status >= 200 && status < 300 ? 'success' : 'error';
-            const statusText = status >= 200 && status < 300 ? 'success' : 'error';
-            
-            resultDiv.className = `result-item ${statusClass}`;
-            resultDiv.querySelector('.result-status').innerHTML = `<span class="status-${statusText}">${statusText.toUpperCase()}</span>`;
-            
-            // Enhanced display for better handling of large JSON responses
-            const resultBody = resultDiv.querySelector('.result-body');
-            if (typeof data === 'object') {
-                const jsonString = JSON.stringify(data, null, 2);
+        function updateResult(resultId, data) {
+            const bodyElement = document.getElementById(`${resultId}-body`);
+            if (bodyElement) {
+                let displayData = data;
                 
-                // Check if this is the grouped providers response and add summary
-                if (data.groups && data.providers && data.terms) {
-                    console.log('✅ Complete Paytrail Grouped Response Structure:');
-                    console.log(`📋 Terms: ${data.terms ? 'Present' : 'Missing'}`);
-                    console.log(`👥 Providers: ${data.providers ? data.providers.length + ' items' : 'Missing'}`);
-                    console.log(`📊 Groups: ${data.groups ? data.groups.length + ' groups' : 'Missing'}`);
-                    if (data.groups) {
-                        data.groups.forEach(group => {
-                            console.log(`  - ${group.name} (${group.providers ? group.providers.length : 0} providers)`);
-                        });
-                    }
-                    
-                    // Create enhanced display with summary + full JSON
+                // Special handling for grouped providers response
+                if (data && data.terms && data.providers && data.groups) {
                     const summaryHTML = `
-                        <div style="background: #e8f5e8; border: 1px solid #4caf50; border-radius: 5px; padding: 10px; margin-bottom: 10px; font-family: Arial, sans-serif; font-size: 13px;">
-                            <strong>✅ Complete Paytrail Response Structure:</strong><br>
-                            📋 Terms: <span style="color: #4caf50;">Present</span><br>
-                            👥 Providers: <span style="color: #4caf50;">${data.providers.length} items</span><br>
-                            📊 Groups: <span style="color: #4caf50;">${data.groups.length} groups</span><br>
-                            ${data.groups.map(group => `&nbsp;&nbsp;• ${group.name} (${group.providers ? group.providers.length : 0} providers)`).join('<br>')}
+                        <div class="summary-box">
+                            <h4>📊 Grouped Providers Summary</h4>
+                            <div class="summary-item"><strong>Terms:</strong> Available</div>
+                            <div class="summary-item"><strong>Providers:</strong> ${data.providers.length} payment methods</div>
+                            <div class="summary-item"><strong>Groups:</strong> ${data.groups.length} categories</div>
+                            ${data.groups.map(group => 
+                                `<div class="summary-item" style="margin-left: 15px;">• ${group.name}: ${group.providers.length} providers</div>`
+                            ).join('')}
                         </div>
-                        <div style="white-space: pre-wrap; font-family: 'Courier New', monospace;">${jsonString}</div>
                     `;
-                    resultBody.innerHTML = summaryHTML;
+                    bodyElement.innerHTML = summaryHTML + JSON.stringify(displayData, null, 2);
                 } else {
-                    resultBody.textContent = jsonString;
+                    bodyElement.textContent = JSON.stringify(displayData, null, 2);
                 }
-            } else {
-                resultBody.textContent = data;
             }
         }
 
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+            resultCounter = 0;
+        }
+
         async function callPaymentProviders() {
-            const button = event.target;
-            button.disabled = true;
-            
-            const resultId = addResult('GET', '/merchants/payment-providers', 'loading', 'Fetching payment providers...');
+            const resultId = addResult('GET', '/api/merchants/payment-providers', 'loading');
             
             try {
                 const response = await fetch('/api/merchants/payment-providers');
                 const data = await response.json();
-                updateResult(resultId, response.status, data);
+                
+                document.getElementById(resultId).className = `result-item ${response.ok ? 'success' : 'error'}`;
+                document.querySelector(`#${resultId} .result-status`).className = `result-status ${response.ok ? 'success' : 'error'}`;
+                document.querySelector(`#${resultId} .result-status`).textContent = response.ok ? 'success' : 'error';
+                
+                updateResult(resultId, data);
             } catch (error) {
-                updateResult(resultId, 500, { error: error.message });
-            } finally {
-                button.disabled = false;
+                document.getElementById(resultId).className = 'result-item error';
+                document.querySelector(`#${resultId} .result-status`).className = 'result-status error';
+                document.querySelector(`#${resultId} .result-status`).textContent = 'error';
+                updateResult(resultId, { error: error.message });
             }
         }
 
         async function callGroupedProviders() {
-            const button = event.target;
-            button.disabled = true;
-            
-            const resultId = addResult('GET', '/merchants/grouped-payment-providers', 'loading', 'Fetching grouped providers...');
+            const resultId = addResult('GET', '/api/merchants/grouped-payment-providers', 'loading');
             
             try {
                 const response = await fetch('/api/merchants/grouped-payment-providers');
                 const data = await response.json();
-                updateResult(resultId, response.status, data);
+                
+                document.getElementById(resultId).className = `result-item ${response.ok ? 'success' : 'error'}`;
+                document.querySelector(`#${resultId} .result-status`).className = `result-status ${response.ok ? 'success' : 'error'}`;
+                document.querySelector(`#${resultId} .result-status`).textContent = response.ok ? 'success' : 'error';
+                
+                updateResult(resultId, data);
             } catch (error) {
-                updateResult(resultId, 500, { error: error.message });
-            } finally {
-                button.disabled = false;
+                document.getElementById(resultId).className = 'result-item error';
+                document.querySelector(`#${resultId} .result-status`).className = 'result-status error';
+                document.querySelector(`#${resultId} .result-status`).textContent = 'error';
+                updateResult(resultId, { error: error.message });
             }
         }
 
         async function createPayment() {
-            const button = event.target;
-            button.disabled = true;
-            
-            const resultId = addResult('POST', '/payments', 'loading', 'Creating payment...');
+            const resultId = addResult('POST', '/api/payments', 'loading');
             
             const paymentData = {
-                stamp: `payment-${Date.now()}`,
+                stamp: `test-payment-${Date.now()}`,
                 reference: `ref-${Date.now()}`,
-                amount: 1590, // €15.90 in cents
+                amount: 1590,
                 currency: 'EUR',
                 language: 'FI',
                 items: [{
                     unitPrice: 1590,
                     units: 1,
                     vatPercentage: 24,
-                    productCode: 'demo-product',
-                    description: 'Demo Product'
+                    productCode: 'test-product',
+                    description: 'Test Product'
                 }],
                 customer: {
-                    email: 'demo@example.com',
-                    firstName: 'John',
-                    lastName: 'Doe',
-                    phone: '+358441234567',
-                    vatId: 'FI12345678'
-                },
-                deliveryAddress: {
-                    streetAddress: 'Testikatu 1',
-                    postalCode: '00100',
-                    city: 'Helsinki',
-                    county: 'Uusimaa',
-                    country: 'FI'
-                },
-                invoicingAddress: {
-                    streetAddress: 'Testikatu 1',
-                    postalCode: '00100',
-                    city: 'Helsinki',
-                    county: 'Uusimaa',
-                    country: 'FI'
+                    email: 'test@example.com',
+                    firstName: 'Test',
+                    lastName: 'User',
+                    phone: '+358441234567'
                 },
                 redirectUrls: {
                     success: 'https://example.com/success',
@@ -395,18 +634,210 @@
                     },
                     body: JSON.stringify(paymentData)
                 });
+                
                 const data = await response.json();
-                updateResult(resultId, response.status, data);
+                
+                document.getElementById(resultId).className = `result-item ${response.ok ? 'success' : 'error'}`;
+                document.querySelector(`#${resultId} .result-status`).className = `result-status ${response.ok ? 'success' : 'error'}`;
+                document.querySelector(`#${resultId} .result-status`).textContent = response.ok ? 'success' : 'error';
+                
+                // Show both request payload and response
+                const resultData = {
+                    requestPayload: paymentData,
+                    response: data
+                };
+                
+                updateResult(resultId, resultData);
             } catch (error) {
-                updateResult(resultId, 500, { error: error.message });
-            } finally {
-                button.disabled = false;
+                document.getElementById(resultId).className = 'result-item error';
+                document.querySelector(`#${resultId} .result-status`).className = 'result-status error';
+                document.querySelector(`#${resultId} .result-status`).textContent = 'error';
+                updateResult(resultId, { error: error.message });
             }
         }
 
-        function clearResults() {
-            document.getElementById('results').innerHTML = '';
-            resultCounter = 0;
+        // Payment Flow Demo JavaScript
+        document.getElementById('payment-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            await createPaymentFlow();
+        });
+
+        async function createPaymentFlow() {
+            const createBtn = document.getElementById('create-btn');
+            createBtn.disabled = true;
+            createBtn.textContent = '⏳ Creating Payment...';
+
+            try {
+                const paymentData = {
+                    stamp: `payment-flow-${Date.now()}`,
+                    reference: `ref-${Date.now()}`,
+                    amount: parseInt(document.getElementById('amount').value),
+                    currency: document.getElementById('currency').value,
+                    language: 'FI',
+                    items: [{
+                        unitPrice: parseInt(document.getElementById('amount').value),
+                        units: 1,
+                        vatPercentage: 24,
+                        productCode: 'demo-flow',
+                        description: document.getElementById('description').value
+                    }],
+                    customer: {
+                        email: document.getElementById('email').value,
+                        firstName: document.getElementById('firstName').value,
+                        lastName: document.getElementById('lastName').value,
+                        phone: document.getElementById('phone').value
+                    },
+                    redirectUrls: {
+                        success: window.location.origin + '/payment-success.html',
+                        cancel: window.location.origin + '/payment-cancel.html'
+                    }
+                };
+
+                const response = await fetch('/api/payments', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(paymentData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    currentPaymentData = data;
+                    showPaymentResponse(data);
+                } else {
+                    throw new Error(data.error || 'Payment creation failed');
+                }
+            } catch (error) {
+                console.error('Error creating payment:', error);
+                alert('Error creating payment: ' + error.message);
+            } finally {
+                createBtn.disabled = false;
+                createBtn.textContent = '💳 Create Payment & Show Providers';
+            }
+        }
+
+        function showPaymentResponse(paymentData) {
+            // Hide form, show response
+            document.getElementById('payment-form-section').style.display = 'none';
+            document.getElementById('payment-response-section').style.display = 'block';
+
+            // Update transaction info
+            document.getElementById('transaction-id').textContent = paymentData.transactionId;
+            
+            // Store the payment URL for the hosted payment page button
+            currentPaymentUrl = paymentData.href;
+
+            // Show providers
+            displayProviders(paymentData.providers);
+        }
+
+        function displayProviders(providers) {
+            const container = document.getElementById('providers-container');
+            
+            if (!providers || providers.length === 0) {
+                container.innerHTML = '<div class="error">No payment providers available</div>';
+                return;
+            }
+
+            // Group providers by their group
+            const groupedProviders = providers.reduce((groups, provider) => {
+                const group = provider.group || 'other';
+                if (!groups[group]) {
+                    groups[group] = [];
+                }
+                groups[group].push(provider);
+                return groups;
+            }, {});
+
+            // Group name translations
+            const groupNames = {
+                'bank': '🏦 Bank Payments (Pankkimaksutavat)',
+                'mobile': '📱 Mobile Payments (Mobiilimaksutavat)',
+                'creditcard': '💳 Card Payments (Korttimaksutavat)',
+                'credit': '📄 Invoice & Installment (Lasku- ja osamaksutavat)',
+                'other': '🔧 Other Payment Methods'
+            };
+
+            let html = '';
+            for (const [groupKey, groupProviders] of Object.entries(groupedProviders)) {
+                const groupName = groupNames[groupKey] || `${groupKey.charAt(0).toUpperCase() + groupKey.slice(1)} Payments`;
+                
+                html += `
+                    <div class="group-section">
+                        <div class="group-header">${groupName}</div>
+                        <div class="payment-providers">
+                `;
+                
+                groupProviders.forEach(provider => {
+                    // Generate hidden input fields for provider parameters
+                    let hiddenInputs = '';
+                    if (provider.parameters && Array.isArray(provider.parameters)) {
+                        provider.parameters.forEach(param => {
+                            // Escape HTML entities in values to prevent XSS
+                            const escapedValue = String(param.value || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                            hiddenInputs += `<input type="hidden" name="${param.name}" value="${escapedValue}">`;
+                        });
+                    }
+                    
+                    html += `
+                        <form method="POST" action="${provider.url}" target="_blank" class="provider-form">
+                            ${hiddenInputs}
+                            <button type="submit" class="provider-card" onclick="trackProviderClick('${provider.id}', '${provider.name}')">
+                                <img src="${provider.icon}" alt="${provider.name}" class="provider-icon" 
+                                     onerror="this.style.display='none'">
+                                <div class="provider-name">${provider.name}</div>
+                                <div class="provider-group">${provider.group}</div>
+                            </button>
+                        </form>
+                    `;
+                });
+                
+                html += `
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function trackProviderClick(providerId, providerName) {
+            console.log(`🔄 User selected payment provider: ${providerName} (${providerId})`);
+            
+            // Show a brief notification
+            const notification = document.createElement('div');
+            notification.className = 'success';
+            notification.textContent = `Redirecting to ${providerName}...`;
+            notification.style.position = 'fixed';
+            notification.style.top = '20px';
+            notification.style.right = '20px';
+            notification.style.zIndex = '1000';
+            notification.style.minWidth = '300px';
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (document.body.contains(notification)) {
+                    document.body.removeChild(notification);
+                }
+            }, 3000);
+        }
+
+        function createNewPayment() {
+            // Reset form
+            document.getElementById('payment-form-section').style.display = 'block';
+            document.getElementById('payment-response-section').style.display = 'none';
+            currentPaymentData = null;
+        }
+
+        function openHostedPaymentPage() {
+            if (currentPaymentUrl) {
+                window.open(currentPaymentUrl, '_blank');
+            } else {
+                alert('No payment URL available. Please create a payment first.');
+            }
         }
     </script>
 </body>
