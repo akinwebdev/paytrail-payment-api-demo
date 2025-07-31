@@ -75,6 +75,7 @@
         }
         .results-section {
             margin-top: 30px;
+            display: none; /* Initially hidden */
         }
         .results-header {
             display: flex;
@@ -491,7 +492,11 @@
 
         function addResult(method, endpoint, status, data) {
             const resultsDiv = document.getElementById('results');
+            const resultsSection = document.querySelector('.results-section');
             const resultId = `result-${++resultCounter}`;
+            
+            // Show the results section when adding the first result
+            resultsSection.style.display = 'block';
             
             const statusClass = status === 'loading' ? 'loading' : (status >= 200 && status < 300 ? 'success' : 'error');
             const statusText = status === 'loading' ? 'loading' : (status >= 200 && status < 300 ? 'success' : 'error');
@@ -545,6 +550,8 @@
         function clearResults() {
             document.getElementById('results').innerHTML = '';
             resultCounter = 0;
+            // Hide the results section when no results are displayed
+            document.querySelector('.results-section').style.display = 'none';
         }
 
         async function callPaymentProviders() {
