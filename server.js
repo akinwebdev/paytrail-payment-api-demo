@@ -15,6 +15,9 @@ app.use(helmet({
 app.use(cors());
 app.use(express.json());
 
+// Serve static files (HTML, CSS, JS, images, etc.) - must be early in middleware chain
+app.use(express.static(__dirname));
+
 // Paytrail API configuration
 const PAYTRAIL_API_URL = process.env.PAYTRAIL_API_URL || 'https://services.paytrail.com';
 const MERCHANT_ID = process.env.PAYTRAIL_MERCHANT_ID || '375917'; // Test merchant ID
@@ -183,12 +186,6 @@ app.post('/api/payments', async (req, res) => {
         res.status(error.response?.status || 500).json(errorResponse);
     }
 });
-
-// Serve static files (including payment-flow.html, etc.)
-app.use(express.static(__dirname));
-
-// Serve static files (HTML, CSS, JS, images, etc.)
-app.use(express.static(__dirname));
 
 // Serve main page
 app.get('/', (req, res) => {
