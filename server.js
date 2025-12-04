@@ -20,8 +20,8 @@ app.use(express.static(__dirname));
 
 // Paytrail API configuration
 const PAYTRAIL_API_URL = process.env.PAYTRAIL_API_URL || 'https://services.paytrail.com';
-const MERCHANT_ID = process.env.PAYTRAIL_MERCHANT_ID || '375917'; // Test merchant ID
-const SECRET_KEY = process.env.PAYTRAIL_SECRET_KEY || 'SAIPPUAKAUPPIAS'; // Test secret key
+const MERCHANT_ID = process.env.PAYTRAIL_MERCHANT_ID || '1100830'; // Merchant ID
+const SECRET_KEY = process.env.PAYTRAIL_SECRET_KEY || '49940e14fa2e814f39a4c69f7d798c01d14fba04f1fcae8cd985c2aa1585ebabd5575973ae26ab90'; // Secret key
 
 // Utility function to create HMAC signature for Paytrail API
 function createPaytrailSignature(method, uri, headers, body = '') {
