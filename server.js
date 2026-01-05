@@ -143,14 +143,43 @@ app.get('/documentation/', (req, res) => {
     res.redirect(301, '/documentation');
 });
 
-// Serve markdown files and assets for documentation (must be early)
-// Use app.use to catch all requests to this path
-app.use('/api-documentation_rev1/docs', (req, res) => {
-    // Get the file path from req.path (Express removes the matched prefix)
-    let requestedPath = req.path;
-    if (requestedPath.startsWith('/')) {
-        requestedPath = requestedPath.substring(1); // Remove leading slash
+// Test endpoint to verify files are in deployment
+app.get('/test-docs', (req, res) => {
+    const fs = require('fs');
+    const docsDir = path.join(__dirname, 'api-documentation_rev1', 'docs');
+    const exists = fs.existsSync(docsDir);
+    let files = [];
+    let error = null;
+    
+    if (exists) {
+        try {
+            files = fs.readdirSync(docsDir);
+            // Check for README.md specifically
+            const readmePath = path.join(docsDir, 'README.md');
+            const readmeExists = fs.existsSync(readmePath);
+            res.json({ 
+                docsDirExists: true, 
+                docsDir: docsDir,
+                __dirname: __dirname,
+                files: files,
+                readmeExists: readmeExists,
+                readmePath: readmePath
+            });
+        } catch (e) {
+            error = e.message;
+            res.json({ docsDirExists: true, error: error, docsDir: docsDir });
+        }
+    } else {
+        res.json({ docsDirExists: false, docsDir: docsDir, __dirname: __dirname });
     }
+});
+
+// Serve markdown files and assets for documentation (must be early)
+// Use a regex route to match all files under this path
+app.get(/^\/api-documentation_rev1\/docs\/(.+)$/, (req, res) => {
+    // Extract the file path from req.url
+    const match = req.url.match(/\/api-documentation_rev1\/docs\/(.+)/);
+    const requestedPath = match ? decodeURIComponent(match[1].split('?')[0]) : '';
     const filePath = path.join(__dirname, 'api-documentation_rev1', 'docs', requestedPath);
     
     console.log('📄 Serving documentation file - req.path:', req.path, 'req.url:', req.url);
