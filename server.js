@@ -144,9 +144,10 @@ app.get('/documentation/', (req, res) => {
 });
 
 // Serve markdown files and assets for documentation (must be early)
-app.get('/api-documentation_rev1/docs/*', (req, res) => {
-    // Get the file path from the request URL
-    const requestedPath = req.url.replace('/api-documentation_rev1/docs/', '').split('?')[0];
+// Use a catch-all pattern that matches everything after /api-documentation_rev1/docs/
+app.get('/api-documentation_rev1/docs/:file(*)', (req, res) => {
+    // Get the file path from the route parameter
+    const requestedPath = req.params.file || '';
     const filePath = path.join(__dirname, 'api-documentation_rev1', 'docs', requestedPath);
     
     console.log('📄 Serving documentation file:', requestedPath);
