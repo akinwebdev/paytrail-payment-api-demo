@@ -124,7 +124,9 @@ app.get('/documentation', (req, res) => {
     }
     
     console.log('✅ File exists, sending...');
-    res.sendFile(docPath, (err) => {
+    // Set content type explicitly
+    res.type('text/html');
+    res.sendFile(docPath, { root: __dirname }, (err) => {
         if (err) {
             console.error('❌ Error serving documentation:', err);
             res.status(500).json({ error: 'Failed to serve documentation', message: err.message });
@@ -291,10 +293,12 @@ app.use((req, res) => {
 });
 
 // Export app for Vercel serverless functions
+// Vercel will use this as the handler
 module.exports = app;
 
 // Start server (only when running locally, not on Vercel)
-if (process.env.VERCEL !== '1') {
+// Check for Vercel environment or if PORT is not set (serverless)
+if (!process.env.VERCEL && process.env.PORT) {
     app.listen(PORT, () => {
         console.log('🚀 Paytrail API Demo Server started');
         console.log(`📍 Server running at http://localhost:${PORT}`);

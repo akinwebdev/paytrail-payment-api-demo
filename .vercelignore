@@ -1,0 +1,3 @@
+# Ignore documentation.html from static serving
+# It should be served by the serverless function instead
+documentation.html
