@@ -17,7 +17,7 @@ app.use(express.json());
 
 // Debug middleware to log all requests
 app.use((req, res, next) => {
-    if (req.path.includes('documentation')) {
+    if (req.path.includes('documentation') || req.path.includes('api-documentation')) {
         console.log('🔍 Request received:', req.method, req.path, req.url);
     }
     next();
@@ -144,13 +144,17 @@ app.get('/documentation/', (req, res) => {
 });
 
 // Serve markdown files and assets for documentation (must be early)
-// Use a catch-all pattern that matches everything after /api-documentation_rev1/docs/
-app.get('/api-documentation_rev1/docs/:file(*)', (req, res) => {
-    // Get the file path from the route parameter
-    const requestedPath = req.params.file || '';
+// Use app.use to catch all requests to this path
+app.use('/api-documentation_rev1/docs', (req, res) => {
+    // Get the file path from req.path (Express removes the matched prefix)
+    let requestedPath = req.path;
+    if (requestedPath.startsWith('/')) {
+        requestedPath = requestedPath.substring(1); // Remove leading slash
+    }
     const filePath = path.join(__dirname, 'api-documentation_rev1', 'docs', requestedPath);
     
-    console.log('📄 Serving documentation file:', requestedPath);
+    console.log('📄 Serving documentation file - req.path:', req.path, 'req.url:', req.url);
+    console.log('Requested path:', requestedPath);
     console.log('Full path:', filePath);
     
     const ext = path.extname(filePath).toLowerCase();

@@ -24,6 +24,10 @@
       "dest": "/server.js"
     },
     {
+      "src": "/api-documentation_rev1/docs/(.*)",
+      "dest": "/server.js"
+    },
+    {
       "src": "/api-documentation_rev1/(.*)",
       "dest": "/server.js"
     },
