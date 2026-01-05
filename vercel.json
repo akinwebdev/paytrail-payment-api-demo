@@ -28,6 +28,14 @@
       "dest": "/server.js"
     },
     {
+      "src": "/documentation",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/api-documentation_rev1/(.*)",
+      "dest": "/server.js"
+    },
+    {
       "src": "/(.*)",
       "dest": "/server.js"
     }
