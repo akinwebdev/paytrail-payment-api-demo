@@ -3,10 +3,19 @@ const cors = require('cors');
 const helmet = require('helmet');
 const path = require('path');
 const crypto = require('crypto');
+const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Password for demo store access (from environment variable)
+const DEMO_PASSWORD = process.env.DEMO_STORE_PASSWORD;
+
+if (!DEMO_PASSWORD) {
+    console.error('❌ Error: DEMO_STORE_PASSWORD environment variable is required');
+    process.exit(1);
+}
 
 // Middleware
 app.use(helmet({
@@ -14,6 +23,81 @@ app.use(helmet({
 }));
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+// Simple in-memory session store (for demo purposes)
+const sessions = new Map();
+
+// Generate session ID
+function generateSessionId() {
+    return crypto.randomBytes(32).toString('hex');
+}
+
+// Authentication middleware
+function requireAuth(req, res, next) {
+    const sessionId = req.cookies.sessionId;
+    
+    console.log('🔒 Auth check - Path:', req.path, 'Session ID:', sessionId ? 'present' : 'missing');
+    
+    // Check if session is valid
+    if (sessionId && sessions.has(sessionId)) {
+        console.log('✅ Authenticated - allowing access');
+        return next();
+    }
+    
+    // Allow access to login page, logout, API endpoints, and health check
+    if (req.path === '/login' || req.path === '/logout' || req.path.startsWith('/api/') || req.path === '/health') {
+        console.log('✅ Public route - allowing access');
+        return next();
+    }
+    
+    // Redirect to login
+    console.log('❌ Not authenticated - redirecting to login');
+    res.redirect('/login');
+}
+
+// Login route (must be before authentication middleware)
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, 'login.html'));
+});
+
+app.post('/login', (req, res) => {
+    const { password } = req.body;
+    
+    if (password === DEMO_PASSWORD) {
+        // Create session
+        const sessionId = generateSessionId();
+        sessions.set(sessionId, {
+            authenticated: true,
+            createdAt: Date.now()
+        });
+        
+        // Set cookie
+        res.cookie('sessionId', sessionId, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 24 * 60 * 60 * 1000 // 24 hours
+        });
+        
+        res.redirect('/');
+    } else {
+        res.redirect('/login?error=1');
+    }
+});
+
+// Logout route
+app.get('/logout', (req, res) => {
+    const sessionId = req.cookies.sessionId;
+    if (sessionId) {
+        sessions.delete(sessionId);
+    }
+    res.clearCookie('sessionId');
+    res.redirect('/login');
+});
+
+// Apply authentication to all routes except login, logout, and API endpoints
+app.use(requireAuth);
 
 // Debug middleware to log all requests
 app.use((req, res, next) => {
