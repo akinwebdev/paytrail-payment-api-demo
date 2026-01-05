@@ -290,16 +290,22 @@ app.use((req, res) => {
     });
 });
 
-// Start server
-app.listen(PORT, () => {
-    console.log('🚀 Paytrail API Demo Server started');
-    console.log(`📍 Server running at http://localhost:${PORT}`);
-    console.log(`🌐 Open http://localhost:${PORT} in your browser to test the API`);
-    console.log('');
-    console.log('Available endpoints:');
-    console.log(`  🔗 GET  /api/merchants/payment-providers`);
-    console.log(`  🔗 GET  /api/merchants/grouped-payment-providers`);
-    console.log(`  🔗 POST /api/payments`);
-    console.log(`  🔗 GET  /health`);
-    console.log('');
-}); 
+// Export app for Vercel serverless functions
+module.exports = app;
+
+// Start server (only when running locally, not on Vercel)
+if (process.env.VERCEL !== '1') {
+    app.listen(PORT, () => {
+        console.log('🚀 Paytrail API Demo Server started');
+        console.log(`📍 Server running at http://localhost:${PORT}`);
+        console.log(`🌐 Open http://localhost:${PORT} in your browser to test the API`);
+        console.log('');
+        console.log('Available endpoints:');
+        console.log(`  🔗 GET  /api/merchants/payment-providers`);
+        console.log(`  🔗 GET  /api/merchants/grouped-payment-providers`);
+        console.log(`  🔗 POST /api/payments`);
+        console.log(`  🔗 GET  /health`);
+        console.log(`  🔗 GET  /documentation`);
+        console.log('');
+    });
+} 

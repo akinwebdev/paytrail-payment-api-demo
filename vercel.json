@@ -28,7 +28,7 @@
       "dest": "/server.js"
     },
     {
-      "src": "/documentation",
+      "src": "/documentation(.*)",
       "dest": "/server.js"
     },
     {
