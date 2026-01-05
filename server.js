@@ -143,6 +143,57 @@ app.get('/documentation/', (req, res) => {
     res.redirect(301, '/documentation');
 });
 
+// Serve markdown files and assets for documentation (must be early)
+app.get('/api-documentation_rev1/docs/*', (req, res) => {
+    // Get the file path from the request URL
+    const requestedPath = req.url.replace('/api-documentation_rev1/docs/', '').split('?')[0];
+    const filePath = path.join(__dirname, 'api-documentation_rev1', 'docs', requestedPath);
+    
+    console.log('📄 Serving documentation file:', requestedPath);
+    console.log('Full path:', filePath);
+    
+    const ext = path.extname(filePath).toLowerCase();
+    
+    // Set appropriate content type
+    if (ext === '.md') {
+        res.type('text/markdown');
+    } else if (ext === '.svg') {
+        res.type('image/svg+xml');
+    } else if (ext === '.png') {
+        res.type('image/png');
+    } else if (ext === '.jpg' || ext === '.jpeg') {
+        res.type('image/jpeg');
+    } else if (ext === '.css') {
+        res.type('text/css');
+    } else if (ext === '.yaml' || ext === '.yml') {
+        res.type('text/yaml');
+    }
+    
+    res.sendFile(filePath, (err) => {
+        if (err) {
+            console.error('❌ Error serving documentation file:', err.message);
+            console.error('Requested path:', requestedPath);
+            console.error('File path:', filePath);
+            // List files for debugging
+            const fs = require('fs');
+            try {
+                const docsDir = path.join(__dirname, 'api-documentation_rev1', 'docs');
+                if (fs.existsSync(docsDir)) {
+                    const files = fs.readdirSync(docsDir);
+                    console.error('Files in docs directory:', files);
+                } else {
+                    console.error('Docs directory does not exist:', docsDir);
+                }
+            } catch (e) {
+                console.error('Error reading docs directory:', e.message);
+            }
+            res.status(404).json({ error: 'File not found', path: requestedPath, fullPath: filePath });
+        } else {
+            console.log('✅ Documentation file served:', requestedPath);
+        }
+    });
+});
+
 // GET /merchants/payment-providers
 app.get('/api/merchants/payment-providers', async (req, res) => {
     try {
@@ -230,24 +281,6 @@ app.post('/api/payments', async (req, res) => {
         
         res.status(error.response?.status || 500).json(errorResponse);
     }
-});
-
-// Serve markdown files for documentation with correct content type
-app.get('/api-documentation_rev1/docs/:file(*)', (req, res) => {
-    const filePath = path.join(__dirname, 'api-documentation_rev1', 'docs', req.params.file);
-    const ext = path.extname(filePath).toLowerCase();
-    
-    // Set content type for markdown files
-    if (ext === '.md') {
-        res.type('text/markdown');
-    }
-    
-    res.sendFile(filePath, (err) => {
-        if (err) {
-            console.error('Error serving documentation file:', err);
-            res.status(404).send('File not found');
-        }
-    });
 });
 
 // Serve static files (HTML, CSS, JS, images, etc.) - must be after specific routes
