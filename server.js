@@ -116,20 +116,21 @@ app.get('/documentation', (req, res) => {
     console.log('Sending file from:', docPath);
     console.log('__dirname is:', __dirname);
     
-    // Check if file exists
-    const fs = require('fs');
-    if (!fs.existsSync(docPath)) {
-        console.error('❌ Documentation file not found at:', docPath);
-        return res.status(404).json({ error: 'Documentation file not found', path: docPath });
-    }
-    
-    console.log('✅ File exists, sending...');
     // Set content type explicitly
     res.type('text/html');
-    res.sendFile(docPath, { root: __dirname }, (err) => {
+    res.sendFile(docPath, (err) => {
         if (err) {
             console.error('❌ Error serving documentation:', err);
-            res.status(500).json({ error: 'Failed to serve documentation', message: err.message });
+            console.error('File path attempted:', docPath);
+            // List files in __dirname for debugging
+            const fs = require('fs');
+            try {
+                const files = fs.readdirSync(__dirname);
+                console.error('Files in __dirname:', files);
+            } catch (e) {
+                console.error('Error reading __dirname:', e.message);
+            }
+            res.status(500).json({ error: 'Failed to serve documentation', message: err.message, path: docPath });
         } else {
             console.log('✅ Documentation served successfully');
         }
