@@ -15,8 +15,13 @@ app.use(helmet({
 app.use(cors());
 app.use(express.json());
 
-// Serve static files (HTML, CSS, JS, images, etc.) - must be early in middleware chain
-app.use(express.static(__dirname));
+// Debug middleware to log all requests
+app.use((req, res, next) => {
+    if (req.path.includes('documentation')) {
+        console.log('🔍 Request received:', req.method, req.path, req.url);
+    }
+    next();
+});
 
 // Paytrail API configuration
 const PAYTRAIL_API_URL = process.env.PAYTRAIL_API_URL || 'https://services.paytrail.com';
@@ -103,6 +108,37 @@ async function makePaytrailRequest(method, endpoint, body = null) {
         throw error;
     }
 }
+
+// Serve documentation page (register early to ensure it's matched)
+app.get('/documentation', (req, res) => {
+    console.log('📚 Documentation route hit - Path:', req.path, 'URL:', req.url, 'Method:', req.method);
+    const docPath = path.join(__dirname, 'documentation.html');
+    console.log('Sending file from:', docPath);
+    console.log('__dirname is:', __dirname);
+    
+    // Check if file exists
+    const fs = require('fs');
+    if (!fs.existsSync(docPath)) {
+        console.error('❌ Documentation file not found at:', docPath);
+        return res.status(404).json({ error: 'Documentation file not found', path: docPath });
+    }
+    
+    console.log('✅ File exists, sending...');
+    res.sendFile(docPath, (err) => {
+        if (err) {
+            console.error('❌ Error serving documentation:', err);
+            res.status(500).json({ error: 'Failed to serve documentation', message: err.message });
+        } else {
+            console.log('✅ Documentation served successfully');
+        }
+    });
+});
+
+// Handle trailing slash
+app.get('/documentation/', (req, res) => {
+    console.log('📚 Documentation route hit (trailing slash)');
+    res.redirect(301, '/documentation');
+});
 
 // GET /merchants/payment-providers
 app.get('/api/merchants/payment-providers', async (req, res) => {
@@ -191,6 +227,34 @@ app.post('/api/payments', async (req, res) => {
         
         res.status(error.response?.status || 500).json(errorResponse);
     }
+});
+
+// Serve markdown files for documentation with correct content type
+app.get('/api-documentation_rev1/docs/:file(*)', (req, res) => {
+    const filePath = path.join(__dirname, 'api-documentation_rev1', 'docs', req.params.file);
+    const ext = path.extname(filePath).toLowerCase();
+    
+    // Set content type for markdown files
+    if (ext === '.md') {
+        res.type('text/markdown');
+    }
+    
+    res.sendFile(filePath, (err) => {
+        if (err) {
+            console.error('Error serving documentation file:', err);
+            res.status(404).send('File not found');
+        }
+    });
+});
+
+// Serve static files (HTML, CSS, JS, images, etc.) - must be after specific routes
+// Exclude documentation path from static serving
+app.use((req, res, next) => {
+    // Skip static serving for documentation routes
+    if (req.path === '/documentation' || req.path === '/documentation/' || req.path.startsWith('/api-documentation_rev1')) {
+        return next();
+    }
+    express.static(__dirname, { index: false })(req, res, next);
 });
 
 // Serve main page
