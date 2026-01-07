@@ -420,11 +420,224 @@
             margin: 1rem 0;
             color: #0B051D;
         }
+        /* Payment Selection UI Styles */
+        .payment-selection-ui {
+            max-width: 500px;
+            width: 100%;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .payment-header {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 0.75rem 1.5rem 0 1.5rem;
+            background: white;
+        }
+
+        .payment-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-square {
+            width: 40px;
+            height: 40px;
+            background: #E60094;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .logo-square svg {
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo-title {
+            font-weight: 700;
+            font-size: 1rem;
+            color: #0B051D;
+            line-height: 1.2;
+        }
+
+        .logo-subtitle {
+            font-size: 0.75rem;
+            color: #2C2242;
+            line-height: 1.2;
+        }
+
+        .language-selector {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .lang-btn {
+            background: transparent;
+            border: none;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+            color: #2C2242;
+            cursor: pointer;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .lang-btn.active {
+            color: #0B051D;
+            text-decoration: underline;
+            font-weight: 600;
+        }
+
+        .lang-btn:hover {
+            color: #E60094;
+        }
+
+        .close-payment-btn {
+            background: transparent;
+            border: none;
+            padding: 0.5rem;
+            cursor: pointer;
+            color: #2C2242;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .close-payment-btn:hover {
+            background: #F9F8F5;
+            color: #E60094;
+        }
+
+        .close-payment-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .amount-display {
+            padding: 1rem 1.5rem 0 1.5rem;
+            text-align: center;
+            background: white;
+        }
+
+        .amount-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0B051D;
+            margin-bottom: 0.5rem;
+        }
+
+        .merchant-info {
+            font-size: 0.875rem;
+            color: #2C2242;
+            line-height: 1.6;
+        }
+
+        .merchant-info div {
+            margin-bottom: 0.25rem;
+        }
+
+        .payment-heading {
+            padding: 0 1.5rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #0B051D;
+            margin: 1rem 0;
+            border: none;
+            padding-bottom: 0;
+        }
+
+        /* Payment Category Styles */
+        .payment-category {
+            background: #F5F5F5;
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+        }
+
+        .category-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #0B051D;
+            margin: 0;
+        }
+
+        .category-description {
+            font-size: 0.875rem;
+            color: #2C2242;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .category-providers {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .category-provider-logo {
+            height: 32px;
+            object-fit: contain;
+            max-width: 80px;
+        }
+
+        .category-provider-card {
+            background: white;
+            border: 1px solid #E4E3DF;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 100px;
+        }
+
+        .category-provider-card:hover {
+            border-color: #E60094;
+            box-shadow: 0 2px 8px rgba(230, 0, 148, 0.1);
+        }
+
+        .category-provider-card img {
+            max-height: 32px;
+            max-width: 100px;
+            object-fit: contain;
+        }
+
         .payment-providers {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            display: flex;
+            flex-direction: column;
             gap: 1rem;
-            margin-top: 1.5rem;
+            padding: 0 1.5rem;
+            margin-bottom: 1.5rem;
         }
 
         .provider-form {
@@ -433,39 +646,332 @@
 
         .provider-card {
             width: 100%;
-            background: #fff;
+            background: white;
             border: 1px solid #E4E3DF;
             border-radius: 12px;
-            padding: 1rem;
+            padding: 1.25rem;
             cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            text-align: left;
         }
 
         .provider-card:hover {
-            border-color: #FFA8CD;
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-color: #E60094;
+            box-shadow: 0 4px 12px rgba(230, 0, 148, 0.1);
         }
 
-        .provider-icon {
-            width: 40px;
-            height: 40px;
-            object-fit: contain;
-            margin-bottom: 0.5rem;
+        .provider-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
         }
 
         .provider-name {
             font-weight: 600;
             color: #0B051D;
-            margin-bottom: 0.25rem;
-            font-size: 0.9rem;
+            font-size: 1rem;
         }
 
-        .provider-group {
+        .provider-description {
+            font-size: 0.875rem;
+            color: #2C2242;
+            line-height: 1.5;
+        }
+
+        .provider-benefits {
+            list-style: none;
+            padding: 0;
+            margin: 0.5rem 0 0 0;
+        }
+
+        .provider-benefits li {
+            font-size: 0.875rem;
+            color: #2C2242;
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .provider-benefits li::before {
+            content: '✓';
+            color: #10B981;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .provider-icon {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            flex-shrink: 0;
+            margin-left: 1rem;
+        }
+
+        .payment-footer {
+            padding: 1.5rem;
+            background: #F9F8F5;
+            border-top: 1px solid #E4E3DF;
             font-size: 0.75rem;
             color: #2C2242;
-            text-transform: capitalize;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        .payment-footer a {
+            color: #0B051D;
+            text-decoration: underline;
+        }
+
+        .payment-footer a:hover {
+            color: #E60094;
+        }
+
+        /* Hosted Payment Option */
+        .hosted-payment-option {
+            text-align: center;
+        }
+
+        .hosted-payment-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            background: #E6FFA9;
+            border: 2px solid #D4F595;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #0B051D;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .hosted-payment-btn:hover {
+            background: #D4F595;
+            border-color: #C4E585;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(230, 255, 169, 0.4);
+        }
+
+        .hosted-payment-note {
+            margin-top: 0.75rem;
+            font-size: 0.875rem;
+            color: #2C2242;
+        }
+
+        /* Payment Selector Tabs */
+        .payment-selector-tabs {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0 1.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #E4E3DF;
+        }
+
+        .selector-tab {
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: #2C2242;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: -1px;
+        }
+
+        .selector-tab:hover {
+            color: #E60094;
+        }
+
+        .selector-tab.active {
+            color: #E60094;
+            border-bottom-color: #E60094;
+        }
+
+        .payment-selector-content {
+            padding: 0 1.5rem;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        /* Payment Selector 2 Styles (Klarna-style) */
+        .payment-options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .payment-option-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: white;
+            border: 2px solid #E4E3DF;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .payment-option-card:hover {
+            border-color: #E60094;
+            background: #FFF5FC;
+        }
+
+        .payment-option-card input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            margin: 0;
+            cursor: pointer;
+            accent-color: #E60094;
+            flex-shrink: 0;
+        }
+
+        .payment-option-card input[type="radio"]:checked ~ .payment-option-content {
+            color: #0B051D;
+        }
+
+        .payment-option-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .payment-option-label {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #0B051D;
+        }
+
+        .payment-option-logos {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .payment-option-logos img {
+            height: 24px;
+            max-width: 60px;
+            object-fit: contain;
+        }
+
+        /* Payment Category Sections for Selector 2 */
+        .payment-category-section {
+            margin-bottom: 2rem;
+        }
+
+        .category-section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #0B051D;
+            margin: 0 0 0.5rem 0;
+            padding: 0;
+        }
+
+        .category-section-description {
+            font-size: 0.875rem;
+            color: #2C2242;
+            margin: 0 0 1rem 0;
+            line-height: 1.5;
+        }
+
+        /* Payment Selector 3 Styles (Collapsible Categories) */
+        .category-box {
+            background: #F5F5F5;
+            border: 2px solid #E4E3DF;
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .category-box:hover {
+            border-color: #E60094;
+            background: #FFF5FC;
+        }
+
+        .category-box.expanded {
+            border-color: #E60094;
+            background: white;
+            box-shadow: 0 4px 12px rgba(230, 0, 148, 0.1);
+        }
+
+        .category-box-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .category-box-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #0B051D;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .category-box-description {
+            font-size: 0.875rem;
+            color: #2C2242;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .category-box-logos {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+            margin-left: 1rem;
+        }
+
+        .category-box-logos img {
+            height: 24px;
+            max-width: 60px;
+            object-fit: contain;
+        }
+
+        .category-box-more-count {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #2C2242;
+            display: flex;
+            align-items: center;
+            padding: 0 0.5rem;
+        }
+
+        .category-box-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            margin-top: 1rem;
+        }
+
+        .category-box.expanded .category-box-content {
+            max-height: 2000px;
+            transition: max-height 0.5s ease-in;
+        }
+
+        .category-box-payment-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
         }
 
         .group-section {
@@ -535,6 +1041,78 @@
 
             .api-button {
                 width: 100%;
+            }
+
+            .payment-selection-ui {
+                max-width: 90%;
+                margin: 0 auto;
+                border-radius: 16px;
+                min-height: auto;
+            }
+
+            #payment-response-section {
+                padding: 1rem 0;
+            }
+
+            .payment-selector-tabs {
+                padding: 0 1rem;
+            }
+
+            .selector-tab {
+                padding: 0.625rem 1rem;
+                font-size: 0.875rem;
+            }
+
+            .payment-selector-content {
+                padding: 0 1rem;
+            }
+
+            .payment-header {
+                padding: 1rem;
+            }
+
+            .amount-display {
+                padding: 1.25rem 1rem;
+            }
+
+            .amount-value {
+                font-size: 1.75rem;
+            }
+
+            .payment-heading {
+                padding: 0 1rem;
+                font-size: 1.125rem;
+            }
+
+            .payment-providers {
+                padding: 0 1rem;
+            }
+
+            .payment-category {
+                padding: 1rem;
+            }
+
+            .category-providers {
+                gap: 0.5rem;
+            }
+
+            .category-provider-card {
+                min-width: 80px;
+                padding: 0.5rem 0.75rem;
+            }
+
+            .provider-card {
+                padding: 1rem;
+            }
+
+            .provider-icon {
+                width: 50px;
+                height: 50px;
+            }
+
+            .payment-footer {
+                padding: 1.25rem 1rem;
+                font-size: 0.7rem;
             }
         }
     </style>
@@ -631,24 +1209,77 @@
         </div>
 
         <!-- Payment Response Section -->
-        <div id="payment-response-section" style="display: none;">
-            <h2>✅ Payment Created Successfully</h2>
-            
-            <div class="payment-info">
-                <strong>Transaction ID:</strong> <span id="transaction-id"></span><br>
-                <button id="hosted-payment-btn" class="btn" style="margin-top: 15px;" onclick="openHostedPaymentPage()">Go to Hosted Payment Page</button>
-            </div>
+        <div id="payment-response-section" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; background: #F9F8F5; overflow-y: auto; padding: 2rem 0;">
+            <!-- Payment Selection UI -->
+            <div class="payment-selection-ui">
+                <!-- Header with close button only -->
+                <div class="payment-header">
+                    <button class="close-payment-btn" onclick="createNewPayment()" title="Close">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
 
-            <h2>🏦 Select Payment Method</h2>
-            <p style="color: #7f8c8d;">Choose a payment provider to complete the payment:</p>
-            
-            <div id="providers-container">
-                <div class="loading">Loading payment providers...</div>
-            </div>
+                <!-- Amount Display -->
+                <div class="amount-display">
+                    <div class="amount-value" id="payment-amount">€15.90</div>
+                </div>
 
-            <button class="btn" onclick="createNewPayment()" style="margin-top: 20px;">
-                🔄 Create New Payment
-            </button>
+                <!-- Choose Payment Heading -->
+                <h2 class="payment-heading">Choose how you want to pay</h2>
+
+                <!-- Hosted Payment Page Alternative -->
+                <div class="hosted-payment-option" style="padding: 0 1.5rem; margin-bottom: 1.5rem;">
+                    <button id="hosted-payment-btn" class="hosted-payment-btn" onclick="openHostedPaymentPage()">
+                        Use Paytrail Hosted Payment Page
+                    </button>
+                    <p class="hosted-payment-note">Or select a payment method below</p>
+                </div>
+
+                <!-- Payment Selector Tabs -->
+                <div class="payment-selector-tabs">
+                    <button class="selector-tab active" data-selector="1" onclick="switchPaymentSelector(1)">
+                        Payment Selector 1
+                    </button>
+                    <button class="selector-tab" data-selector="2" onclick="switchPaymentSelector(2)">
+                        Payment Selector 2
+                    </button>
+                    <button class="selector-tab" data-selector="3" onclick="switchPaymentSelector(3)">
+                        Payment Selector 3
+                    </button>
+                </div>
+
+                <!-- Payment Methods Container - Selector 1 (Categories) -->
+                <div id="providers-container" class="payment-selector-content" data-selector="1">
+                    <div class="loading">Loading payment providers...</div>
+                </div>
+
+                <!-- Payment Methods Container - Selector 2 (Klarna-style) -->
+                <div id="providers-container-2" class="payment-selector-content" data-selector="2" style="display: none;">
+                    <div class="loading">Loading payment providers...</div>
+                </div>
+
+                <!-- Payment Methods Container - Selector 3 (Collapsible Categories) -->
+                <div id="providers-container-3" class="payment-selector-content" data-selector="3" style="display: none;">
+                    <div class="loading">Loading payment providers...</div>
+                </div>
+
+                <!-- Footer with Terms -->
+                <div class="payment-footer">
+                    <p>By selecting a payment method, you agree to our <a href="#" target="_blank">payment service terms & conditions</a>. Payment service provider: <a href="#" target="_blank">Paytrail Oyj</a>.</p>
+                </div>
+
+                <!-- Hidden transaction info -->
+                <div style="display: none;">
+                    <strong>Transaction ID:</strong> <span id="transaction-id"></span>
+                </div>
+
+                <button class="btn" onclick="createNewPayment()" style="margin-top: 20px; display: none;">
+                    🔄 Create New Payment
+                </button>
+            </div>
         </div>
     </div>
 
@@ -656,6 +1287,7 @@
         let resultCounter = 0;
         let currentPaymentData = null;
         let currentPaymentUrl = null;
+        let allProviders = []; // Store all providers for filtering
 
         function addResult(method, endpoint, status, data) {
             const resultsDiv = document.getElementById('results');
@@ -890,11 +1522,48 @@
             // Update transaction info
             document.getElementById('transaction-id').textContent = paymentData.transactionId;
             
-            // Store the payment URL for the hosted payment page button
+            // Store the payment URL for later use
             currentPaymentUrl = paymentData.href;
 
-            // Show providers
-            displayProviders(paymentData.providers);
+            // Update amount display
+            const amount = paymentData.amount ? (paymentData.amount / 100).toFixed(2) : '15.90';
+            document.getElementById('payment-amount').textContent = `€${amount}`;
+
+            // Enable/disable hosted payment button
+            const hostedBtn = document.getElementById('hosted-payment-btn');
+            if (hostedBtn) {
+                if (currentPaymentUrl) {
+                    hostedBtn.disabled = false;
+                    hostedBtn.style.opacity = '1';
+                    hostedBtn.style.cursor = 'pointer';
+                } else {
+                    hostedBtn.disabled = true;
+                    hostedBtn.style.opacity = '0.5';
+                    hostedBtn.style.cursor = 'not-allowed';
+                }
+            }
+
+            // Store all providers
+            allProviders = paymentData.providers || [];
+            
+            // Show providers in all selectors
+            displayProviders(allProviders);
+            displayProvidersSelector2(allProviders);
+            displayProvidersSelector3(allProviders);
+        }
+
+        function switchPaymentSelector(selectorNum) {
+            // Update tab states
+            document.querySelectorAll('.selector-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`.selector-tab[data-selector="${selectorNum}"]`).classList.add('active');
+
+            // Show/hide content
+            document.querySelectorAll('.payment-selector-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            document.querySelector(`.payment-selector-content[data-selector="${selectorNum}"]`).style.display = 'block';
         }
 
         function displayProviders(providers) {
@@ -905,7 +1574,7 @@
                 return;
             }
 
-            // Group providers by their group
+            // Group providers by their group field
             const groupedProviders = providers.reduce((groups, provider) => {
                 const group = provider.group || 'other';
                 if (!groups[group]) {
@@ -915,26 +1584,53 @@
                 return groups;
             }, {});
 
-            // Group name translations
-            const groupNames = {
-                'bank': '🏦 Bank Payments (Pankkimaksutavat)',
-                'mobile': '📱 Mobile Payments (Mobiilimaksutavat)',
-                'creditcard': '💳 Card Payments (Korttimaksutavat)',
-                'credit': '📄 Invoice & Installment (Lasku- ja osamaksutavat)',
-                'other': '🔧 Other Payment Methods'
+            // Category names and descriptions
+            const categoryInfo = {
+                'bank': {
+                    name: 'Bank payment',
+                    description: 'Directly from your bank account'
+                },
+                'mobile': {
+                    name: 'Mobile payment',
+                    description: 'Conveniently with your mobile device'
+                },
+                'creditcard': {
+                    name: 'Card payment',
+                    description: 'Easily with a debit or credit card'
+                },
+                'credit': {
+                    name: 'Invoice & Installment',
+                    description: 'Pay later with flexible payment options'
+                },
+                'other': {
+                    name: 'Other payment methods',
+                    description: 'Additional payment options'
+                }
             };
 
             let html = '';
-            for (const [groupKey, groupProviders] of Object.entries(groupedProviders)) {
-                const groupName = groupNames[groupKey] || `${groupKey.charAt(0).toUpperCase() + groupKey.slice(1)} Payments`;
+            
+            // Display categories in order
+            const categoryOrder = ['bank', 'mobile', 'creditcard', 'credit', 'other'];
+            
+            categoryOrder.forEach(categoryId => {
+                const categoryProviders = groupedProviders[categoryId];
+                if (!categoryProviders || categoryProviders.length === 0) {
+                    return;
+                }
+
+                const category = categoryInfo[categoryId] || categoryInfo['other'];
                 
                 html += `
-                    <div class="group-section">
-                        <div class="group-header">${groupName}</div>
-                        <div class="payment-providers">
+                    <div class="payment-category">
+                        <div class="category-header">
+                            <h3 class="category-title">${category.name}</h3>
+                        </div>
+                        <p class="category-description">${category.description}</p>
+                        <div class="category-providers">
                 `;
-                
-                groupProviders.forEach(provider => {
+
+                categoryProviders.forEach(provider => {
                     // Generate hidden input fields for provider parameters
                     let hiddenInputs = '';
                     if (provider.parameters && Array.isArray(provider.parameters)) {
@@ -944,27 +1640,277 @@
                             hiddenInputs += `<input type="hidden" name="${param.name}" value="${escapedValue}">`;
                         });
                     }
-                    
+
                     html += `
-                        <form method="POST" action="${provider.url}" target="_blank" class="provider-form">
+                        <form method="POST" action="${provider.url}" target="_blank" class="provider-form" style="margin: 0;">
                             ${hiddenInputs}
-                            <button type="submit" class="provider-card" onclick="trackProviderClick('${provider.id}', '${provider.name}')">
-                                <img src="${provider.icon}" alt="${provider.name}" class="provider-icon" 
+                            <button type="submit" class="category-provider-card" onclick="trackProviderClick('${provider.id}', '${provider.name}')">
+                                <img src="${provider.icon || provider.svg}" alt="${provider.name}" class="category-provider-logo" 
                                      onerror="this.style.display='none'">
-                                <div class="provider-name">${provider.name}</div>
-                                <div class="provider-group">${provider.group}</div>
                             </button>
                         </form>
                     `;
                 });
-                
+
                 html += `
                         </div>
                     </div>
                 `;
+            });
+
+            if (html === '') {
+                html = '<div class="error">No payment methods available</div>';
             }
 
             container.innerHTML = html;
+        }
+
+        function displayProvidersSelector2(providers) {
+            const container = document.getElementById('providers-container-2');
+            
+            if (!providers || providers.length === 0) {
+                container.innerHTML = '<div class="error">No payment providers available</div>';
+                return;
+            }
+
+            // Group providers by their group field
+            const groupedProviders = providers.reduce((groups, provider) => {
+                const group = provider.group || 'other';
+                if (!groups[group]) {
+                    groups[group] = [];
+                }
+                groups[group].push(provider);
+                return groups;
+            }, {});
+
+            // Category names
+            const categoryInfo = {
+                'bank': {
+                    name: 'Bank payment',
+                    description: 'Directly from your bank account'
+                },
+                'mobile': {
+                    name: 'Mobile payment',
+                    description: 'Conveniently with your mobile device'
+                },
+                'creditcard': {
+                    name: 'Card payment',
+                    description: 'Easily with a debit or credit card'
+                },
+                'credit': {
+                    name: 'Invoice & Installment',
+                    description: 'Pay later with flexible payment options'
+                },
+                'other': {
+                    name: 'Other payment methods',
+                    description: 'Additional payment options'
+                }
+            };
+
+            let html = '';
+            let globalIndex = 0;
+            
+            // Display categories in order
+            const categoryOrder = ['bank', 'mobile', 'creditcard', 'credit', 'other'];
+            
+            categoryOrder.forEach(categoryId => {
+                const categoryProviders = groupedProviders[categoryId];
+                if (!categoryProviders || categoryProviders.length === 0) {
+                    return;
+                }
+
+                const category = categoryInfo[categoryId] || categoryInfo['other'];
+                
+                html += `
+                    <div class="payment-category-section">
+                        <h3 class="category-section-title">${category.name}</h3>
+                        <p class="category-section-description">${category.description}</p>
+                        <div class="payment-options-list">
+                `;
+
+                categoryProviders.forEach(provider => {
+                    // Generate hidden input fields for provider parameters
+                    let hiddenInputs = '';
+                    if (provider.parameters && Array.isArray(provider.parameters)) {
+                        provider.parameters.forEach(param => {
+                            const escapedValue = String(param.value || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                            hiddenInputs += `<input type="hidden" name="${param.name}" value="${escapedValue}">`;
+                        });
+                    }
+
+                    const providerId = `provider-${globalIndex}`;
+                    const isChecked = globalIndex === 0 ? 'checked' : '';
+                    globalIndex++;
+
+                    html += `
+                        <form method="POST" action="${provider.url}" target="_blank" class="provider-form" style="margin: 0;">
+                            ${hiddenInputs}
+                            <div class="payment-option-card" onclick="this.querySelector('input[type=radio]').click(); this.closest('form').submit();">
+                                <input type="radio" name="paymentMethod" id="${providerId}" value="${provider.id}" ${isChecked} onclick="event.stopPropagation(); trackProviderClick('${provider.id}', '${provider.name}'); this.closest('form').submit();">
+                                <div class="payment-option-content">
+                                    <label for="${providerId}" class="payment-option-label">
+                                        ${provider.name}
+                                    </label>
+                                    <div class="payment-option-logos">
+                                        <img src="${provider.icon || provider.svg}" alt="${provider.name}" 
+                                             onerror="this.style.display='none'">
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    `;
+                });
+
+                html += `
+                        </div>
+                    </div>
+                `;
+            });
+
+            if (html === '') {
+                html = '<div class="error">No payment methods available</div>';
+            }
+
+            container.innerHTML = html;
+        }
+
+        function displayProvidersSelector3(providers) {
+            const container = document.getElementById('providers-container-3');
+            
+            if (!providers || providers.length === 0) {
+                container.innerHTML = '<div class="error">No payment providers available</div>';
+                return;
+            }
+
+            // Group providers by their group field
+            const groupedProviders = providers.reduce((groups, provider) => {
+                const group = provider.group || 'other';
+                if (!groups[group]) {
+                    groups[group] = [];
+                }
+                groups[group].push(provider);
+                return groups;
+            }, {});
+
+            // Category names
+            const categoryInfo = {
+                'bank': {
+                    name: 'Bank payment',
+                    description: 'Directly from your bank account'
+                },
+                'mobile': {
+                    name: 'Mobile payment',
+                    description: 'Conveniently with your mobile device'
+                },
+                'creditcard': {
+                    name: 'Card payment',
+                    description: 'Easily with a debit or credit card'
+                },
+                'credit': {
+                    name: 'Invoice & Installment',
+                    description: 'Pay later with flexible payment options'
+                },
+                'other': {
+                    name: 'Other payment methods',
+                    description: 'Additional payment options'
+                }
+            };
+
+            let html = '';
+            let globalIndex = 0;
+            
+            // Display categories in order
+            const categoryOrder = ['bank', 'mobile', 'creditcard', 'credit', 'other'];
+            
+            categoryOrder.forEach((categoryId, categoryIndex) => {
+                const categoryProviders = groupedProviders[categoryId];
+                if (!categoryProviders || categoryProviders.length === 0) {
+                    return;
+                }
+
+                const category = categoryInfo[categoryId] || categoryInfo['other'];
+                const categoryBoxId = `category-box-${categoryId}`;
+                
+                // Get first 3 logos for collapsed view
+                const totalCount = categoryProviders.length;
+                const firstThreeLogos = categoryProviders.slice(0, 3).map(provider => 
+                    `<img src="${provider.icon || provider.svg}" alt="${provider.name}" onerror="this.style.display='none'" onclick="event.stopPropagation();">`
+                ).join('');
+                
+                const moreCount = totalCount > 3 ? totalCount - 3 : 0;
+                const moreCountText = moreCount > 0 ? `<span class="category-box-more-count">+${moreCount}</span>` : '';
+
+                html += `
+                    <div class="category-box" id="${categoryBoxId}" onclick="toggleCategoryBox('${categoryBoxId}')">
+                        <div class="category-box-header">
+                            <div style="flex: 1;">
+                                <div class="category-box-title">${category.name}</div>
+                                <div class="category-box-description">${category.description}</div>
+                            </div>
+                            ${firstThreeLogos || moreCountText ? `
+                            <div class="category-box-logos">
+                                ${firstThreeLogos}
+                                ${moreCountText}
+                            </div>
+                            ` : ''}
+                        </div>
+                        <div class="category-box-content">
+                            <div class="category-box-payment-options">
+                `;
+
+                categoryProviders.forEach(provider => {
+                    // Generate hidden input fields for provider parameters
+                    let hiddenInputs = '';
+                    if (provider.parameters && Array.isArray(provider.parameters)) {
+                        provider.parameters.forEach(param => {
+                            const escapedValue = String(param.value || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                            hiddenInputs += `<input type="hidden" name="${param.name}" value="${escapedValue}">`;
+                        });
+                    }
+
+                    const providerId = `provider-3-${globalIndex}`;
+                    const isChecked = globalIndex === 0 ? 'checked' : '';
+                    globalIndex++;
+
+                    html += `
+                        <form method="POST" action="${provider.url}" target="_blank" class="provider-form" style="margin: 0;" onclick="event.stopPropagation();">
+                            ${hiddenInputs}
+                            <div class="payment-option-card" onclick="this.querySelector('input[type=radio]').click(); this.closest('form').submit();">
+                                <input type="radio" name="paymentMethod" id="${providerId}" value="${provider.id}" ${isChecked} onclick="event.stopPropagation(); trackProviderClick('${provider.id}', '${provider.name}'); this.closest('form').submit();">
+                                <div class="payment-option-content">
+                                    <label for="${providerId}" class="payment-option-label">
+                                        ${provider.name}
+                                    </label>
+                                    <div class="payment-option-logos">
+                                        <img src="${provider.icon || provider.svg}" alt="${provider.name}" 
+                                             onerror="this.style.display='none'">
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    `;
+                });
+
+                html += `
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            if (html === '') {
+                html = '<div class="error">No payment methods available</div>';
+            }
+
+            container.innerHTML = html;
+        }
+
+        function toggleCategoryBox(boxId) {
+            const box = document.getElementById(boxId);
+            if (!box) return;
+            
+            // Toggle the expanded class
+            box.classList.toggle('expanded');
         }
 
         function trackProviderClick(providerId, providerName) {
@@ -989,13 +1935,6 @@
             }, 3000);
         }
 
-        function createNewPayment() {
-            // Reset form
-            document.getElementById('payment-form-section').style.display = 'block';
-            document.getElementById('payment-response-section').style.display = 'none';
-            currentPaymentData = null;
-        }
-
         function openHostedPaymentPage() {
             if (currentPaymentUrl) {
                 window.open(currentPaymentUrl, '_blank');
@@ -1003,6 +1942,30 @@
                 alert('No payment URL available. Please create a payment first.');
             }
         }
+        
+        function createNewPayment() {
+            // Reset form
+            document.getElementById('payment-form-section').style.display = 'block';
+            document.getElementById('payment-response-section').style.display = 'none';
+            currentPaymentData = null;
+            currentPaymentUrl = null;
+            allProviders = [];
+        }
+
+        // Handle language selector buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            // Language selector buttons
+            const langButtons = document.querySelectorAll('.lang-btn');
+            langButtons.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    langButtons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    // You can add language switching logic here
+                    console.log('Language changed to:', this.dataset.lang);
+                });
+            });
+        });
     </script>
         </main>
     </div>
