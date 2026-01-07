@@ -50,6 +50,67 @@
       #app {
         padding-top: 0;
       }
+      /* Info banner styles */
+      .info-banner {
+        background: #FEF3C7;
+        border: 1px solid #FDE68A;
+        border-left: 4px solid #F59E0B;
+        color: #92400E;
+        padding: 1rem 1.5rem;
+        margin-bottom: 1rem;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      /* Ensure banner appears in content area, not behind sidebar */
+      .markdown-section {
+        position: relative;
+      }
+      .markdown-section .info-banner {
+        margin-top: 0;
+      }
+      .info-banner.hidden {
+        display: none;
+      }
+      .info-banner-content {
+        flex: 1;
+      }
+      .info-banner a {
+        color: #92400E;
+        text-decoration: underline;
+        font-weight: 500;
+      }
+      .info-banner a:hover {
+        color: #78350F;
+      }
+      .info-banner-close {
+        background: transparent;
+        border: none;
+        color: #92400E;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        transition: background 0.2s;
+        flex-shrink: 0;
+      }
+      .info-banner-close:hover {
+        background: rgba(146, 64, 14, 0.1);
+      }
+      .info-banner-close:active {
+        background: rgba(146, 64, 14, 0.2);
+      }
     </style>
   </head>
   <body>
@@ -106,7 +167,97 @@
         requestHeaders: {
           'cache-control': 'max-age=600',
         },
+        hooks: {
+          mounted: function() {
+            // Inject info banner into the content area after Docsify mounts
+            setTimeout(function() {
+              injectInfoBanner();
+            }, 300);
+          },
+          doneEach: function() {
+            // Re-inject banner on each page navigation if it doesn't exist
+            setTimeout(function() {
+              const existingBanner = document.querySelector('.markdown-section .info-banner:not(.hidden)');
+              if (!existingBanner) {
+                injectInfoBanner();
+              }
+            }, 150);
+          }
+        }
       };
+      
+      // Function to inject info banner into content area
+      function injectInfoBanner() {
+        // Check if banner was previously closed
+        if (localStorage.getItem('infoBannerClosed') === 'true') {
+          return;
+        }
+        
+        // Try multiple selectors to find the content area - Docsify structure
+        let markdownSection = document.querySelector('.markdown-section');
+        if (!markdownSection) {
+          // Try alternative selectors
+          markdownSection = document.querySelector('#app section');
+        }
+        if (!markdownSection) {
+          markdownSection = document.querySelector('#app .content');
+        }
+        if (!markdownSection) {
+          // Last resort: find any section or main content div
+          const app = document.querySelector('#app');
+          if (app) {
+            markdownSection = app.querySelector('section') || app.querySelector('div[class*="section"]') || app;
+          }
+        }
+        
+        if (!markdownSection) {
+          // If markdown section doesn't exist yet, try again after a short delay
+          setTimeout(injectInfoBanner, 300);
+          return;
+        }
+        
+        // Check if banner already exists anywhere in the app
+        const existingBanner = document.querySelector('#infoBanner');
+        if (existingBanner) {
+          // If it exists but is hidden, remove it and recreate
+          if (existingBanner.classList.contains('hidden')) {
+            existingBanner.remove();
+          } else {
+            return;
+          }
+        }
+        
+        // Create banner element
+        const banner = document.createElement('div');
+        banner.className = 'info-banner';
+        banner.id = 'infoBanner';
+        banner.innerHTML = `
+          <div class="info-banner-content">
+            The contents of the Klarna section are not finalized; they are currently being reviewed in this <a href="https://docs.google.com/document/d/1OYcUodcWKHcMkHGot2MsrkVihZHmBJFw32WpDE5pqa8/edit?tab=t.0#heading=h.n186feolxsz2" target="_blank" rel="noopener noreferrer">Google Doc</a>.
+          </div>
+          <button class="info-banner-close" id="closeBanner" aria-label="Close banner" title="Close">×</button>
+        `;
+        
+        // Insert banner at the beginning of the markdown section
+        // Remove any existing hidden banners first
+        const hiddenBanners = markdownSection.querySelectorAll('.info-banner.hidden');
+        hiddenBanners.forEach(function(b) { b.remove(); });
+        
+        if (markdownSection.firstChild) {
+          markdownSection.insertBefore(banner, markdownSection.firstChild);
+        } else {
+          markdownSection.appendChild(banner);
+        }
+        
+        // Attach close button handler
+        const closeButton = banner.querySelector('#closeBanner');
+        if (closeButton) {
+          closeButton.addEventListener('click', function() {
+            banner.classList.add('hidden');
+            localStorage.setItem('infoBannerClosed', 'true');
+          });
+        }
+      }
       
       // Fix logo path after Docsify loads to prevent basePath duplication
       window.addEventListener('DOMContentLoaded', function() {
@@ -116,7 +267,22 @@
             logoImg.src = '/api-documentation_rev1/docs/images/paytrail-logo.svg';
           }
         }, 100);
+        
+        // Fallback: Try to inject banner after DOM is ready
+        setTimeout(function() {
+          injectInfoBanner();
+        }, 500);
       });
+      
+      // Also try when window loads completely
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          injectInfoBanner();
+        }, 500);
+      });
+      
+      // Make function globally accessible for debugging
+      window.injectInfoBanner = injectInfoBanner;
     </script>
   </body>
 </html>
