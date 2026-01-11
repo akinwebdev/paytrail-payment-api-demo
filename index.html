@@ -12,6 +12,8 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png?t=1753910000">
     <!-- Meta theme color -->
     <meta name="theme-color" content="#0066cc">
+    <!-- Klarna Fonts -->
+    <link rel="stylesheet" href="/fonts/klarna-fonts.css">
     <style>
         /* Reset and base styles */
         * {
@@ -30,7 +32,7 @@
             margin: 0;
             padding: 0;
             width: 100%;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Klarna Text', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             line-height: 1.6;
             color: #0B051D;
             background: #F9F8F5;
@@ -50,22 +52,26 @@
         }
 
         h1 {
+            font-family: 'Klarna Title', 'Klarna Text', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             font-size: 2rem;
             font-weight: 700;
             color: #0B051D;
             text-align: center;
             margin-bottom: 2rem;
-            font-weight: 800;
         }
 
         h2 {
+            font-family: 'Klarna Title', 'Klarna Text', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             font-size: 1.5rem;
-            font-weight: 600;
+            font-weight: 700;
             color: #0B051D;
             margin-bottom: 1rem;
-            font-weight: 700;
             border-bottom: 1px solid #E4E3DF;
             padding-bottom: 0.5rem;
+        }
+
+        h3 {
+            font-family: 'Klarna Title', 'Klarna Text', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
         /* Header styles */
         .header {
@@ -229,7 +235,7 @@
             border: 1px solid #E4E3DF;
             border-radius: 8px;
             padding: 1rem;
-            font-family: 'Courier New', monospace;
+            font-family: 'Klarna Mono', 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
             font-size: 0.8rem;
             line-height: 1.4;
             max-height: 600px;
@@ -279,7 +285,7 @@
             background: #fff;
             border: 1px solid #E4E3DF;
             border-radius: 8px;
-            font-family: 'Courier New', monospace;
+            font-family: 'Klarna Mono', 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
             font-size: 0.8rem;
             color: #2C2242;
         }
@@ -340,6 +346,26 @@
             flex-direction: column;
             gap: 0.5rem;
             margin-bottom: 1rem;
+        }
+
+        .form-group small {
+            font-size: 0.75rem;
+            margin-top: -0.25rem;
+        }
+
+        #payment-form h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 1.5rem 0 1rem 0;
+            color: #0B051D;
+            border-top: 1px solid #E4E3DF;
+            padding-top: 1rem;
+        }
+
+        #payment-form h3:first-of-type {
+            border-top: none;
+            padding-top: 0;
+            margin-top: 0;
         }
 
         .form-row {
@@ -1120,15 +1146,23 @@
 <body>
     <div class="container">
         <main class="main-content">
-            <h1>Paytrail Payment API Demo</h1>
-        
-        <div style="text-align: center; margin-bottom: 2rem;">
-            <a href="/documentation" style="display: inline-block; padding: 0.75rem 1.5rem; background: #FFA8CD; color: #0B051D; text-decoration: none; border-radius: 8px; font-weight: 500; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; border: 2px solid #FFA8CD; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 8px 20px rgba(255, 168, 205, 0.4)'; this.style.background='#FF8FB8';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.style.background='#FFA8CD';">
-                📚 View API Documentation
-            </a>
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 2rem;">
+                <div style="display: flex; align-items: center; justify-content: center; gap: 1.25rem; flex-wrap: wrap;">
+                    <img src="/images/paytrail-logo.svg" alt="Paytrail" style="height: 50px; max-width: 250px; object-fit: contain; display: block;">
+                    <span style="font-size: 1.5rem; color: #0B051D; font-weight: 300; margin: 0;">×</span>
+                    <img src="/images/klarna-logo.svg" alt="Klarna" style="height: 50px; max-width: 250px; object-fit: contain; display: block;" onerror="this.onerror=null; this.src='/images/klarna-logo.png'; this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <svg width="120" height="50" viewBox="0 0 120 50" xmlns="http://www.w3.org/2000/svg" style="display: none;">
+                        <text x="0" y="35" font-family="Arial, Helvetica, sans-serif" font-size="36" font-weight="bold" fill="#0B051D" letter-spacing="-1px">Klarna</text>
+                    </svg>
+                </div>
+                <div style="text-align: center;">
+                    <span style="font-size: 1.1rem; color: #0B051D; font-weight: 500; letter-spacing: 0.5px;">Network Demo Store</span>
+                </div>
         </div>
 
-        <h2>🔧 API Testing Interface</h2>
+        <!-- Presentation Assets Section -->
+        <div class="payment-flow-section">
+            <h2>1. Presentation Assets</h2>
         <div class="button-section">
             <button class="api-button btn-providers" onclick="callPaymentProviders()">
                 📋 Get Payment Providers
@@ -1151,55 +1185,315 @@
     </div>
 
     <!-- Payment Flow Demo Section -->
-    <div class="container payment-flow-section">
-        <h2>💳 Complete Payment Flow Demo</h2>
+    <div class="payment-flow-section" style="margin-top: 2rem;">
+        <h2>2. Payment Flow</h2>
         <p class="description">
             Create a payment and test the actual payment flow with Paytrail payment providers
         </p>
 
+        <!-- Payment Summary Box -->
+        <div id="payment-summary-box" style="background: #ffffff; border: 1px solid #E4E3DF; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                <h3 style="font-size: 1rem; font-weight: 600; color: #0B051D; margin: 0;">Payment Summary</h3>
+                <button type="button" id="edit-payload-btn" class="btn" style="padding: 0.5rem 1rem; font-size: 0.875rem; background: #0B051D; color: white; border: none; border-radius: 6px; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#1a1a2e';" onmouseout="this.style.background='#0B051D';">
+                    Edit Payload
+                </button>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <div>
+                    <strong style="color: #7f8c8d; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Amount</strong>
+                    <p style="margin: 0.25rem 0 0 0; font-size: 1rem; color: #0B051D; font-weight: 500;" id="summary-amount">€15.90</p>
+                </div>
+                <div>
+                    <strong style="color: #7f8c8d; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Currency</strong>
+                    <p style="margin: 0.25rem 0 0 0; font-size: 1rem; color: #0B051D; font-weight: 500;" id="summary-currency">EUR</p>
+                </div>
+                <div>
+                    <strong style="color: #7f8c8d; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Customer Email</strong>
+                    <p style="margin: 0.25rem 0 0 0; font-size: 1rem; color: #0B051D; font-weight: 500;" id="summary-email">customer@email.fi</p>
+                </div>
+                <div>
+                    <strong style="color: #7f8c8d; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Customer Name</strong>
+                    <p style="margin: 0.25rem 0 0 0; font-size: 1rem; color: #0B051D; font-weight: 500;" id="summary-name">Test Person-fi</p>
+                </div>
+            </div>
+        </div>
+
         <!-- Payment Creation Form -->
-        <div id="payment-form-section">
-            <h2>📝 Create Payment</h2>
+        <div id="payment-form-section" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 style="font-size: 1rem; font-weight: 600; color: #0B051D; margin: 0;">Edit Payment Payload</h3>
+                <button type="button" id="close-form-btn" class="btn" style="padding: 0.5rem 1rem; font-size: 0.875rem; background: #7f8c8d; color: white; border: none; border-radius: 6px; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#95a5a6';" onmouseout="this.style.background='#7f8c8d';">
+                    Close
+                </button>
+            </div>
             <form id="payment-form">
+                <!-- Basic Payment Information -->
+                <h3 style="font-size: 1rem; font-weight: 600; margin: 1.5rem 0 1rem 0; color: #0B051D;">Basic Information</h3>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="amount">Amount (cents)</label>
-                        <input type="number" id="amount" value="1590" min="100" required>
-                        <small style="color: #7f8c8d;">€15.90 = 1590 cents</small>
+                        <label for="stamp">Stamp (Merchant unique identifier)</label>
+                        <input type="text" id="stamp" value="" maxlength="200" required>
+                        <small style="color: #7f8c8d;">Max 200 characters</small>
                     </div>
                     <div class="form-group">
-                        <label for="currency">Currency</label>
-                        <select id="currency" required>
-                            <option value="EUR">EUR</option>
-                        </select>
+                        <label for="reference">Reference (Order reference)</label>
+                        <input type="text" id="reference" value="" maxlength="200" required>
+                        <small style="color: #7f8c8d;">Max 200 characters</small>
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="email">Customer Email</label>
-                        <input type="email" id="email" value="customer@example.com" required>
+                        <label for="amount">Amount (cents)</label>
+                        <input type="number" id="amount" value="1590" min="1" max="99999998" required>
+                        <small style="color: #7f8c8d;">€15.90 = 1590 cents</small>
                     </div>
                     <div class="form-group">
-                        <label for="phone">Customer Phone</label>
-                        <input type="tel" id="phone" value="+358441234567" required>
+                        <label for="currency">Currency</label>
+                        <input type="text" id="currency" value="EUR" readonly style="background-color: #f5f5f5; cursor: not-allowed;" title="Paytrail API only supports EUR">
+                        <small style="color: #7f8c8d;">Paytrail API only supports EUR</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="language">Language</label>
+                        <select id="language" required>
+                            <option value="FI">FI (Finnish)</option>
+                            <option value="SV">SV (Swedish)</option>
+                            <option value="EN" selected>EN (English)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Customer Information -->
+                <h3 style="font-size: 1rem; font-weight: 600; margin: 1.5rem 0 1rem 0; color: #0B051D;">Customer Information</h3>
+                <div class="form-group">
+                    <label for="sampleCountry">Country for Sample Data</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <select id="sampleCountry" style="flex: 1;">
+                            <option value="FI" selected>Finland 🇫🇮</option>
+                            <option value="AU">Australia 🇦🇺</option>
+                            <option value="AT">Austria 🇦🇹</option>
+                            <option value="BE">Belgium 🇧🇪</option>
+                            <option value="CA">Canada 🇨🇦</option>
+                            <option value="CZ">Czech Republic 🇨🇿</option>
+                            <option value="DK">Denmark 🇩🇰</option>
+                            <option value="FR">France 🇫🇷</option>
+                            <option value="DE">Germany 🇩🇪</option>
+                            <option value="GR">Greece 🇬🇷</option>
+                            <option value="HU">Hungary 🇭🇺</option>
+                            <option value="IE">Ireland 🇮🇪</option>
+                            <option value="IT">Italy 🇮🇹</option>
+                            <option value="MX">Mexico 🇲🇽</option>
+                            <option value="NL">Netherlands 🇳🇱</option>
+                            <option value="NZ">New Zealand 🇳🇿</option>
+                            <option value="NO">Norway 🇳🇴</option>
+                            <option value="PL">Poland 🇵🇱</option>
+                            <option value="PT">Portugal 🇵🇹</option>
+                            <option value="RO">Romania 🇷🇴</option>
+                            <option value="SK">Slovakia 🇸🇰</option>
+                            <option value="ES">Spain 🇪🇸</option>
+                            <option value="SE">Sweden 🇸🇪</option>
+                            <option value="CH">Switzerland 🇨🇭</option>
+                            <option value="GB">United Kingdom 🇬🇧</option>
+                            <option value="US">United States of America 🇺🇸</option>
+                        </select>
+                        <button type="button" id="loadSampleDataBtn" style="padding: 10px 20px; background-color: #0B051D; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; white-space: nowrap; flex-shrink: 0;">Load Sample Data</button>
+                    </div>
+                    <small style="color: #7f8c8d; margin-top: 5px; display: block;">
+                        ℹ️ Currency will remain EUR for all countries. Klarna handles currency conversion on their payment screen.
+                    </small>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email">Email <span style="color: #e74c3c;">*</span></label>
+                        <input type="email" id="email" value="customer@email.fi" maxlength="200" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone</label>
+                        <input type="tel" id="phone" value="+358401234567">
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <label for="firstName">First Name</label>
-                        <input type="text" id="firstName" value="John" required>
+                        <input type="text" id="firstName" value="Test" maxlength="50">
                     </div>
                     <div class="form-group">
                         <label for="lastName">Last Name</label>
-                        <input type="text" id="lastName" value="Doe" required>
+                        <input type="text" id="lastName" value="Person-fi" maxlength="50">
                     </div>
                 </div>
 
+                <div class="form-row">
                 <div class="form-group">
-                    <label for="description">Product Description</label>
-                    <input type="text" id="description" value="Demo Product" required>
+                        <label for="vatId">VAT ID</label>
+                        <input type="text" id="vatId" value="" placeholder="FI02454583">
+                    </div>
+                    <div class="form-group">
+                        <label for="companyName">Company Name</label>
+                        <input type="text" id="companyName" value="" maxlength="100" placeholder="Example company">
+                    </div>
+                </div>
+
+                <!-- Delivery Address -->
+                <h3 style="font-size: 1rem; font-weight: 600; margin: 1.5rem 0 1rem 0; color: #0B051D;">Delivery Address</h3>
+                <div class="form-group">
+                    <label for="deliveryStreetAddress">Street Address</label>
+                    <input type="text" id="deliveryStreetAddress" value="Mannerheimintie 34" maxlength="50" placeholder="Fake Street 123">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="deliveryPostalCode">Postal Code</label>
+                        <input type="text" id="deliveryPostalCode" value="00100" maxlength="15" placeholder="00100">
+                    </div>
+                    <div class="form-group">
+                        <label for="deliveryCity">City</label>
+                        <input type="text" id="deliveryCity" value="Helsinki" maxlength="30" placeholder="Helsinki">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="deliveryCounty">County/State</label>
+                        <input type="text" id="deliveryCounty" value="Uusimaa" maxlength="200" placeholder="Uusimaa">
+                    </div>
+                    <div class="form-group">
+                        <label for="deliveryCountry">Country (Alpha-2)</label>
+                        <input type="text" id="deliveryCountry" value="FI" maxlength="2" placeholder="FI">
+                    </div>
+                </div>
+
+                <!-- Invoicing Address -->
+                <h3 style="font-size: 1rem; font-weight: 600; margin: 1.5rem 0 1rem 0; color: #0B051D;">Invoicing Address</h3>
+                <div class="form-group">
+                    <label for="invoicingStreetAddress">Street Address</label>
+                    <input type="text" id="invoicingStreetAddress" value="Mannerheimintie 34" maxlength="50" placeholder="Testikatu 1">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="invoicingPostalCode">Postal Code</label>
+                        <input type="text" id="invoicingPostalCode" value="00100" maxlength="15" placeholder="00510">
+                    </div>
+                    <div class="form-group">
+                        <label for="invoicingCity">City</label>
+                        <input type="text" id="invoicingCity" value="Helsinki" maxlength="30" placeholder="Helsinki">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="invoicingCounty">County/State</label>
+                        <input type="text" id="invoicingCounty" value="Uusimaa" maxlength="200" placeholder="Uusimaa">
+                    </div>
+                    <div class="form-group">
+                        <label for="invoicingCountry">Country (Alpha-2)</label>
+                        <input type="text" id="invoicingCountry" value="FI" maxlength="2" placeholder="FI">
+                    </div>
+                </div>
+
+                <!-- Item Information -->
+                <h3 style="font-size: 1rem; font-weight: 600; margin: 1.5rem 0 1rem 0; color: #0B051D;">Item Information</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="itemUnitPrice">Unit Price (cents) <span style="color: #e74c3c;">*</span></label>
+                        <input type="number" id="itemUnitPrice" value="1590" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="itemUnits">Units (Quantity) <span style="color: #e74c3c;">*</span></label>
+                        <input type="number" id="itemUnits" value="1" min="1" max="99999998" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="itemVatPercentage">VAT Percentage <span style="color: #e74c3c;">*</span></label>
+                        <input type="number" id="itemVatPercentage" value="24" min="0" max="100" step="0.1" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="itemProductCode">Product Code <span style="color: #e74c3c;">*</span></label>
+                        <input type="text" id="itemProductCode" value="demo-product" maxlength="100" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="itemDescription">Description</label>
+                        <input type="text" id="itemDescription" value="Demo Product" maxlength="1000">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="itemCategory">Category</label>
+                        <input type="text" id="itemCategory" value="" maxlength="100" placeholder="Pet supplies">
+                    </div>
+                    <div class="form-group">
+                        <label for="itemStamp">Item Stamp (Unique identifier)</label>
+                        <input type="text" id="itemStamp" value="" maxlength="200" placeholder="d4aca017-f1e7-4fa5-bfb5-2906e141ebac">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="itemReference">Item Reference</label>
+                    <input type="text" id="itemReference" value="" placeholder="fur-suits-5">
+                </div>
+
+                <!-- Redirect URLs -->
+                <h3 style="font-size: 1rem; font-weight: 600; margin: 1.5rem 0 1rem 0; color: #0B051D;">Redirect URLs <span style="color: #e74c3c;">*</span></h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="redirectSuccess">Success URL</label>
+                        <input type="url" id="redirectSuccess" value="" placeholder="https://example.org/success" maxlength="300">
+                        <small style="color: #7f8c8d;">Auto-filled if empty</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="redirectCancel">Cancel URL</label>
+                        <input type="url" id="redirectCancel" value="" placeholder="https://example.org/cancel" maxlength="300">
+                        <small style="color: #7f8c8d;">Auto-filled if empty</small>
+                    </div>
+                </div>
+
+                <!-- Callback URLs (Optional) -->
+                <h3 style="font-size: 1rem; font-weight: 600; margin: 1.5rem 0 1rem 0; color: #0B051D;">Callback URLs (Optional)</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="callbackSuccess">Callback Success URL</label>
+                        <input type="url" id="callbackSuccess" value="" placeholder="https://example.org/callback/success" maxlength="3000">
+                    </div>
+                    <div class="form-group">
+                        <label for="callbackCancel">Callback Cancel URL</label>
+                        <input type="url" id="callbackCancel" value="" placeholder="https://example.org/callback/cancel" maxlength="3000">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="callbackDelay">Callback Delay (seconds, 0-900)</label>
+                    <input type="number" id="callbackDelay" value="0" min="0" max="900">
+                    <small style="color: #7f8c8d;">Delay before calling callback URLs</small>
+                </div>
+
+                <!-- Advanced Options -->
+                <h3 style="font-size: 1rem; font-weight: 600; margin: 1.5rem 0 1rem 0; color: #0B051D;">Advanced Options</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="orderId">Order ID (Deprecated)</label>
+                        <input type="text" id="orderId" value="" maxlength="60" placeholder="Order ID">
+                    </div>
+                    <div class="form-group">
+                        <label for="manualInvoiceActivation">Manual Invoice Activation</label>
+                        <select id="manualInvoiceActivation">
+                            <option value="false">False (Default)</option>
+                            <option value="true">True</option>
+                        </select>
+                        <small style="color: #7f8c8d;">For Walley and Klarna</small>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="usePricesWithoutVat">Use Prices Without VAT</label>
+                        <select id="usePricesWithoutVat">
+                            <option value="false">False (Default)</option>
+                            <option value="true">True</option>
+                        </select>
+                        <small style="color: #7f8c8d;">If true, amount should exclude VAT</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="groups">Payment Method Groups (comma-separated)</label>
+                        <input type="text" id="groups" value="" placeholder="mobile,bank,creditcard,credit,other">
+                        <small style="color: #7f8c8d;">Filter payment methods by groups</small>
+                    </div>
                 </div>
 
                 <button type="submit" class="btn btn-create" id="create-btn">
@@ -1225,7 +1519,7 @@
                 <!-- Amount Display -->
                 <div class="amount-display">
                     <div class="amount-value" id="payment-amount">€15.90</div>
-                </div>
+            </div>
 
                 <!-- Choose Payment Heading -->
                 <h2 class="payment-heading">Choose how you want to pay</h2>
@@ -1253,8 +1547,8 @@
 
                 <!-- Payment Methods Container - Selector 1 (Categories) -->
                 <div id="providers-container" class="payment-selector-content" data-selector="1">
-                    <div class="loading">Loading payment providers...</div>
-                </div>
+                <div class="loading">Loading payment providers...</div>
+            </div>
 
                 <!-- Payment Methods Container - Selector 2 (Klarna-style) -->
                 <div id="providers-container-2" class="payment-selector-content" data-selector="2" style="display: none;">
@@ -1277,9 +1571,57 @@
                 </div>
 
                 <button class="btn" onclick="createNewPayment()" style="margin-top: 20px; display: none;">
-                    🔄 Create New Payment
+                🔄 Create New Payment
+            </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conversion Boosters Section -->
+    <div class="payment-flow-section" style="margin-top: 2rem;">
+        <h2>3. Conversion Boosters</h2>
+        
+        <div style="margin-bottom: 2rem;">
+            <h3 style="font-size: 1.1rem; font-weight: 600; color: #0B051D; margin-bottom: 1rem;">Using dedicated Interoperability endpoints</h3>
+            <div class="button-section">
+                <button class="api-button btn-providers" onclick="alert('KEC 1-step - Coming soon')">
+                    KEC 1-step
+                </button>
+                <button class="api-button btn-grouped" onclick="alert('KEC multi-step - Coming soon')">
+                    KEC multi-step
                 </button>
             </div>
+        </div>
+
+        <div style="margin-bottom: 2rem;">
+            <h3 style="font-size: 1.1rem; font-weight: 600; color: #0B051D; margin-bottom: 1rem;">Using the regular /payments endpoint (with redirection)</h3>
+            <div class="button-section">
+                <button class="api-button btn-payment" onclick="alert('KEC - Coming soon')">
+                    KEC
+                </button>
+                <button class="api-button btn-providers" onclick="alert('OSM - Coming soon')">
+                    OSM
+                </button>
+                <button class="api-button btn-grouped" onclick="alert('SIWK - Coming soon')" style="opacity: 0.6; cursor: not-allowed;">
+                    SIWK (coming soon)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Transaction Management Section -->
+    <div class="payment-flow-section" style="margin-top: 2rem;">
+        <h2>4. Payment Transaction Management</h2>
+        <p style="text-align: center; color: #7f8c8d; margin: 2rem 0;">Coming soon</p>
+    </div>
+
+    <!-- API Documentation Section -->
+    <div class="payment-flow-section" style="margin-top: 2rem;">
+        <h2>5. API documentation</h2>
+        <div style="text-align: center; margin-top: 1rem;">
+            <a href="/documentation" style="display: inline-block; padding: 0.75rem 1.5rem; background: #FFA8CD; color: #0B051D; text-decoration: none; border-radius: 8px; font-weight: 500; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; border: 2px solid #FFA8CD; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 8px 20px rgba(255, 168, 205, 0.4)'; this.style.background='#FF8FB8';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.style.background='#FFA8CD';">
+                📚 View API Documentation
+            </a>
         </div>
     </div>
 
@@ -1452,10 +1794,512 @@
             }
         }
 
+        // Generate UUID function
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        // Klarna sample customer data (all countries)
+        const sampleCustomerData = {
+            'FI': {
+                email: 'customer@email.fi',
+                phone: '+358401234567',
+                firstName: 'Test',
+                lastName: 'Person-fi',
+                deliveryStreetAddress: 'Mannerheimintie 34',
+                deliveryPostalCode: '00100',
+                deliveryCity: 'Helsinki',
+                deliveryCounty: 'Uusimaa',
+                deliveryCountry: 'FI',
+                invoicingStreetAddress: 'Mannerheimintie 34',
+                invoicingPostalCode: '00100',
+                invoicingCity: 'Helsinki',
+                invoicingCounty: 'Uusimaa',
+                invoicingCountry: 'FI'
+            },
+            'AU': {
+                email: 'customer@email.au',
+                phone: '+61473752244',
+                firstName: 'Test',
+                lastName: 'Person-au',
+                deliveryStreetAddress: '4 Wharf St',
+                deliveryPostalCode: '4877',
+                deliveryCity: 'Port Douglas',
+                deliveryCounty: 'QLD',
+                deliveryCountry: 'AU',
+                invoicingStreetAddress: '4 Wharf St',
+                invoicingPostalCode: '4877',
+                invoicingCity: 'Port Douglas',
+                invoicingCounty: 'QLD',
+                invoicingCountry: 'AU'
+            },
+            'AT': {
+                email: 'customer@email.at',
+                phone: '+4306762600456',
+                firstName: 'Test',
+                lastName: 'Person-at',
+                deliveryStreetAddress: 'Kärntner Straße 1',
+                deliveryPostalCode: '1010',
+                deliveryCity: 'Vienna',
+                deliveryCounty: 'Vienna',
+                deliveryCountry: 'AT',
+                invoicingStreetAddress: 'Kärntner Straße 1',
+                invoicingPostalCode: '1010',
+                invoicingCity: 'Vienna',
+                invoicingCounty: 'Vienna',
+                invoicingCountry: 'AT'
+            },
+            'BE': {
+                email: 'customer@email.be',
+                phone: '+32485121291',
+                firstName: 'Test',
+                lastName: 'Person-be',
+                deliveryStreetAddress: 'Rue Neuve 1',
+                deliveryPostalCode: '1000',
+                deliveryCity: 'Brussels',
+                deliveryCounty: 'Brussels Capital',
+                deliveryCountry: 'BE',
+                invoicingStreetAddress: 'Rue Neuve 1',
+                invoicingPostalCode: '1000',
+                invoicingCity: 'Brussels',
+                invoicingCounty: 'Brussels Capital',
+                invoicingCountry: 'BE'
+            },
+            'CA': {
+                email: 'customer@email.ca',
+                phone: '+15197438620',
+                firstName: 'Test',
+                lastName: 'Person-ca',
+                deliveryStreetAddress: '1 Yonge St',
+                deliveryPostalCode: 'M5E 1E5',
+                deliveryCity: 'Toronto',
+                deliveryCounty: 'ON',
+                deliveryCountry: 'CA',
+                invoicingStreetAddress: '1 Yonge St',
+                invoicingPostalCode: 'M5E 1E5',
+                invoicingCity: 'Toronto',
+                invoicingCounty: 'ON',
+                invoicingCountry: 'CA'
+            },
+            'CZ': {
+                email: 'customer@email.cz',
+                phone: '+420771613715',
+                firstName: 'Test',
+                lastName: 'Person-cz',
+                deliveryStreetAddress: 'Václavské náměstí 1',
+                deliveryPostalCode: '110 00',
+                deliveryCity: 'Prague',
+                deliveryCounty: 'Prague',
+                deliveryCountry: 'CZ',
+                invoicingStreetAddress: 'Václavské náměstí 1',
+                invoicingPostalCode: '110 00',
+                invoicingCity: 'Prague',
+                invoicingCounty: 'Prague',
+                invoicingCountry: 'CZ'
+            },
+            'DK': {
+                email: 'customer@email.dk',
+                phone: '+4542555628',
+                firstName: 'Test',
+                lastName: 'Person-dk',
+                deliveryStreetAddress: 'Strøget 1',
+                deliveryPostalCode: '1160',
+                deliveryCity: 'Copenhagen',
+                deliveryCounty: 'Capital Region',
+                deliveryCountry: 'DK',
+                invoicingStreetAddress: 'Strøget 1',
+                invoicingPostalCode: '1160',
+                invoicingCity: 'Copenhagen',
+                invoicingCounty: 'Capital Region',
+                invoicingCountry: 'DK'
+            },
+            'FR': {
+                email: 'customer@email.fr',
+                phone: '+33689854321',
+                firstName: 'Test',
+                lastName: 'Person-fr',
+                deliveryStreetAddress: '123 Avenue des Champs-Élysées',
+                deliveryPostalCode: '75008',
+                deliveryCity: 'Paris',
+                deliveryCounty: 'Île-de-France',
+                deliveryCountry: 'FR',
+                invoicingStreetAddress: '123 Avenue des Champs-Élysées',
+                invoicingPostalCode: '75008',
+                invoicingCity: 'Paris',
+                invoicingCounty: 'Île-de-France',
+                invoicingCountry: 'FR'
+            },
+            'DE': {
+                email: 'customer@email.de',
+                phone: '+49017614284340',
+                firstName: 'Test',
+                lastName: 'Person-de',
+                deliveryStreetAddress: 'Kurfürstendamm 1',
+                deliveryPostalCode: '10719',
+                deliveryCity: 'Berlin',
+                deliveryCounty: 'Berlin',
+                deliveryCountry: 'DE',
+                invoicingStreetAddress: 'Kurfürstendamm 1',
+                invoicingPostalCode: '10719',
+                invoicingCity: 'Berlin',
+                invoicingCounty: 'Berlin',
+                invoicingCountry: 'DE'
+            },
+            'GR': {
+                email: 'customer@email.gr',
+                phone: '+306945553624',
+                firstName: 'Test',
+                lastName: 'Person-gr',
+                deliveryStreetAddress: 'Ermou 1',
+                deliveryPostalCode: '105 63',
+                deliveryCity: 'Athens',
+                deliveryCounty: 'Attica',
+                deliveryCountry: 'GR',
+                invoicingStreetAddress: 'Ermou 1',
+                invoicingPostalCode: '105 63',
+                invoicingCity: 'Athens',
+                invoicingCounty: 'Attica',
+                invoicingCountry: 'GR'
+            },
+            'HU': {
+                email: 'customer@email.hu',
+                phone: '+36300102692',
+                firstName: 'Test',
+                lastName: 'Person-hu',
+                deliveryStreetAddress: 'Váci utca 1',
+                deliveryPostalCode: '1052',
+                deliveryCity: 'Budapest',
+                deliveryCounty: 'Budapest',
+                deliveryCountry: 'HU',
+                invoicingStreetAddress: 'Váci utca 1',
+                invoicingPostalCode: '1052',
+                invoicingCity: 'Budapest',
+                invoicingCounty: 'Budapest',
+                invoicingCountry: 'HU'
+            },
+            'IE': {
+                email: 'customer@email.ie',
+                phone: '+353855351400',
+                firstName: 'Test',
+                lastName: 'Person-ie',
+                deliveryStreetAddress: 'Grafton Street 1',
+                deliveryPostalCode: 'D02 VF65',
+                deliveryCity: 'Dublin',
+                deliveryCounty: 'Dublin',
+                deliveryCountry: 'IE',
+                invoicingStreetAddress: 'Grafton Street 1',
+                invoicingPostalCode: 'D02 VF65',
+                invoicingCity: 'Dublin',
+                invoicingCounty: 'Dublin',
+                invoicingCountry: 'IE'
+            },
+            'IT': {
+                email: 'customer@email.it',
+                phone: '+393339741231',
+                firstName: 'Test',
+                lastName: 'Person-it',
+                deliveryStreetAddress: 'Via Montenapoleone 1',
+                deliveryPostalCode: '20121',
+                deliveryCity: 'Milan',
+                deliveryCounty: 'Lombardy',
+                deliveryCountry: 'IT',
+                invoicingStreetAddress: 'Via Montenapoleone 1',
+                invoicingPostalCode: '20121',
+                invoicingCity: 'Milan',
+                invoicingCounty: 'Lombardy',
+                invoicingCountry: 'IT'
+            },
+            'MX': {
+                email: 'customer@email.mx',
+                phone: '+525593747739',
+                firstName: 'Test',
+                lastName: 'Person-mx',
+                deliveryStreetAddress: 'Paseo de la Reforma 1',
+                deliveryPostalCode: '06000',
+                deliveryCity: 'Mexico City',
+                deliveryCounty: 'CDMX',
+                deliveryCountry: 'MX',
+                invoicingStreetAddress: 'Paseo de la Reforma 1',
+                invoicingPostalCode: '06000',
+                invoicingCity: 'Mexico City',
+                invoicingCounty: 'CDMX',
+                invoicingCountry: 'MX'
+            },
+            'NL': {
+                email: 'customer@email.nl',
+                phone: '+31689124321',
+                firstName: 'Test',
+                lastName: 'Person-nl',
+                deliveryStreetAddress: 'Dam 1',
+                deliveryPostalCode: '1012 JS',
+                deliveryCity: 'Amsterdam',
+                deliveryCounty: 'North Holland',
+                deliveryCountry: 'NL',
+                invoicingStreetAddress: 'Dam 1',
+                invoicingPostalCode: '1012 JS',
+                invoicingCity: 'Amsterdam',
+                invoicingCounty: 'North Holland',
+                invoicingCountry: 'NL'
+            },
+            'NZ': {
+                email: 'customer@email.nz',
+                phone: '+6427555290',
+                firstName: 'Test',
+                lastName: 'Person-nz',
+                deliveryStreetAddress: '286 Mount Wellington Highway',
+                deliveryPostalCode: '6011',
+                deliveryCity: 'Auckland',
+                deliveryCounty: 'Auckland',
+                deliveryCountry: 'NZ',
+                invoicingStreetAddress: '286 Mount Wellington Highway',
+                invoicingPostalCode: '6011',
+                invoicingCity: 'Auckland',
+                invoicingCounty: 'Auckland',
+                invoicingCountry: 'NZ'
+            },
+            'NO': {
+                email: 'customer@email.no',
+                phone: '+4740123456',
+                firstName: 'Test',
+                lastName: 'Person-no',
+                deliveryStreetAddress: 'Karl Johans gate 1',
+                deliveryPostalCode: '0154',
+                deliveryCity: 'Oslo',
+                deliveryCounty: 'Oslo',
+                deliveryCountry: 'NO',
+                invoicingStreetAddress: 'Karl Johans gate 1',
+                invoicingPostalCode: '0154',
+                invoicingCity: 'Oslo',
+                invoicingCounty: 'Oslo',
+                invoicingCountry: 'NO'
+            },
+            'PL': {
+                email: 'customer@email.pl',
+                phone: '+48795222223',
+                firstName: 'Test',
+                lastName: 'Person-pl',
+                deliveryStreetAddress: 'Nowy Świat 1',
+                deliveryPostalCode: '00-001',
+                deliveryCity: 'Warsaw',
+                deliveryCounty: 'Masovian',
+                deliveryCountry: 'PL',
+                invoicingStreetAddress: 'Nowy Świat 1',
+                invoicingPostalCode: '00-001',
+                invoicingCity: 'Warsaw',
+                invoicingCounty: 'Masovian',
+                invoicingCountry: 'PL'
+            },
+            'PT': {
+                email: 'customer@email.pt',
+                phone: '+351935556731',
+                firstName: 'Test',
+                lastName: 'Person-pt',
+                deliveryStreetAddress: 'Avenida da Liberdade 1',
+                deliveryPostalCode: '1250-096',
+                deliveryCity: 'Lisbon',
+                deliveryCounty: 'Lisbon',
+                deliveryCountry: 'PT',
+                invoicingStreetAddress: 'Avenida da Liberdade 1',
+                invoicingPostalCode: '1250-096',
+                invoicingCity: 'Lisbon',
+                invoicingCounty: 'Lisbon',
+                invoicingCountry: 'PT'
+            },
+            'RO': {
+                email: 'customer@email.ro',
+                phone: '+40741209876',
+                firstName: 'Test',
+                lastName: 'Person-ro',
+                deliveryStreetAddress: 'Calea Victoriei 1',
+                deliveryPostalCode: '010061',
+                deliveryCity: 'Bucharest',
+                deliveryCounty: 'Bucharest',
+                deliveryCountry: 'RO',
+                invoicingStreetAddress: 'Calea Victoriei 1',
+                invoicingPostalCode: '010061',
+                invoicingCity: 'Bucharest',
+                invoicingCounty: 'Bucharest',
+                invoicingCountry: 'RO'
+            },
+            'SK': {
+                email: 'customer@email.sk',
+                phone: '+421905123456',
+                firstName: 'Test',
+                lastName: 'Person-sk',
+                deliveryStreetAddress: 'Hlavná 1',
+                deliveryPostalCode: '811 01',
+                deliveryCity: 'Bratislava',
+                deliveryCounty: 'Bratislava',
+                deliveryCountry: 'SK',
+                invoicingStreetAddress: 'Hlavná 1',
+                invoicingPostalCode: '811 01',
+                invoicingCity: 'Bratislava',
+                invoicingCounty: 'Bratislava',
+                invoicingCountry: 'SK'
+            },
+            'ES': {
+                email: 'customer@email.es',
+                phone: '+34672563009',
+                firstName: 'Test',
+                lastName: 'Person-es',
+                deliveryStreetAddress: 'Gran Vía 1',
+                deliveryPostalCode: '28013',
+                deliveryCity: 'Madrid',
+                deliveryCounty: 'Madrid',
+                deliveryCountry: 'ES',
+                invoicingStreetAddress: 'Gran Vía 1',
+                invoicingPostalCode: '28013',
+                invoicingCity: 'Madrid',
+                invoicingCounty: 'Madrid',
+                invoicingCountry: 'ES'
+            },
+            'SE': {
+                email: 'customer@email.se',
+                phone: '+46701740615',
+                firstName: 'Test',
+                lastName: 'Person-se',
+                deliveryStreetAddress: 'Drottninggatan 1',
+                deliveryPostalCode: '111 51',
+                deliveryCity: 'Stockholm',
+                deliveryCounty: 'Stockholm',
+                deliveryCountry: 'SE',
+                invoicingStreetAddress: 'Drottninggatan 1',
+                invoicingPostalCode: '111 51',
+                invoicingCity: 'Stockholm',
+                invoicingCounty: 'Stockholm',
+                invoicingCountry: 'SE'
+            },
+            'CH': {
+                email: 'customer@email.ch',
+                phone: '+41758680000',
+                firstName: 'Test',
+                lastName: 'Person-ch',
+                deliveryStreetAddress: 'Bahnhofstrasse 1',
+                deliveryPostalCode: '8001',
+                deliveryCity: 'Zurich',
+                deliveryCounty: 'Zurich',
+                deliveryCountry: 'CH',
+                invoicingStreetAddress: 'Bahnhofstrasse 1',
+                invoicingPostalCode: '8001',
+                invoicingCity: 'Zurich',
+                invoicingCounty: 'Zurich',
+                invoicingCountry: 'CH'
+            },
+            'GB': {
+                email: 'customer@email.uk',
+                phone: '+447755564318',
+                firstName: 'Test',
+                lastName: 'Person-gb',
+                deliveryStreetAddress: '123 Oxford Street',
+                deliveryPostalCode: 'W1D 2HG',
+                deliveryCity: 'London',
+                deliveryCounty: 'Greater London',
+                deliveryCountry: 'GB',
+                invoicingStreetAddress: '123 Oxford Street',
+                invoicingPostalCode: 'W1D 2HG',
+                invoicingCity: 'London',
+                invoicingCounty: 'Greater London',
+                invoicingCountry: 'GB'
+            },
+            'US': {
+                email: 'customer@email.us',
+                phone: '+13106683312',
+                firstName: 'Test',
+                lastName: 'Person-us',
+                deliveryStreetAddress: '509 Amsterdam Ave',
+                deliveryPostalCode: '10024-3941',
+                deliveryCity: 'New York',
+                deliveryCounty: 'NY',
+                deliveryCountry: 'US',
+                invoicingStreetAddress: '509 Amsterdam Ave',
+                invoicingPostalCode: '10024-3941',
+                invoicingCity: 'New York',
+                invoicingCounty: 'NY',
+                invoicingCountry: 'US'
+            }
+        };
+
+        // Load sample data function
+        function loadSampleData() {
+            const country = document.getElementById('sampleCountry').value;
+            const sample = sampleCustomerData[country];
+            
+            if (!sample) {
+                console.warn('No sample data found for country:', country);
+                return;
+            }
+            
+            // Populate customer fields
+            document.getElementById('email').value = sample.email;
+            document.getElementById('phone').value = sample.phone;
+            document.getElementById('firstName').value = sample.firstName;
+            document.getElementById('lastName').value = sample.lastName;
+            
+            // Populate delivery address
+            document.getElementById('deliveryStreetAddress').value = sample.deliveryStreetAddress;
+            document.getElementById('deliveryPostalCode').value = sample.deliveryPostalCode;
+            document.getElementById('deliveryCity').value = sample.deliveryCity;
+            document.getElementById('deliveryCounty').value = sample.deliveryCounty;
+            document.getElementById('deliveryCountry').value = sample.deliveryCountry;
+            
+            // Populate invoicing address
+            document.getElementById('invoicingStreetAddress').value = sample.invoicingStreetAddress;
+            document.getElementById('invoicingPostalCode').value = sample.invoicingPostalCode;
+            document.getElementById('invoicingCity').value = sample.invoicingCity;
+            document.getElementById('invoicingCounty').value = sample.invoicingCounty;
+            document.getElementById('invoicingCountry').value = sample.invoicingCountry;
+            
+            // Update payment summary
+            updatePaymentSummary();
+            
+            console.log('Sample data loaded for country:', country);
+        }
+
+        // Set default values with UUIDs on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const uuid = generateUUID();
+            const shortUuid = uuid.substring(0, 8);
+            
+            // Set stamp and reference with UUIDs appended
+            const stampField = document.getElementById('stamp');
+            const referenceField = document.getElementById('reference');
+            if (stampField) {
+                const baseValue = stampField.value || 'payment-flow';
+                stampField.value = `${baseValue}-${shortUuid}`;
+            }
+            if (referenceField) {
+                const baseValue = referenceField.value || 'ref';
+                referenceField.value = `${baseValue}-${shortUuid}`;
+            }
+            
+            // Set item stamp and reference with UUIDs appended
+            const itemStampField = document.getElementById('itemStamp');
+            const itemReferenceField = document.getElementById('itemReference');
+            if (itemStampField && !itemStampField.value) {
+                itemStampField.value = uuid;
+            }
+            if (itemReferenceField) {
+                const baseValue = itemReferenceField.value || 'item-ref';
+                itemReferenceField.value = `${baseValue}-${shortUuid}`;
+            }
+        });
+
         // Payment Flow Demo JavaScript
         document.getElementById('payment-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             await createPaymentFlow();
+        });
+
+        // Load Sample Data button event listener
+        document.addEventListener('DOMContentLoaded', function() {
+            const loadSampleBtn = document.getElementById('loadSampleDataBtn');
+            if (loadSampleBtn) {
+                loadSampleBtn.addEventListener('click', loadSampleData);
+            }
         });
 
         async function createPaymentFlow() {
@@ -1464,30 +2308,129 @@
             createBtn.textContent = '⏳ Creating Payment...';
 
             try {
+                // Build customer object
+                const customer = {
+                    email: document.getElementById('email').value
+                };
+                if (document.getElementById('firstName').value) customer.firstName = document.getElementById('firstName').value;
+                if (document.getElementById('lastName').value) customer.lastName = document.getElementById('lastName').value;
+                if (document.getElementById('phone').value) customer.phone = document.getElementById('phone').value;
+                if (document.getElementById('vatId').value) customer.vatId = document.getElementById('vatId').value;
+                if (document.getElementById('companyName').value) customer.companyName = document.getElementById('companyName').value;
+
+                // Build delivery address if provided
+                let deliveryAddress = null;
+                if (document.getElementById('deliveryStreetAddress').value) {
+                    deliveryAddress = {
+                        streetAddress: document.getElementById('deliveryStreetAddress').value,
+                        postalCode: document.getElementById('deliveryPostalCode').value,
+                        city: document.getElementById('deliveryCity').value,
+                        country: document.getElementById('deliveryCountry').value || 'FI'
+                    };
+                    if (document.getElementById('deliveryCounty').value) {
+                        deliveryAddress.county = document.getElementById('deliveryCounty').value;
+                    }
+                }
+
+                // Build invoicing address if provided
+                let invoicingAddress = null;
+                if (document.getElementById('invoicingStreetAddress').value) {
+                    invoicingAddress = {
+                        streetAddress: document.getElementById('invoicingStreetAddress').value,
+                        postalCode: document.getElementById('invoicingPostalCode').value,
+                        city: document.getElementById('invoicingCity').value,
+                        country: document.getElementById('invoicingCountry').value || 'FI'
+                    };
+                    if (document.getElementById('invoicingCounty').value) {
+                        invoicingAddress.county = document.getElementById('invoicingCounty').value;
+                    }
+                }
+
+                // Build item object
+                const item = {
+                    unitPrice: parseInt(document.getElementById('itemUnitPrice').value),
+                    units: parseInt(document.getElementById('itemUnits').value),
+                    vatPercentage: parseFloat(document.getElementById('itemVatPercentage').value),
+                    productCode: document.getElementById('itemProductCode').value
+                };
+                if (document.getElementById('itemDescription').value) item.description = document.getElementById('itemDescription').value;
+                if (document.getElementById('itemCategory').value) item.category = document.getElementById('itemCategory').value;
+                if (document.getElementById('itemStamp').value) item.stamp = document.getElementById('itemStamp').value;
+                if (document.getElementById('itemReference').value) item.reference = document.getElementById('itemReference').value;
+
+                // Build redirect URLs
+                const redirectSuccess = document.getElementById('redirectSuccess').value || window.location.origin + '/payment-success.html';
+                const redirectCancel = document.getElementById('redirectCancel').value || window.location.origin + '/payment-cancel.html';
+
+                // Generate UUIDs and append to ID/reference fields
+                const uuid = generateUUID();
+                const shortUuid = uuid.substring(0, 8);
+                
+                // Append UUID to stamp and reference
+                const stampValue = document.getElementById('stamp').value;
+                const referenceValue = document.getElementById('reference').value;
+                const stamp = stampValue ? `${stampValue}-${shortUuid}` : `payment-flow-${shortUuid}`;
+                const reference = referenceValue ? `${referenceValue}-${shortUuid}` : `ref-${shortUuid}`;
+                
+                // Add UUID to item stamp and reference
+                if (!item.stamp) {
+                    item.stamp = uuid;
+                } else {
+                    item.stamp = `${item.stamp}-${shortUuid}`;
+                }
+                const itemRefValue = document.getElementById('itemReference').value;
+                if (!item.reference) {
+                    item.reference = itemRefValue ? `${itemRefValue}-${shortUuid}` : `item-ref-${shortUuid}`;
+                } else {
+                    item.reference = `${item.reference}-${shortUuid}`;
+                }
+
+                // Build payment data
                 const paymentData = {
-                    stamp: `payment-flow-${Date.now()}`,
-                    reference: `ref-${Date.now()}`,
+                    stamp: stamp,
+                    reference: reference,
                     amount: parseInt(document.getElementById('amount').value),
                     currency: document.getElementById('currency').value,
-                    language: 'FI',
-                    items: [{
-                        unitPrice: parseInt(document.getElementById('amount').value),
-                        units: 1,
-                        vatPercentage: 24,
-                        productCode: 'demo-flow',
-                        description: document.getElementById('description').value
-                    }],
-                    customer: {
-                        email: document.getElementById('email').value,
-                        firstName: document.getElementById('firstName').value,
-                        lastName: document.getElementById('lastName').value,
-                        phone: document.getElementById('phone').value
-                    },
+                    language: document.getElementById('language').value,
+                    items: [item],
+                    customer: customer,
                     redirectUrls: {
-                        success: window.location.origin + '/payment-success.html',
-                        cancel: window.location.origin + '/payment-cancel.html'
+                        success: redirectSuccess,
+                        cancel: redirectCancel
                     }
                 };
+
+                // Add optional fields
+                if (document.getElementById('orderId').value) {
+                    paymentData.orderId = document.getElementById('orderId').value;
+                }
+                if (deliveryAddress) {
+                    paymentData.deliveryAddress = deliveryAddress;
+                }
+                if (invoicingAddress) {
+                    paymentData.invoicingAddress = invoicingAddress;
+                }
+                if (document.getElementById('manualInvoiceActivation').value === 'true') {
+                    paymentData.manualInvoiceActivation = true;
+                }
+                if (document.getElementById('callbackSuccess').value || document.getElementById('callbackCancel').value) {
+                    paymentData.callbackUrls = {};
+                    if (document.getElementById('callbackSuccess').value) {
+                        paymentData.callbackUrls.success = document.getElementById('callbackSuccess').value;
+                    }
+                    if (document.getElementById('callbackCancel').value) {
+                        paymentData.callbackUrls.cancel = document.getElementById('callbackCancel').value;
+                    }
+                }
+                if (document.getElementById('callbackDelay').value && parseInt(document.getElementById('callbackDelay').value) > 0) {
+                    paymentData.callbackDelay = parseInt(document.getElementById('callbackDelay').value);
+                }
+                if (document.getElementById('groups').value) {
+                    paymentData.groups = document.getElementById('groups').value.split(',').map(g => g.trim()).filter(g => g);
+                }
+                if (document.getElementById('usePricesWithoutVat').value === 'true') {
+                    paymentData.usePricesWithoutVat = true;
+                }
 
                 const response = await fetch('/api/payments', {
                     method: 'POST',
@@ -1503,11 +2446,23 @@
                     currentPaymentData = data;
                     showPaymentResponse(data);
                 } else {
-                    throw new Error(data.error || 'Payment creation failed');
+                    // Show more detailed error message
+                    let errorMessage = data.error || 'Payment creation failed';
+                    if (data.message) {
+                        errorMessage += ': ' + data.message;
+                    }
+                    if (data.details && typeof data.details === 'object') {
+                        const detailsStr = JSON.stringify(data.details, null, 2);
+                        errorMessage += '\n\nDetails:\n' + detailsStr;
+                    }
+                    
+                    throw new Error(errorMessage);
                 }
             } catch (error) {
                 console.error('Error creating payment:', error);
-                alert('Error creating payment: ' + error.message);
+                // Show error in a more user-friendly way
+                const errorMsg = error.message || 'Unknown error occurred';
+                alert('Error creating payment:\n\n' + errorMsg);
             } finally {
                 createBtn.disabled = false;
                 createBtn.textContent = '💳 Create Payment & Show Providers';
@@ -1515,8 +2470,9 @@
         }
 
         function showPaymentResponse(paymentData) {
-            // Hide form, show response
+            // Hide form and summary, show response
             document.getElementById('payment-form-section').style.display = 'none';
+            document.getElementById('payment-summary-box').style.display = 'none';
             document.getElementById('payment-response-section').style.display = 'block';
 
             // Update transaction info
@@ -1632,6 +2588,15 @@
 
                 categoryProviders.forEach(provider => {
                     // Generate hidden input fields for provider parameters
+                    // For Klarna, these parameters include:
+                    // - checkout-transaction-id: Paytrail transaction ID
+                    // - checkout-account: Merchant ID
+                    // - checkout-method: HTTP method (POST)
+                    // - checkout-algorithm: HMAC algorithm (sha256)
+                    // - checkout-timestamp: ISO 8601 timestamp
+                    // - checkout-nonce: Unique nonce for replay attack prevention
+                    // - signature: HMAC signature for authentication
+                    // These are POST parameters sent to the provider's URL (e.g., Klarna's loading-and-redirect URL)
                     let hiddenInputs = '';
                     if (provider.parameters && Array.isArray(provider.parameters)) {
                         provider.parameters.forEach(param => {
@@ -1640,7 +2605,10 @@
                             hiddenInputs += `<input type="hidden" name="${param.name}" value="${escapedValue}">`;
                         });
                     }
-
+                    
+                    // Create a POST form that submits all parameters to the provider's URL
+                    // When user clicks the provider button, the form is submitted with all authentication parameters
+                    // This redirects the user to the provider's payment page (e.g., Klarna checkout)
                     html += `
                         <form method="POST" action="${provider.url}" target="_blank" class="provider-form" style="margin: 0;">
                             ${hiddenInputs}
@@ -1651,7 +2619,7 @@
                         </form>
                     `;
                 });
-
+                
                 html += `
                         </div>
                     </div>
@@ -1860,6 +2828,15 @@
 
                 categoryProviders.forEach(provider => {
                     // Generate hidden input fields for provider parameters
+                    // For Klarna, these parameters are POST form fields used for authentication:
+                    // - checkout-transaction-id: Paytrail transaction ID
+                    // - checkout-account: Merchant ID
+                    // - checkout-method: HTTP method (POST)
+                    // - checkout-algorithm: HMAC algorithm (sha256)
+                    // - checkout-timestamp: ISO 8601 timestamp
+                    // - checkout-nonce: Unique nonce for replay attack prevention
+                    // - signature: HMAC signature for authentication
+                    // These are submitted via POST to the provider's URL (e.g., Klarna's loading-and-redirect URL)
                     let hiddenInputs = '';
                     if (provider.parameters && Array.isArray(provider.parameters)) {
                         provider.parameters.forEach(param => {
@@ -1942,14 +2919,45 @@
                 alert('No payment URL available. Please create a payment first.');
             }
         }
-        
+
         function createNewPayment() {
             // Reset form
-            document.getElementById('payment-form-section').style.display = 'block';
+            document.getElementById('payment-form-section').style.display = 'none';
+            document.getElementById('payment-summary-box').style.display = 'block';
             document.getElementById('payment-response-section').style.display = 'none';
             currentPaymentData = null;
             currentPaymentUrl = null;
             allProviders = [];
+            updatePaymentSummary();
+        }
+
+        // Function to update payment summary box
+        function updatePaymentSummary() {
+            const amount = document.getElementById('amount').value || 0;
+            const currency = document.getElementById('currency').value || 'EUR';
+            const email = document.getElementById('email').value || '';
+            const firstName = document.getElementById('firstName').value || '';
+            const lastName = document.getElementById('lastName').value || '';
+            
+            // Format amount as currency
+            const amountInEuros = (parseInt(amount) / 100).toFixed(2);
+            
+            document.getElementById('summary-amount').textContent = `€${amountInEuros}`;
+            document.getElementById('summary-currency').textContent = currency;
+            document.getElementById('summary-email').textContent = email || 'Not set';
+            document.getElementById('summary-name').textContent = `${firstName} ${lastName}`.trim() || 'Not set';
+        }
+
+        // Toggle form visibility
+        function togglePaymentForm(show) {
+            if (show) {
+                document.getElementById('payment-form-section').style.display = 'block';
+                document.getElementById('payment-summary-box').style.display = 'none';
+            } else {
+                document.getElementById('payment-form-section').style.display = 'none';
+                document.getElementById('payment-summary-box').style.display = 'block';
+                updatePaymentSummary();
+            }
         }
 
         // Handle language selector buttons
@@ -1963,7 +2971,36 @@
                     this.classList.add('active');
                     // You can add language switching logic here
                     console.log('Language changed to:', this.dataset.lang);
+            });
+            });
+
+            // Initialize payment summary
+            updatePaymentSummary();
+
+            // Edit Payload button
+            const editPayloadBtn = document.getElementById('edit-payload-btn');
+            if (editPayloadBtn) {
+                editPayloadBtn.addEventListener('click', function() {
+                    togglePaymentForm(true);
                 });
+            }
+
+            // Close form button
+            const closeFormBtn = document.getElementById('close-form-btn');
+            if (closeFormBtn) {
+                closeFormBtn.addEventListener('click', function() {
+                    togglePaymentForm(false);
+                });
+            }
+
+            // Update summary when form fields change
+            const formFields = ['amount', 'currency', 'email', 'firstName', 'lastName'];
+            formFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.addEventListener('input', updatePaymentSummary);
+                    field.addEventListener('change', updatePaymentSummary);
+                }
             });
         });
     </script>
