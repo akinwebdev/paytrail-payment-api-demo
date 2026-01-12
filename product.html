@@ -247,11 +247,13 @@
                             if (!resp.ok) {
                                 const errorData = await resp.json();
                                 console.error('❌ Payment request failed:', errorData);
+                                console.error('Full error response:', JSON.stringify(errorData, null, 2));
                                 throw new Error(errorData.message || errorData.error || 'Failed to create payment request');
                             }
                             
                             const data = await resp.json();
                             console.log('✅ Payment request created:', data);
+                            console.log('Full response data:', JSON.stringify(data, null, 2));
                             
                             if (!data.paymentRequestId) {
                                 throw new Error('Payment request ID not returned from server');
