@@ -547,6 +547,7 @@ app.post('/api/klarna/payment-request', async (req, res) => {
         console.log('📤 Partner Account ID:', KLARNA_PARTNER_ACCOUNT_ID);
         console.log('📤 API URL:', KLARNA_API_URL);
 
+        // Add timeout to prevent hanging requests
         const response = await axios({
             method: 'POST',
             url: endpointUrl,
@@ -554,7 +555,8 @@ app.post('/api/klarna/payment-request', async (req, res) => {
                 'Authorization': `Basic ${auth}`,
                 'Content-Type': 'application/json'
             },
-            data: payload
+            data: payload,
+            timeout: 30000 // 30 second timeout
         });
 
         console.log('✅ Klarna payment request created successfully');
