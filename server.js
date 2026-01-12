@@ -129,7 +129,7 @@ app.use((req, res, next) => {
     // Skip API routes and special paths
     if (req.path.startsWith('/api/') || req.path === '/login' || req.path === '/logout' || 
         req.path === '/health' || req.path === '/documentation' || req.path.startsWith('/api-documentation_rev1') ||
-        req.path === '/' || req.path === '/product' || req.path === '/payment-success') {
+        req.path === '/' || req.path === '/payment-success') {
         return next();
     }
     
