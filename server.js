@@ -126,13 +126,48 @@ app.get('/logout', (req, res) => {
 // Serve static files BEFORE authentication (CSS, JS, fonts, images, etc.)
 // This must be registered BEFORE the authentication middleware
 app.use((req, res, next) => {
-    // Only serve static files, skip API routes and other paths
+    // Skip API routes and special paths
     if (req.path.startsWith('/api/') || req.path === '/login' || req.path === '/logout' || 
-        req.path === '/health' || req.path === '/documentation' || req.path.startsWith('/api-documentation_rev1')) {
+        req.path === '/health' || req.path === '/documentation' || req.path.startsWith('/api-documentation_rev1') ||
+        req.path === '/' || req.path === '/product' || req.path === '/payment-success') {
         return next();
     }
     
-    // Use express.static for all other paths
+    // Check if it's a static file request
+    const isStaticFile = req.path.endsWith('.css') || 
+                        req.path.endsWith('.js') || 
+                        req.path.endsWith('.svg') || 
+                        req.path.endsWith('.png') || 
+                        req.path.endsWith('.jpg') || 
+                        req.path.endsWith('.jpeg') || 
+                        req.path.endsWith('.woff') || 
+                        req.path.endsWith('.woff2') || 
+                        req.path.endsWith('.ttf') ||
+                        req.path.startsWith('/fonts/') ||
+                        req.path.startsWith('/images/');
+    
+    if (isStaticFile) {
+        const filePath = path.join(__dirname, req.path);
+        const fs = require('fs');
+        if (fs.existsSync(filePath)) {
+            const ext = path.extname(filePath).toLowerCase();
+            const mimeTypes = {
+                '.css': 'text/css',
+                '.js': 'application/javascript',
+                '.svg': 'image/svg+xml',
+                '.png': 'image/png',
+                '.jpg': 'image/jpeg',
+                '.jpeg': 'image/jpeg',
+                '.woff': 'font/woff',
+                '.woff2': 'font/woff2',
+                '.ttf': 'font/ttf'
+            };
+            res.type(mimeTypes[ext] || 'text/plain');
+            return res.sendFile(filePath);
+        }
+    }
+    
+    // Use express.static for other paths
     express.static(__dirname, {
         index: false,
         setHeaders: (res, filePath) => {
