@@ -84,8 +84,10 @@ app.post('/login', (req, res) => {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             maxAge: 24 * 60 * 60 * 1000, // 24 hours
-            sameSite: 'lax' // Allow cookie to be sent on navigation
+            sameSite: 'lax', // Allow cookie to be sent on navigation
+            path: '/' // Ensure cookie is available for all paths
         });
+        console.log('🍪 Cookie set - Session ID:', sessionId, 'Path: /');
         
         // Redirect to returnUrl if provided and valid, otherwise to homepage
         const redirectTo = returnUrl && returnUrl !== '/login' && returnUrl.startsWith('/') 
