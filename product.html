@@ -228,6 +228,16 @@
                     initiationMode: "DEVICE_BEST",
                     initiate: async () => {
                         console.log('🔄🔄🔄 INITIATE CALLBACK EXECUTED! 🔄🔄🔄');
+                        
+                        // Check if user provided a payment request ID
+                        const paymentRequestIdInput = document.getElementById('payment-request-id-input');
+                        const manualPaymentRequestId = paymentRequestIdInput?.value?.trim();
+                        
+                        if (manualPaymentRequestId) {
+                            console.log('✅ Using manually provided payment request ID:', manualPaymentRequestId);
+                            return { paymentRequestId: manualPaymentRequestId };
+                        }
+                        
                         console.log('🔄 Step 3: Creating payment request (server-side)...');
                         
                         // Collect data to send to server
