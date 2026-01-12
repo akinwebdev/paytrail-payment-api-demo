@@ -149,12 +149,21 @@
                     <p style="margin-top: 0.5rem; font-size: 0.75rem; color: #6B7280;">
                         Leave empty to create a new payment request
                     </p>
-                    <button 
-                        id="test-initiate-btn" 
-                        style="margin-top: 0.5rem; padding: 0.5rem 1rem; background: #FF6B9D; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.875rem;"
-                    >
-                        🧪 Test Initiate Callback
-                    </button>
+                    <div style="margin-top: 0.5rem; display: flex; gap: 0.5rem;">
+                        <button 
+                            id="test-initiate-btn" 
+                            style="padding: 0.5rem 1rem; background: #FF6B9D; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.875rem;"
+                        >
+                            🧪 Test Initiate Callback
+                        </button>
+                        <button 
+                            id="create-payment-request-btn" 
+                            style="padding: 0.5rem 1rem; background: #4A90E2; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.875rem;"
+                        >
+                            🔧 Create Payment Request
+                        </button>
+                    </div>
+                    <div id="payment-request-result" style="margin-top: 0.5rem; padding: 0.75rem; background: #F3F4F6; border-radius: 6px; font-size: 0.75rem; font-family: monospace; display: none; max-height: 200px; overflow-y: auto;"></div>
                 </div>
                 <div id="klarna-payment-button" class="loading" style="margin-top: 1.5rem;">
                     Loading Klarna payment button...
@@ -396,6 +405,72 @@
                         } catch (error) {
                             console.error('🧪 TEST: Initiate callback error:', error);
                             alert(`Initiate callback failed: ${error.message}`);
+                        }
+                    });
+                }
+                
+                // Add "Create Payment Request" button listener
+                const createPaymentRequestBtn = document.getElementById('create-payment-request-btn');
+                const paymentRequestResult = document.getElementById('payment-request-result');
+                if (createPaymentRequestBtn) {
+                    createPaymentRequestBtn.addEventListener('click', async () => {
+                        console.log('🔧 TEST: Creating payment request directly...');
+                        createPaymentRequestBtn.disabled = true;
+                        createPaymentRequestBtn.textContent = '⏳ Creating...';
+                        paymentRequestResult.style.display = 'none';
+                        
+                        try {
+                            const postData = {
+                                amount: Math.round(productPrice * 100), // Convert to cents
+                                currency: 'EUR'
+                            };
+                            
+                            console.log('Sending to server:', postData);
+                            
+                            const controller = new AbortController();
+                            const timeoutId = setTimeout(() => {
+                                controller.abort();
+                            }, 35000);
+                            
+                            const resp = await fetch('/api/klarna/payment-request', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(postData),
+                                signal: controller.signal
+                            });
+                            
+                            clearTimeout(timeoutId);
+                            
+                            const data = await resp.json();
+                            
+                            if (resp.ok) {
+                                console.log('✅ Payment request created:', data);
+                                paymentRequestResult.style.display = 'block';
+                                paymentRequestResult.style.background = '#D1FAE5';
+                                paymentRequestResult.style.border = '1px solid #10B981';
+                                paymentRequestResult.textContent = `✅ Success!\n\nPayment Request ID:\n${data.paymentRequestId || data.payment_request_id || 'N/A'}\n\nFull Response:\n${JSON.stringify(data, null, 2)}`;
+                                
+                                // Auto-fill the input field with the payment request ID
+                                const paymentRequestIdInput = document.getElementById('payment-request-id-input');
+                                if (paymentRequestIdInput && (data.paymentRequestId || data.payment_request_id)) {
+                                    paymentRequestIdInput.value = data.paymentRequestId || data.payment_request_id;
+                                }
+                            } else {
+                                console.error('❌ Payment request failed:', data);
+                                paymentRequestResult.style.display = 'block';
+                                paymentRequestResult.style.background = '#FEE2E2';
+                                paymentRequestResult.style.border = '1px solid #EF4444';
+                                paymentRequestResult.textContent = `❌ Error (${resp.status}):\n\n${JSON.stringify(data, null, 2)}`;
+                            }
+                        } catch (error) {
+                            console.error('❌ Error creating payment request:', error);
+                            paymentRequestResult.style.display = 'block';
+                            paymentRequestResult.style.background = '#FEE2E2';
+                            paymentRequestResult.style.border = '1px solid #EF4444';
+                            paymentRequestResult.textContent = `❌ Error:\n\n${error.message}`;
+                        } finally {
+                            createPaymentRequestBtn.disabled = false;
+                            createPaymentRequestBtn.textContent = '🔧 Create Payment Request';
                         }
                     });
                 }
