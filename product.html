@@ -212,6 +212,9 @@
                 console.log('Klarna SDK initialized:', klarna);
                 console.log('Klarna object keys:', Object.keys(klarna));
                 console.log('Klarna.Payment:', klarna.Payment);
+                
+                // Store klarna instance globally so we can use it in click handler
+                window.klarnaInstance = klarna;
 
                 // Create payment button
                 console.log('Creating payment button...');
@@ -322,40 +325,62 @@
                         console.log('✅ Klarna button element found after', attempts * 200, 'ms');
                         clearInterval(checkInterval);
                         
-                        // Intercept click and manually trigger initiate callback
-                        // Since the SDK serializes the callback and can't execute it, we'll call it manually
+                        // Use the SDK's Payment.initiate method directly after getting payment request ID
+                        // The button's initiate callback is serialized, so we'll handle it manually
                         const originalInitiate = klarnaPaymentButton.initialConfig?.initiate;
                         
                         if (originalInitiate && typeof originalInitiate === 'function') {
-                            console.log('✅ Found initiate callback in initialConfig, setting up manual trigger');
+                            console.log('✅ Found initiate callback, setting up Payment.initiate integration');
                             
-                            // Override the button's click behavior to manually call initiate
+                            // Listen for button click and use Payment.initiate directly
                             klarnaButton.addEventListener('click', async (e) => {
-                                console.log('🖱️ Klarna button clicked - manually triggering initiate!');
+                                console.log('🖱️ Klarna button clicked - using Payment.initiate');
                                 
-                                // Prevent default and stop propagation to avoid SDK's broken handler
+                                // Prevent default to avoid SDK's broken handler
+                                e.preventDefault();
                                 e.stopPropagation();
                                 
                                 try {
-                                    // Manually call the initiate callback
-                                    console.log('🔄 Calling initiate callback manually...');
+                                    // Call the initiate callback to get payment request ID
+                                    console.log('🔄 Calling initiate callback to get payment request ID...');
                                     const result = await originalInitiate();
                                     console.log('✅ Initiate callback returned:', result);
                                     
-                                    // Try to set the payment request ID on the button so SDK can continue
                                     if (result && result.paymentRequestId) {
-                                        klarnaButton.setAttribute('data-payment-request-id', result.paymentRequestId);
-                                        console.log('✅ Payment request ID set on button:', result.paymentRequestId);
+                                        console.log('🔄 Starting payment flow with Payment.initiate...');
+                                        console.log('Payment Request ID:', result.paymentRequestId);
                                         
-                                        // Try to trigger the SDK's internal state change
-                                        // The SDK might be waiting for this
-                                        klarnaButton.dispatchEvent(new CustomEvent('payment-request-created', {
-                                            detail: result,
-                                            bubbles: true
-                                        }));
+                                        // Use the SDK's Payment.initiate method directly
+                                        // This should handle the redirect to Klarna's purchase flow
+                                        try {
+                                            const paymentRequest = await window.klarnaInstance.Payment.initiate({
+                                                paymentRequestId: result.paymentRequestId
+                                            });
+                                            
+                                            console.log('✅ Payment.initiate returned:', paymentRequest);
+                                            
+                                            // Check if we need to redirect manually
+                                            if (paymentRequest?.redirectUrl) {
+                                                console.log('🔄 Redirecting to Klarna:', paymentRequest.redirectUrl);
+                                                window.location.href = paymentRequest.redirectUrl;
+                                            } else if (paymentRequest?.url) {
+                                                console.log('🔄 Redirecting to Klarna (url):', paymentRequest.url);
+                                                window.location.href = paymentRequest.url;
+                                            } else {
+                                                console.log('⚠️ No redirect URL in payment request, checking state...');
+                                                console.log('Payment request state:', paymentRequest?.state);
+                                                console.log('Full payment request:', paymentRequest);
+                                            }
+                                        } catch (initiateError) {
+                                            console.error('❌ Error calling Payment.initiate:', initiateError);
+                                            console.error('Error details:', {
+                                                message: initiateError.message,
+                                                stack: initiateError.stack
+                                            });
+                                        }
                                     }
                                 } catch (error) {
-                                    console.error('❌ Error in manual initiate:', error);
+                                    console.error('❌ Error in payment initiation:', error);
                                 }
                             }, { capture: true, once: false });
                         } else {
