@@ -523,11 +523,17 @@ app.post('/api/klarna/payment-request', async (req, res) => {
         const { amount, currency } = req.body;
 
         // Get the base URL for return_url
-        // Use the request origin or construct from headers
-        const protocol = req.protocol || (req.get('x-forwarded-proto') || 'https');
-        const host = req.get('host') || req.get('x-forwarded-host') || 'paytrail-payment-api-demo.vercel.app';
-        // Match Postman return_url format with all template variables
-        const returnUrl = `${protocol}://${host}/payment-success?payment_request_id={klarna.payment_request.id}&state={klarna.payment_request.state}&payment_token={klarna.payment_request.payment_token}&payment_request_reference={klarna.payment_request.payment_request_reference}`;
+        // Klarna requires HTTPS, so prioritize x-forwarded-proto and default to https
+        // On Vercel, x-forwarded-proto should be 'https'
+        const protocol = req.get('x-forwarded-proto') || 'https';
+        const host = req.get('x-forwarded-host') || req.get('host') || 'paytrail-payment-api-demo.vercel.app';
+        
+        // Ensure we always use HTTPS for Klarna (required by their API)
+        const returnUrl = `https://${host}/payment-success?payment_request_id={klarna.payment_request.id}&state={klarna.payment_request.state}&payment_token={klarna.payment_request.payment_token}&payment_request_reference={klarna.payment_request.payment_request_reference}`;
+        
+        console.log('📤 Constructed return URL:', returnUrl);
+        console.log('📤 Protocol from headers:', req.get('x-forwarded-proto'));
+        console.log('📤 Host from headers:', req.get('x-forwarded-host') || req.get('host'));
 
         // Prepare payment request payload matching Postman working request
         const crypto = require('crypto');
