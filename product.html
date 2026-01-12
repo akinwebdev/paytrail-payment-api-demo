@@ -219,68 +219,67 @@
                 // Create payment button
                 console.log('Creating payment button...');
                 
-                // Create a wrapper function that will be accessible even if serialized
-                // Store the actual callback logic in a way that can be accessed
-                const createInitiateCallback = () => {
-                    return async () => {
-                        console.log('🔄🔄🔄 INITIATE CALLBACK EXECUTED! 🔄🔄🔄');
-                        try {
-                            console.log('🔄 Initiating payment request (server-side)...');
-                            
-                            // Collect minimal data to send to server per Klarna API specs
-                            const postData = {
-                                amount: Math.round(productPrice * 100), // Convert to cents
-                                currency: 'EUR'
-                            };
-                            
-                            console.log('Sending to server:', postData);
-                            
-                            // Create payment request on server side (recommended approach)
-                            const resp = await fetch('/api/klarna/payment-request', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify(postData)
-                            });
-                            
-                            console.log('Response received, status:', resp.status);
-                            
-                            if (!resp.ok) {
-                                const errorData = await resp.json();
-                                console.error('❌ Payment request failed:', errorData);
-                                console.error('Full error response:', JSON.stringify(errorData, null, 2));
-                                throw new Error(errorData.message || errorData.error || 'Failed to create payment request');
-                            }
-                            
-                            const data = await resp.json();
-                            console.log('✅ Payment request created:', data);
-                            console.log('Full response data:', JSON.stringify(data, null, 2));
-                            
-                            if (!data.paymentRequestId) {
-                                throw new Error('Payment request ID not returned from server');
-                            }
-                            
-                            // Return payment request ID to Klarna SDK
-                            const result = { paymentRequestId: data.paymentRequestId };
-                            console.log('Returning to Klarna SDK:', result);
-                            return result;
-                        } catch (error) {
-                            console.error('❌ Error in initiate callback:', error);
-                            console.error('Error details:', {
-                                message: error.message,
-                                stack: error.stack,
-                                name: error.name
-                            });
-                            throw error;
+                // Store the initiate callback function globally so SDK can access it
+                // The SDK serializes callbacks, so we need to make it accessible
+                window.klarnaInitiateCallback = async () => {
+                    console.log('🔄🔄🔄 INITIATE CALLBACK EXECUTED! 🔄🔄🔄');
+                    try {
+                        console.log('🔄 Initiating payment request (server-side)...');
+                        
+                        // Collect minimal data to send to server per Klarna API specs
+                        const postData = {
+                            amount: Math.round(productPrice * 100), // Convert to cents
+                            currency: 'EUR'
+                        };
+                        
+                        console.log('Sending to server:', postData);
+                        
+                        // Create payment request on server side (recommended approach)
+                        const resp = await fetch('/api/klarna/payment-request', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(postData)
+                        });
+                        
+                        console.log('Response received, status:', resp.status);
+                        
+                        if (!resp.ok) {
+                            const errorData = await resp.json();
+                            console.error('❌ Payment request failed:', errorData);
+                            console.error('Full error response:', JSON.stringify(errorData, null, 2));
+                            throw new Error(errorData.message || errorData.error || 'Failed to create payment request');
                         }
-                    };
+                        
+                        const data = await resp.json();
+                        console.log('✅ Payment request created:', data);
+                        console.log('Full response data:', JSON.stringify(data, null, 2));
+                        
+                        if (!data.paymentRequestId) {
+                            throw new Error('Payment request ID not returned from server');
+                        }
+                        
+                        // Return payment request ID to Klarna SDK
+                        const result = { paymentRequestId: data.paymentRequestId };
+                        console.log('Returning to Klarna SDK:', result);
+                        return result;
+                    } catch (error) {
+                        console.error('❌ Error in initiate callback:', error);
+                        console.error('Error details:', {
+                            message: error.message,
+                            stack: error.stack,
+                            name: error.name
+                        });
+                        throw error;
+                    }
                 };
                 
                 // Create payment button with server-side payment request creation
                 // This is the recommended approach per Klarna documentation
+                // Use the global function so SDK can access it even if serialized
                 const klarnaPaymentButton = klarna.Payment.button({
                     container: '#klarna-payment-button',
                     intents: ['PAY'],
-                    initiate: createInitiateCallback(),
+                    initiate: window.klarnaInitiateCallback,
                     onComplete: async (paymentRequest) => {
                         console.log('Payment completed:', paymentRequest);
                         
