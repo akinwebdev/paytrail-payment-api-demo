@@ -182,8 +182,7 @@ const SECRET_KEY = process.env.PAYTRAIL_SECRET_KEY;
 
 // Klarna WebSDK configuration
 const KLARNA_WEBSDK_CLIENT_ID = process.env.KLARNA_WEBSDK_CLIENT_ID;
-const KLARNA_WEBSDK_USERNAME = process.env.KLARNA_WEBSDK_USERNAME;
-const KLARNA_WEBSDK_PASSWORD = process.env.KLARNA_WEBSDK_PASSWORD;
+const KLARNA_API_KEY = process.env.KLARNA_API_KEY; // API key for Basic Auth
 const KLARNA_API_URL = process.env.KLARNA_API_URL || 'https://api.klarna.com';
 
 // Validate required environment variables
@@ -472,9 +471,10 @@ app.post('/api/klarna/payment-request', async (req, res) => {
         console.log('🔄 Creating Klarna payment request...');
         console.log('Payment request data:', JSON.stringify(req.body, null, 2));
         
-        if (!KLARNA_WEBSDK_USERNAME || !KLARNA_WEBSDK_PASSWORD) {
+        if (!KLARNA_API_KEY) {
             return res.status(500).json({
-                error: 'Klarna WebSDK credentials not configured',
+                error: 'Klarna API key not configured',
+                message: 'Please set KLARNA_API_KEY environment variable',
                 timestamp: new Date().toISOString()
             });
         }
@@ -495,8 +495,9 @@ app.post('/api/klarna/payment-request', async (req, res) => {
             }
         };
 
-        // Create Basic Auth header
-        const auth = Buffer.from(`${KLARNA_WEBSDK_USERNAME}:${KLARNA_WEBSDK_PASSWORD}`).toString('base64');
+        // Create Basic Auth header using API key
+        // For Klarna API, the API key is used as the username with empty password
+        const auth = Buffer.from(`${KLARNA_API_KEY}:`).toString('base64');
 
         const response = await axios({
             method: 'POST',
