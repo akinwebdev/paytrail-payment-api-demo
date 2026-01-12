@@ -76,17 +76,26 @@
             min-height: 60px;
             display: block;
             visibility: visible;
+            position: relative;
         }
         
-        /* Ensure Klarna button elements are visible */
+        /* Ensure Klarna button elements are visible and clickable */
         #klarna-payment-button * {
             visibility: visible !important;
+            pointer-events: auto !important;
         }
         
         klarna-payment-button {
             display: block !important;
             width: 100% !important;
             min-height: 60px !important;
+            pointer-events: auto !important;
+            cursor: pointer !important;
+        }
+        
+        klarna-payment-button::part(button) {
+            pointer-events: auto !important;
+            cursor: pointer !important;
         }
         .loading {
             text-align: center;
@@ -274,15 +283,37 @@
                         console.log('✅ Klarna button element found after', attempts * 200, 'ms');
                         clearInterval(checkInterval);
                         
-                        // Add click event listener for debugging
-                        klarnaButton.addEventListener('click', (e) => {
-                            console.log('🖱️ Klarna button clicked!', e);
+                        // Add multiple event listeners to catch any interaction
+                        const events = ['click', 'mousedown', 'mouseup', 'touchstart', 'touchend'];
+                        events.forEach(eventType => {
+                            klarnaButton.addEventListener(eventType, (e) => {
+                                console.log(`🖱️ Klarna button ${eventType} event!`, e);
+                            }, { capture: true });
+                        });
+                        
+                        // Also try adding to the container
+                        container.addEventListener('click', (e) => {
+                            console.log('🖱️ Container clicked!', e.target);
+                        }, { capture: true });
+                        
+                        // Check button state and properties
+                        console.log('Button properties:', {
+                            disabled: klarnaButton.disabled,
+                            hidden: klarnaButton.hidden,
+                            style: klarnaButton.getAttribute('style'),
+                            computedStyle: window.getComputedStyle(klarnaButton),
+                            innerHTML: klarnaButton.innerHTML.substring(0, 200)
                         });
                         
                         // Listen for any errors
                         klarnaButton.addEventListener('error', (e) => {
                             console.error('❌ Klarna button error:', e);
                         });
+                        
+                        // Try to access the button's internal methods if available
+                        if (klarnaButton._initiate || klarnaButton.initiate) {
+                            console.log('Button has initiate method:', !!klarnaButton._initiate || !!klarnaButton.initiate);
+                        }
                     } else if (attempts >= maxAttempts) {
                         console.warn('⚠️ Klarna button element not found after', attempts * 200, 'ms');
                         clearInterval(checkInterval);
