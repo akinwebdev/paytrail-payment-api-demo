@@ -51,8 +51,20 @@ function requireAuth(req, res, next) {
         return next();
     }
     
-    // Allow access to login page, logout, API endpoints, and health check
-    if (req.path === '/login' || req.path === '/logout' || req.path.startsWith('/api/') || req.path === '/health') {
+    // Allow access to login page, logout, API endpoints, health check, and static assets
+    const publicPaths = ['/login', '/logout', '/health'];
+    const publicPrefixes = ['/api/', '/styles.css', '/fonts/', '/images/', '/favicon'];
+    
+    if (publicPaths.includes(req.path) || 
+        publicPrefixes.some(prefix => req.path.startsWith(prefix)) ||
+        req.path.endsWith('.css') || 
+        req.path.endsWith('.js') || 
+        req.path.endsWith('.svg') || 
+        req.path.endsWith('.png') || 
+        req.path.endsWith('.jpg') || 
+        req.path.endsWith('.woff') || 
+        req.path.endsWith('.woff2') || 
+        req.path.endsWith('.ttf')) {
         console.log('✅ Public route - allowing access');
         return next();
     }
