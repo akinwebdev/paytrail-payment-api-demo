@@ -123,6 +123,29 @@ app.get('/logout', (req, res) => {
     res.redirect('/login');
 });
 
+// Serve static files BEFORE authentication (CSS, JS, fonts, images, etc.)
+app.use((req, res, next) => {
+    // Check if this is a static asset request
+    const isStaticAsset = req.path.endsWith('.css') || 
+                         req.path.endsWith('.js') || 
+                         req.path.endsWith('.svg') || 
+                         req.path.endsWith('.png') || 
+                         req.path.endsWith('.jpg') || 
+                         req.path.endsWith('.jpeg') || 
+                         req.path.endsWith('.woff') || 
+                         req.path.endsWith('.woff2') || 
+                         req.path.endsWith('.ttf') ||
+                         req.path.startsWith('/fonts/') ||
+                         req.path.startsWith('/images/') ||
+                         req.path === '/styles.css' ||
+                         req.path === '/favicon.svg';
+    
+    if (isStaticAsset) {
+        return express.static(__dirname, { index: false })(req, res, next);
+    }
+    next();
+});
+
 // Apply authentication to all routes except login, logout, and API endpoints
 app.use(requireAuth);
 
@@ -396,9 +419,18 @@ app.get('/api/merchants/grouped-payment-providers', async (req, res) => {
 // GET /api/klarna/config - Return Klarna WebSDK configuration
 app.get('/api/klarna/config', (req, res) => {
     try {
+        console.log('🔍 Klarna config request - CLIENT_ID present:', !!KLARNA_WEBSDK_CLIENT_ID);
+        console.log('🔍 Environment check:', {
+            hasClientId: !!process.env.KLARNA_WEBSDK_CLIENT_ID,
+            hasUsername: !!process.env.KLARNA_WEBSDK_USERNAME,
+            hasPassword: !!process.env.KLARNA_WEBSDK_PASSWORD
+        });
+        
         if (!KLARNA_WEBSDK_CLIENT_ID) {
+            console.error('❌ Klarna WebSDK Client ID not configured in environment variables');
             return res.status(500).json({
                 error: 'Klarna WebSDK Client ID not configured',
+                message: 'Please set KLARNA_WEBSDK_CLIENT_ID environment variable',
                 timestamp: new Date().toISOString()
             });
         }
