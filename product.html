@@ -318,17 +318,49 @@
                 klarnaPaymentButton.mount("#klarna-payment-button");
                 console.log('✅ Payment button mounted');
                 
+                // Wait a bit for the button to render, then add debug listeners
+                setTimeout(() => {
+                    const buttonContainer = document.getElementById('klarna-payment-button');
+                    const klarnaButtonElement = buttonContainer?.querySelector('klarna-payment-button');
+                    
+                    if (klarnaButtonElement) {
+                        console.log('✅ Found klarna-payment-button element, adding debug listeners');
+                        
+                        // Add click listener to debug
+                        klarnaButtonElement.addEventListener('click', (e) => {
+                            console.log('🖱️ DEBUG: klarna-payment-button clicked!', e);
+                        }, true);
+                        
+                        // Also listen on the container
+                        buttonContainer.addEventListener('click', (e) => {
+                            console.log('🖱️ DEBUG: Container clicked!', e.target);
+                        }, true);
+                        
+                        // Check if button is visible and clickable
+                        const rect = klarnaButtonElement.getBoundingClientRect();
+                        console.log('✅ Button element position:', {
+                            visible: rect.width > 0 && rect.height > 0,
+                            width: rect.width,
+                            height: rect.height,
+                            top: rect.top,
+                            left: rect.left
+                        });
+                    } else {
+                        console.warn('⚠️ klarna-payment-button element not found after mount');
+                    }
+                }, 500);
+                
                 // Attach event listeners following reference pattern
                 klarna.Payment.on('error', (error, paymentRequest) => {
-                    console.error('Payment Error:', error, paymentRequest);
+                    console.error('❌ Payment Error:', error, paymentRequest);
                 });
                 
                 klarna.Payment.on('abort', (paymentRequest) => {
-                    console.log('Payment Aborted:', paymentRequest);
+                    console.log('⚠️ Payment Aborted:', paymentRequest);
                 });
                 
                 klarna.Payment.on('complete', async (paymentRequest) => {
-                    console.log('Payment Complete:', paymentRequest);
+                    console.log('✅ Payment Complete:', paymentRequest);
                     
                     // Check if we have the interoperability_token in the callback
                     if (paymentRequest.stateContext?.interoperabilityToken) {
