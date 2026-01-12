@@ -205,8 +205,14 @@
                     intents: ['PAY'], // Valid intents: PAY, SUBSCRIBE, SIGNUP, SIGNIN, DONATE, ADD_TO_WALLET
                     initiate: async () => {
                         try {
-                            console.log('Initiating payment request...');
+                            console.log('🔄 Initiating payment request...');
+                            console.log('Payment amount:', productPrice, 'EUR');
+                            console.log('Payment amount in cents:', Math.round(productPrice * 100));
+                            
                             // Create payment request on server
+                            const paymentRequestRef = `kec-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+                            console.log('Payment request reference:', paymentRequestRef);
+                            
                             const response = await fetch('/api/klarna/payment-request', {
                                 method: 'POST',
                                 headers: {
@@ -215,23 +221,35 @@
                                 body: JSON.stringify({
                                     amount: Math.round(productPrice * 100), // Convert to cents
                                     currency: 'EUR',
-                                    paymentRequestReference: `kec-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+                                    paymentRequestReference: paymentRequestRef
                                 })
                             });
 
+                            console.log('Response status:', response.status);
+                            console.log('Response ok:', response.ok);
+
                             if (!response.ok) {
-                                const error = await response.json();
-                                throw new Error(error.message || 'Failed to create payment request');
+                                const errorData = await response.json();
+                                console.error('❌ Payment request failed:', errorData);
+                                throw new Error(errorData.message || errorData.error || 'Failed to create payment request');
                             }
 
                             const data = await response.json();
-                            console.log('Payment request created:', data);
+                            console.log('✅ Payment request created:', data);
+                            console.log('Payment request ID:', data.paymentRequestId);
                             
-                            return {
+                            if (!data.paymentRequestId) {
+                                throw new Error('Payment request ID not returned from server');
+                            }
+                            
+                            const result = {
                                 paymentRequestId: data.paymentRequestId
                             };
+                            console.log('Returning to Klarna SDK:', result);
+                            return result;
                         } catch (error) {
-                            console.error('Error initiating payment:', error);
+                            console.error('❌ Error initiating payment:', error);
+                            console.error('Error stack:', error.stack);
                             document.getElementById('error-message').textContent = `Error: ${error.message}`;
                             document.getElementById('error-message').style.display = 'block';
                             throw error;

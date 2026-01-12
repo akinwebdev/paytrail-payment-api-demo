@@ -497,6 +497,7 @@ app.post('/api/klarna/payment-request', async (req, res) => {
         console.log('Payment request data:', JSON.stringify(req.body, null, 2));
         
         if (!KLARNA_API_KEY) {
+            console.error('❌ Klarna API key not configured');
             return res.status(500).json({
                 error: 'Klarna API key not configured',
                 message: 'Please set KLARNA_API_KEY environment variable',
@@ -520,6 +521,8 @@ app.post('/api/klarna/payment-request', async (req, res) => {
             }
         };
 
+        console.log('📤 Sending to Klarna API:', JSON.stringify(payload, null, 2));
+
         // Create Basic Auth header using API key
         // For Klarna API, the API key is used as the username with empty password
         const auth = Buffer.from(`${KLARNA_API_KEY}:`).toString('base64');
@@ -535,7 +538,19 @@ app.post('/api/klarna/payment-request', async (req, res) => {
         });
 
         console.log('✅ Klarna payment request created successfully');
+        console.log('Response status:', response.status);
+        console.log('Response data:', JSON.stringify(response.data, null, 2));
         console.log('Payment request ID:', response.data.payment_request_id);
+        
+        if (!response.data.payment_request_id) {
+            console.error('❌ Payment request ID missing from response');
+            return res.status(500).json({
+                error: 'Invalid response from Klarna API',
+                message: 'Payment request ID not found in response',
+                response: response.data,
+                timestamp: new Date().toISOString()
+            });
+        }
         
         res.status(201).json({
             paymentRequestId: response.data.payment_request_id,
