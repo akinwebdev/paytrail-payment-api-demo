@@ -74,6 +74,19 @@
         #klarna-payment-button {
             width: 100%;
             min-height: 60px;
+            display: block;
+            visibility: visible;
+        }
+        
+        /* Ensure Klarna button elements are visible */
+        #klarna-payment-button * {
+            visibility: visible !important;
+        }
+        
+        klarna-payment-button {
+            display: block !important;
+            width: 100% !important;
+            min-height: 60px !important;
         }
         .loading {
             text-align: center;
@@ -145,7 +158,6 @@
                 }
                 
                 klarnaClientId = config.clientId;
-                console.log('Klarna Client ID:', klarnaClientId);
                 
                 // Get product price from URL params or use default
                 const urlParams = new URLSearchParams(window.location.search);
@@ -238,6 +250,22 @@
                     }
                 });
                 console.log('Payment button created:', klarnaPaymentButton);
+                
+                // Wait a bit for button to render, then check
+                setTimeout(() => {
+                    const container = document.getElementById('klarna-payment-button');
+                    console.log('Button container element:', container);
+                    console.log('Button container HTML:', container?.innerHTML);
+                    console.log('Button container children:', container?.children);
+                    console.log('Button container computed style:', window.getComputedStyle(container));
+                    
+                    // Check for Klarna button element
+                    const klarnaButton = container?.querySelector('klarna-payment-button');
+                    console.log('Klarna button element:', klarnaButton);
+                    if (klarnaButton) {
+                        console.log('Klarna button computed style:', window.getComputedStyle(klarnaButton));
+                    }
+                }, 1000);
 
                 // Listen for payment complete event
                 klarna.Payment.on('complete', async (paymentRequest) => {
