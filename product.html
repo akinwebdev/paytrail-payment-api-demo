@@ -300,8 +300,25 @@
                         clearInterval(checkInterval);
                         
                         // Add click event listener to debug
-                        klarnaButton.addEventListener('click', (e) => {
+                        klarnaButton.addEventListener('click', async (e) => {
                             console.log('🖱️ Klarna button clicked!', e);
+                            
+                            // If the SDK isn't calling the callback, try to manually trigger it
+                            // Check if initiate callback exists and call it
+                            if (window.klarnaInitiateCallback) {
+                                console.log('⚠️ SDK callback not called, manually triggering initiate...');
+                                try {
+                                    const result = await window.klarnaInitiateCallback();
+                                    console.log('✅ Manual initiate result:', result);
+                                    
+                                    // Try to set the payment request ID on the button
+                                    if (klarnaButton.setAttribute) {
+                                        klarnaButton.setAttribute('data-payment-request-id', result.paymentRequestId);
+                                    }
+                                } catch (error) {
+                                    console.error('❌ Manual initiate failed:', error);
+                                }
+                            }
                         });
                         
                         // Listen for any errors
@@ -309,9 +326,12 @@
                             console.error('❌ Klarna button error:', e);
                         });
                         
-                        // Also listen for custom events from Klarna SDK
-                        klarnaButton.addEventListener('klarna-payment-initiate', (e) => {
-                            console.log('🔄 Klarna payment initiate event:', e);
+                        // Listen for all custom events to see what Klarna SDK is doing
+                        const events = ['initiate', 'complete', 'error', 'loading', 'ready'];
+                        events.forEach(eventName => {
+                            klarnaButton.addEventListener(eventName, (e) => {
+                                console.log(`🔄 Klarna ${eventName} event:`, e);
+                            });
                         });
                     } else if (attempts >= maxAttempts) {
                         console.warn('⚠️ Klarna button element not found after', attempts * 200, 'ms');
