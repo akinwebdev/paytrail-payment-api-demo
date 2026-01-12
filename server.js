@@ -51,8 +51,8 @@ function requireAuth(req, res, next) {
         return next();
     }
     
-    // Allow access to login page, logout, API endpoints, health check, and static assets
-    const publicPaths = ['/login', '/logout', '/health'];
+    // Allow access to login page, logout, API endpoints, health check, product page, and static assets
+    const publicPaths = ['/login', '/logout', '/health', '/product', '/payment-success'];
     const publicPrefixes = ['/api/', '/styles.css', '/fonts/', '/images/', '/favicon'];
     
     if (publicPaths.includes(req.path) || 
