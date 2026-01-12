@@ -247,13 +247,24 @@
                         
                         const data = await resp.json();
                         console.log('✅ Payment request created:', data);
+                        console.log('✅ Full response data:', JSON.stringify(data, null, 2));
+                        console.log('✅ Response keys:', Object.keys(data));
+                        console.log('✅ paymentRequestId value:', data.paymentRequestId);
+                        console.log('✅ payment_request_id value:', data.payment_request_id);
                         
-                        if (!data.paymentRequestId) {
+                        // Check both camelCase and snake_case
+                        const paymentRequestId = data.paymentRequestId || data.payment_request_id;
+                        
+                        if (!paymentRequestId) {
+                            console.error('❌ Payment request ID missing from response');
+                            console.error('Response data structure:', data);
                             throw new Error('Payment request ID not returned from server');
                         }
                         
+                        console.log('✅ Found payment request ID:', paymentRequestId);
+                        
                         // Return payment request ID to Klarna SDK (following reference pattern)
-                        return { paymentRequestId: data.paymentRequestId };
+                        return { paymentRequestId: paymentRequestId };
                     }
                 });
                 
