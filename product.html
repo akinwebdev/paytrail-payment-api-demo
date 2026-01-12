@@ -225,22 +225,42 @@
                             
                             // Create payment request on server side (recommended approach)
                             console.log('🔄 Making fetch request to /api/klarna/payment-request...');
+                            console.log('Request URL:', window.location.origin + '/api/klarna/payment-request');
+                            
                             let resp;
                             try {
+                                // Add timeout to detect hanging requests
+                                const controller = new AbortController();
+                                const timeoutId = setTimeout(() => {
+                                    controller.abort();
+                                    console.error('❌ Fetch request timed out after 30 seconds');
+                                }, 30000);
+                                
                                 resp = await fetch('/api/klarna/payment-request', {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify(postData)
+                                    body: JSON.stringify(postData),
+                                    signal: controller.signal
                                 });
+                                
+                                clearTimeout(timeoutId);
                                 console.log('✅ Fetch request completed, status:', resp.status);
                             } catch (fetchError) {
                                 console.error('❌ Fetch request failed:', fetchError);
                                 console.error('Fetch error details:', {
                                     message: fetchError.message,
                                     name: fetchError.name,
+                                    type: fetchError.constructor.name,
                                     stack: fetchError.stack
                                 });
-                                throw new Error(`Failed to connect to server: ${fetchError.message}`);
+                                
+                                if (fetchError.name === 'AbortError') {
+                                    throw new Error('Request timed out - server is not responding');
+                                } else if (fetchError.message.includes('Failed to fetch')) {
+                                    throw new Error('Network error - cannot reach server. Check if server is running.');
+                                } else {
+                                    throw new Error(`Failed to connect to server: ${fetchError.message}`);
+                                }
                             }
                             
                             console.log('Response received, status:', resp.status);
