@@ -191,6 +191,7 @@
                 console.log('Creating payment button...');
                 const klarnaPaymentButton = klarna.Payment.button({
                     container: '#klarna-payment-button',
+                    intents: ['buy'], // Add intents array to fix the warning
                     initiate: async () => {
                         try {
                             console.log('Initiating payment request...');

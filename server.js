@@ -656,8 +656,38 @@ app.use((err, req, res, next) => {
     });
 });
 
-// 404 handler
+// 404 handler - but skip for static files that might not exist
 app.use((req, res) => {
+    // If it's a static file request, try to serve it with correct MIME type
+    const isStaticAsset = req.path.endsWith('.css') || 
+                         req.path.endsWith('.js') || 
+                         req.path.endsWith('.svg') || 
+                         req.path.endsWith('.png') || 
+                         req.path.endsWith('.jpg') || 
+                         req.path.endsWith('.woff') || 
+                         req.path.endsWith('.woff2') || 
+                         req.path.endsWith('.ttf');
+    
+    if (isStaticAsset) {
+        const filePath = path.join(__dirname, req.path);
+        const fs = require('fs');
+        if (fs.existsSync(filePath)) {
+            const ext = path.extname(filePath).toLowerCase();
+            const mimeTypes = {
+                '.css': 'text/css',
+                '.js': 'application/javascript',
+                '.svg': 'image/svg+xml',
+                '.png': 'image/png',
+                '.jpg': 'image/jpeg',
+                '.woff': 'font/woff',
+                '.woff2': 'font/woff2',
+                '.ttf': 'font/ttf'
+            };
+            res.type(mimeTypes[ext] || 'text/plain');
+            return res.sendFile(filePath);
+        }
+    }
+    
     res.status(404).json({
         error: 'Not found',
         path: req.path,
