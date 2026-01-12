@@ -227,34 +227,10 @@
                         try {
                             console.log('🔄 Initiating payment request (server-side)...');
                             
-                            // Collect data to send to server
-                            // Include proper line items and customer data for Klarna
+                            // Collect minimal data to send to server per Klarna API specs
                             const postData = {
                                 amount: Math.round(productPrice * 100), // Convert to cents
-                                currency: 'EUR',
-                                paymentRequestReference: `kec-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-                                supplementaryPurchaseData: {
-                                    purchase_reference: `kec-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-                                    line_items: [
-                                        {
-                                            type: 'physical',
-                                            reference: 'demo-product',
-                                            name: 'Demo Product',
-                                            quantity: 1,
-                                            quantity_unit: 'pcs',
-                                            unit_price: Math.round(productPrice * 100),
-                                            tax_rate: 2400, // 24% in basis points
-                                            total_amount: Math.round(productPrice * 100),
-                                            total_tax_amount: Math.round(productPrice * 100 * 0.24 / 1.24) // VAT included
-                                        }
-                                    ],
-                                    shipping: [],
-                                    customer: {
-                                        customer_account: {
-                                            // Klarna will collect customer info during checkout
-                                        }
-                                    }
-                                }
+                                currency: 'EUR'
                             };
                             
                             console.log('Sending to server:', postData);

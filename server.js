@@ -516,38 +516,16 @@ app.post('/api/klarna/payment-request', async (req, res) => {
         }
 
         const axios = require('axios');
-        const { amount, currency, paymentRequestReference, supplementaryPurchaseData } = req.body;
+        const { amount, currency } = req.body;
 
-        // Prepare the payment request payload
-        // Use provided supplementaryPurchaseData or create default with proper structure
-        const defaultSupplementaryData = {
-            purchase_reference: paymentRequestReference || `kec-${Date.now()}`,
-            line_items: [
-                {
-                    type: 'physical',
-                    reference: 'demo-product',
-                    name: 'Demo Product',
-                    quantity: 1,
-                    quantity_unit: 'pcs',
-                    unit_price: amount || 1590,
-                    tax_rate: 2400, // 24% in basis points
-                    total_amount: amount || 1590,
-                    total_tax_amount: Math.round((amount || 1590) * 0.24 / 1.24) // VAT included
-                }
-            ],
-            shipping: [],
-            customer: {
-                customer_account: {
-                    // Klarna will collect customer info during checkout
-                }
-            }
-        };
-        
+        // Prepare minimal payment request payload per Klarna API specs
         const payload = {
             currency: currency || 'EUR',
             amount: amount || 1590, // Default to 15.90 EUR in cents
-            payment_request_reference: paymentRequestReference || `kec-${Date.now()}`,
-            supplementary_purchase_data: supplementaryPurchaseData || defaultSupplementaryData
+            customer_interaction_config: {
+                method: 'HANDOVER',
+                return_url: `${req.protocol}://${req.get('host')}/payment-success?paymentRequestId={klarna.payment_request.id}`
+            }
         };
 
         console.log('📤 Sending to Klarna API:', JSON.stringify(payload, null, 2));
