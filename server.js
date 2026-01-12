@@ -39,6 +39,11 @@ function requireAuth(req, res, next) {
     const sessionId = req.cookies.sessionId;
     
     console.log('🔒 Auth check - Path:', req.path, 'Session ID:', sessionId ? 'present' : 'missing');
+    console.log('🔒 All cookies:', req.cookies);
+    if (sessionId) {
+        console.log('🔒 Session exists in store:', sessions.has(sessionId));
+        console.log('🔒 Total sessions in store:', sessions.size);
+    }
     
     // Check if session is valid
     if (sessionId && sessions.has(sessionId)) {
