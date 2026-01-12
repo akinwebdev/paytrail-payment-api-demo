@@ -133,6 +133,7 @@
         <div class="error" id="error"></div>
         <form method="POST" action="/login" id="loginForm">
             <input type="password" name="password" placeholder="Enter password" required autofocus id="password">
+            <input type="hidden" name="returnUrl" id="returnUrl" value="">
             <button type="submit">Login</button>
         </form>
     </div>
@@ -142,6 +143,12 @@
         if (urlParams.get('error') === '1') {
             document.getElementById('error').textContent = 'Invalid password. Please try again.';
             document.getElementById('error').classList.add('show');
+        }
+        
+        // Preserve returnUrl from query string
+        const returnUrl = urlParams.get('returnUrl');
+        if (returnUrl) {
+            document.getElementById('returnUrl').value = returnUrl;
         }
         
         // Focus password field

@@ -46,15 +46,16 @@ function requireAuth(req, res, next) {
         return next();
     }
     
-    // Allow access to login page, logout, API endpoints, health check, and product pages
-    if (req.path === '/login' || req.path === '/logout' || req.path.startsWith('/api/') || req.path === '/health' || req.path === '/product' || req.path === '/payment-success') {
+    // Allow access to login page, logout, API endpoints, and health check
+    if (req.path === '/login' || req.path === '/logout' || req.path.startsWith('/api/') || req.path === '/health') {
         console.log('✅ Public route - allowing access');
         return next();
     }
     
-    // Redirect to login
+    // Redirect to login with return URL
     console.log('❌ Not authenticated - redirecting to login');
-    res.redirect('/login');
+    const returnUrl = req.originalUrl || req.url;
+    res.redirect(`/login?returnUrl=${encodeURIComponent(returnUrl)}`);
 }
 
 // Login route (must be before authentication middleware)
