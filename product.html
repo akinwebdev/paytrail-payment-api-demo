@@ -282,10 +282,15 @@
                 }
                 
                 // Wait for custom element to be defined and add click listener
-                setTimeout(() => {
+                // Check multiple times as custom elements may take time to register
+                let attempts = 0;
+                const maxAttempts = 10;
+                const checkInterval = setInterval(() => {
+                    attempts++;
                     const klarnaButton = container?.querySelector('klarna-payment-button');
                     if (klarnaButton) {
-                        console.log('✅ Klarna button element found');
+                        console.log('✅ Klarna button element found after', attempts * 200, 'ms');
+                        clearInterval(checkInterval);
                         
                         // Add click event listener to debug
                         klarnaButton.addEventListener('click', (e) => {
@@ -296,10 +301,16 @@
                         klarnaButton.addEventListener('error', (e) => {
                             console.error('❌ Klarna button error:', e);
                         });
-                    } else {
-                        console.warn('⚠️ Klarna button element not found');
+                        
+                        // Also listen for custom events from Klarna SDK
+                        klarnaButton.addEventListener('klarna-payment-initiate', (e) => {
+                            console.log('🔄 Klarna payment initiate event:', e);
+                        });
+                    } else if (attempts >= maxAttempts) {
+                        console.warn('⚠️ Klarna button element not found after', attempts * 200, 'ms');
+                        clearInterval(checkInterval);
                     }
-                }, 1000);
+                }, 200);
 
                 // Listen for payment events
                 klarna.Payment.on('complete', async (paymentRequest) => {
@@ -311,13 +322,9 @@
                     }
                 });
                 
-                // Listen for other payment events for debugging
+                // Listen for error events for debugging
                 klarna.Payment.on('error', (error) => {
                     console.error('❌ Klarna Payment error event:', error);
-                });
-                
-                klarna.Payment.on('state-change', (state) => {
-                    console.log('🔄 Klarna Payment state change:', state);
                 });
 
             } catch (error) {
