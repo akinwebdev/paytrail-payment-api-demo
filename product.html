@@ -163,32 +163,16 @@
                 
                 // Import and initialize Klarna SDK dynamically
                 console.log('Importing Klarna SDK...');
-                const KlarnaModule = await import('https://js.klarna.com/web-sdk/v2/klarna.mjs');
-                console.log('Full KlarnaModule:', KlarnaModule);
-                console.log('KlarnaModule.default:', KlarnaModule.default);
-                console.log('KlarnaModule keys:', Object.keys(KlarnaModule));
-                
-                // The Klarna SDK exports an object with init method
-                // Try different import patterns
-                let Klarna = KlarnaModule.default || KlarnaModule;
-                
-                // If it's still a function, it might be a factory
-                if (typeof Klarna === 'function') {
-                    console.log('Klarna is a function, trying as factory...');
-                    // Try calling it - might return the SDK object
-                    const result = Klarna();
-                    if (result && result.init) {
-                        Klarna = result;
-                    }
-                }
-                
-                console.log('Final Klarna object:', Klarna);
-                console.log('Klarna.init:', Klarna.init);
+                const { Klarna } = await import('https://js.klarna.com/web-sdk/v2/klarna.mjs');
+                console.log('Klarna object:', Klarna);
+                console.log('Klarna type:', typeof Klarna);
+                console.log('Klarna keys:', Klarna ? Object.keys(Klarna) : 'null');
                 
                 // Initialize Klarna SDK
                 console.log('Initializing Klarna with clientId:', klarnaClientId);
-                if (!Klarna.init || typeof Klarna.init !== 'function') {
-                    throw new Error('Klarna.init is not a function. Available methods: ' + Object.keys(Klarna).join(', '));
+                if (!Klarna || !Klarna.init || typeof Klarna.init !== 'function') {
+                    console.error('Klarna structure:', Klarna);
+                    throw new Error('Klarna.init is not available. Klarna object: ' + JSON.stringify(Klarna));
                 }
                 
                 const klarna = Klarna.init({
