@@ -546,18 +546,52 @@ app.post('/api/klarna/payment-request', async (req, res) => {
         console.log('📤 Klarna API endpoint:', endpointUrl);
         console.log('📤 Partner Account ID:', KLARNA_PARTNER_ACCOUNT_ID);
         console.log('📤 API URL:', KLARNA_API_URL);
+        console.log('📤 Payload:', JSON.stringify(payload, null, 2));
+        console.log('📤 Auth header (first 20 chars):', auth.substring(0, 20) + '...');
 
-        // Add timeout to prevent hanging requests
-        const response = await axios({
-            method: 'POST',
-            url: endpointUrl,
-            headers: {
-                'Authorization': `Basic ${auth}`,
-                'Content-Type': 'application/json'
-            },
-            data: payload,
-            timeout: 30000 // 30 second timeout
-        });
+        let response;
+        const startTime = Date.now();
+        try {
+            console.log('🔄 Making request to Klarna API...');
+            
+            response = await axios({
+                method: 'POST',
+                url: endpointUrl,
+                headers: {
+                    'Authorization': `Basic ${auth}`,
+                    'Content-Type': 'application/json'
+                },
+                data: payload,
+                timeout: 30000 // 30 second timeout
+            });
+            
+            const duration = Date.now() - startTime;
+            console.log(`✅ Klarna API responded in ${duration}ms`);
+        } catch (axiosError) {
+            const duration = Date.now() - startTime;
+            console.error(`❌ Klarna API request failed after ${duration}ms`);
+            console.error('Error type:', axiosError.code || axiosError.message);
+            
+            if (axiosError.code === 'ECONNABORTED') {
+                console.error('❌ Request timed out after 30 seconds');
+                throw new Error('Klarna API request timed out');
+            } else if (axiosError.response) {
+                console.error('❌ Klarna API error response:', axiosError.response.status);
+                console.error('❌ Error data:', JSON.stringify(axiosError.response.data, null, 2));
+                throw axiosError;
+            } else if (axiosError.request) {
+                console.error('❌ No response from Klarna API');
+                console.error('Request details:', {
+                    url: endpointUrl,
+                    method: 'POST',
+                    hasAuth: !!auth
+                });
+                throw new Error('No response from Klarna API - check endpoint URL and network');
+            } else {
+                console.error('❌ Request setup error:', axiosError.message);
+                throw axiosError;
+            }
+        }
 
         console.log('✅ Klarna payment request created successfully');
         console.log('Response status:', response.status);
