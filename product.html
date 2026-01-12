@@ -149,6 +149,12 @@
                     <p style="margin-top: 0.5rem; font-size: 0.75rem; color: #6B7280;">
                         Leave empty to create a new payment request
                     </p>
+                    <button 
+                        id="test-initiate-btn" 
+                        style="margin-top: 0.5rem; padding: 0.5rem 1rem; background: #FF6B9D; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.875rem;"
+                    >
+                        🧪 Test Initiate Callback
+                    </button>
                 </div>
                 <div id="klarna-payment-button" class="loading" style="margin-top: 1.5rem;">
                     Loading Klarna payment button...
@@ -219,14 +225,8 @@
                 
                 // Step 3: Implement initiate callback (server-side approach - recommended)
                 // Following the reference implementation pattern
-                const klarnaPaymentButton = klarna.Payment.button({
-                    id: "klarna-payment-button",
-                    locale: "en-FI",
-                    shape: "pill",
-                    theme: "default",
-                    intents: ["PAY"],
-                    initiationMode: "DEVICE_BEST",
-                    initiate: async () => {
+                // Store initiate callback globally so we can test it
+                const initiateCallback = async () => {
                         console.log('🔄🔄🔄 INITIATE CALLBACK EXECUTED! 🔄🔄🔄');
                         
                         // Check if user provided a payment request ID
@@ -310,7 +310,19 @@
                         
                         // Return payment request ID to Klarna SDK (following reference pattern)
                         return { paymentRequestId: paymentRequestId };
-                    }
+                    };
+                
+                // Store globally for testing
+                window.klarnaInitiateCallback = initiateCallback;
+                
+                const klarnaPaymentButton = klarna.Payment.button({
+                    id: "klarna-payment-button",
+                    locale: "en-FI",
+                    shape: "pill",
+                    theme: "default",
+                    intents: ["PAY"],
+                    initiationMode: "DEVICE_BEST",
+                    initiate: initiateCallback
                 });
                 
                 // Mount the button to the container (Step 2) - following reference pattern
@@ -371,6 +383,22 @@
                 });
                 
                 console.log('✅ Klarna payment button setup complete');
+                
+                // Add test button listener
+                const testInitiateBtn = document.getElementById('test-initiate-btn');
+                if (testInitiateBtn) {
+                    testInitiateBtn.addEventListener('click', async () => {
+                        console.log('🧪 TEST: Manually triggering initiate callback...');
+                        try {
+                            const result = await window.klarnaInitiateCallback();
+                            console.log('🧪 TEST: Initiate callback result:', result);
+                            alert(`Initiate callback executed successfully!\nResult: ${JSON.stringify(result, null, 2)}`);
+                        } catch (error) {
+                            console.error('🧪 TEST: Initiate callback error:', error);
+                            alert(`Initiate callback failed: ${error.message}`);
+                        }
+                    });
+                }
 
                 // Listen for payment events
                 klarna.Payment.on('complete', async (paymentRequest) => {
