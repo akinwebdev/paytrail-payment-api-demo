@@ -72,19 +72,6 @@
             line-height: 1.6;
             color: #5A5A5A;
         }
-        .klarna-button-container {
-            margin-top: 2rem;
-            padding: 2rem;
-            background: white;
-            border-radius: 8px;
-            border: 1px solid #E4E3DF;
-        }
-        .klarna-button-container h3 {
-            font-family: 'Klarna Title', sans-serif;
-            font-size: 1.25rem;
-            margin: 0 0 1rem 0;
-            color: #0B051D;
-        }
         #klarna-payment-button {
             width: 100%;
             min-height: 60px;
@@ -128,15 +115,11 @@
                 <div class="product-description">
                     <p>This is a demo product for testing Klarna Express Checkout integration. The product details and pricing can be customized as needed.</p>
                 </div>
+                <div id="klarna-payment-button" class="loading" style="margin-top: 1.5rem;">
+                    Loading Klarna payment button...
+                </div>
+                <div id="error-message" style="display: none; margin-top: 1rem;" class="error"></div>
             </div>
-        </div>
-        
-        <div class="klarna-button-container">
-            <h3>Pay with Klarna</h3>
-            <div id="klarna-payment-button" class="loading">
-                Loading Klarna payment button...
-            </div>
-            <div id="error-message" style="display: none;" class="error"></div>
         </div>
     </div>
 
@@ -150,14 +133,22 @@
         // Fetch configuration from server
         async function initKlarna() {
             try {
+                console.log('Initializing Klarna SDK...');
+                
                 const configResponse = await fetch('/api/klarna/config');
+                if (!configResponse.ok) {
+                    throw new Error(`Failed to fetch config: ${configResponse.status}`);
+                }
+                
                 const config = await configResponse.json();
+                console.log('Config received:', config);
                 
                 if (!config.clientId) {
                     throw new Error('Klarna Client ID not configured');
                 }
                 
                 klarnaClientId = config.clientId;
+                console.log('Klarna Client ID:', klarnaClientId);
                 
                 // Get product price from URL params or use default
                 const urlParams = new URLSearchParams(window.location.search);
@@ -167,16 +158,25 @@
                     document.getElementById('product-price').textContent = `€${productPrice.toFixed(2)}`;
                 }
                 
+                // Clear the loading text
+                const buttonContainer = document.getElementById('klarna-payment-button');
+                buttonContainer.innerHTML = '';
+                buttonContainer.classList.remove('loading');
+                
                 // Initialize Klarna SDK
+                console.log('Initializing Klarna with clientId:', klarnaClientId);
                 const klarna = Klarna.init({
                     clientId: klarnaClientId
                 });
+                console.log('Klarna SDK initialized:', klarna);
 
                 // Create payment button
+                console.log('Creating payment button...');
                 const klarnaPaymentButton = klarna.Payment.button({
                     container: '#klarna-payment-button',
                     initiate: async () => {
                         try {
+                            console.log('Initiating payment request...');
                             // Create payment request on server
                             const response = await fetch('/api/klarna/payment-request', {
                                 method: 'POST',
@@ -196,6 +196,7 @@
                             }
 
                             const data = await response.json();
+                            console.log('Payment request created:', data);
                             
                             return {
                                 paymentRequestId: data.paymentRequestId
@@ -219,6 +220,7 @@
                         }
                     }
                 });
+                console.log('Payment button created:', klarnaPaymentButton);
 
                 // Listen for payment complete event
                 klarna.Payment.on('complete', async (paymentRequest) => {
@@ -232,8 +234,9 @@
 
             } catch (error) {
                 console.error('Error initializing Klarna:', error);
-                document.getElementById('klarna-payment-button').innerHTML = 
-                    `<div class="error">Error: ${error.message}</div>`;
+                const buttonContainer = document.getElementById('klarna-payment-button');
+                buttonContainer.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+                buttonContainer.classList.remove('loading');
             }
         }
 
