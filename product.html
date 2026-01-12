@@ -223,13 +223,34 @@
                         };
                         
                         console.log('Sending to server:', postData);
+                        console.log('Request URL:', window.location.origin + '/api/klarna/payment-request');
                         
                         // Create payment request on server side (recommended approach)
-                        const resp = await fetch('/api/klarna/payment-request', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(postData)
-                        });
+                        // Add timeout to prevent hanging
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => {
+                            controller.abort();
+                            console.error('❌ Fetch request timed out after 35 seconds');
+                        }, 35000);
+                        
+                        let resp;
+                        try {
+                            resp = await fetch('/api/klarna/payment-request', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(postData),
+                                signal: controller.signal
+                            });
+                            clearTimeout(timeoutId);
+                            console.log('✅ Fetch request completed, status:', resp.status);
+                        } catch (fetchError) {
+                            clearTimeout(timeoutId);
+                            console.error('❌ Fetch request failed:', fetchError);
+                            if (fetchError.name === 'AbortError') {
+                                throw new Error('Request timed out - server is not responding');
+                            }
+                            throw fetchError;
+                        }
                         
                         console.log('Response received, status:', resp.status);
                         
