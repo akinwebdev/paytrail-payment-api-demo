@@ -181,39 +181,23 @@
                 buttonContainer.innerHTML = '';
                 buttonContainer.classList.remove('loading');
                 
-                // Import and initialize Klarna SDK dynamically
-                console.log('Importing Klarna SDK from: https://js.klarna.com/web-sdk/v2/klarna.mjs');
-                const KlarnaModule = await import('https://js.klarna.com/web-sdk/v2/klarna.mjs');
-                console.log('Klarna SDK version/type check:', {
-                    hasDefault: !!KlarnaModule.default,
-                    hasKlarnaSDK: !!KlarnaModule.KlarnaSDK,
-                    hasInitiateKlarnaWebSdk: !!KlarnaModule.initiateKlarnaWebSdk,
-                    moduleType: typeof KlarnaModule
+                // Step 1: Import Library - Use the correct import pattern from Klarna docs
+                console.log('Step 1: Importing Klarna SDK from: https://js.klarna.com/web-sdk/v2/klarna.mjs');
+                const { KlarnaSDK } = await import('https://js.klarna.com/web-sdk/v2/klarna.mjs');
+                
+                // Initialize Klarna SDK with clientId and products
+                console.log('Initializing Klarna SDK with clientId:', klarnaClientId);
+                const klarna = await KlarnaSDK({
+                    clientId: klarnaClientId,
+                    products: ["PAYMENT"],
+                    locale: "en-US" // optional
                 });
-                console.log('Full KlarnaModule:', KlarnaModule);
-                console.log('KlarnaModule.default:', KlarnaModule.default);
-                console.log('KlarnaModule keys:', Object.keys(KlarnaModule));
                 
-                // The default export is a function - this is the init function
-                const Klarna = KlarnaModule.default || KlarnaModule;
-                console.log('Klarna function:', Klarna);
-                console.log('Klarna type:', typeof Klarna);
-                
-                // Initialize Klarna SDK - call the function directly with clientId
-                console.log('Initializing Klarna with clientId:', klarnaClientId);
-                if (!Klarna || typeof Klarna !== 'function') {
-                    throw new Error('Klarna is not a function. Module exports: ' + JSON.stringify(Object.keys(KlarnaModule)));
-                }
-                
-                // Call Klarna function with clientId to initialize (returns a Promise)
-                const klarna = await Klarna({
-                    clientId: klarnaClientId
-                });
-                console.log('Klarna SDK initialized:', klarna);
+                console.log('✅ Klarna SDK initialized:', klarna);
                 console.log('Klarna object keys:', Object.keys(klarna));
                 console.log('Klarna.Payment:', klarna.Payment);
                 
-                // Store klarna instance globally so we can use it in click handler
+                // Store klarna instance globally for access
                 window.klarnaInstance = klarna;
 
                 // Step 2: Display the Klarna payment button
