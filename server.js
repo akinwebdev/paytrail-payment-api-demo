@@ -615,15 +615,32 @@ app.post('/api/klarna/payment-request', async (req, res) => {
         });
     } catch (error) {
         console.error('❌ Error creating Klarna payment request:', error.message);
-        console.error('Error response status:', error.response?.status);
-        console.error('Error response headers:', error.response?.headers);
-        console.error('Error response data:', JSON.stringify(error.response?.data, null, 2));
+        console.error('Error type:', error.constructor.name);
+        console.error('Error code:', error.code);
+        
+        if (error.response) {
+            console.error('Error response status:', error.response.status);
+            console.error('Error response headers:', error.response.headers);
+            console.error('Error response data:', JSON.stringify(error.response.data, null, 2));
+        } else if (error.request) {
+            console.error('No response received from Klarna API');
+            console.error('Request config:', {
+                url: error.config?.url,
+                method: error.config?.method,
+                timeout: error.config?.timeout
+            });
+        }
+        
         console.error('Request payload that failed:', JSON.stringify(payload, null, 2));
+        console.error('Endpoint URL:', endpointUrl);
+        console.error('Partner Account ID:', KLARNA_PARTNER_ACCOUNT_ID);
         
         res.status(error.response?.status || 500).json({
             error: 'Failed to create Klarna payment request',
             message: error.response?.data?.message || error.response?.data?.error || error.message,
             details: error.response?.data || null,
+            errorType: error.constructor.name,
+            errorCode: error.code,
             timestamp: new Date().toISOString()
         });
     }
