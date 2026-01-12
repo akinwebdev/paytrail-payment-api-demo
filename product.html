@@ -201,67 +201,42 @@
                 // Create payment button
                 console.log('Creating payment button...');
                 
-                // Store initiate callback as a global function to prevent serialization issues
-                // The Klarna SDK may need to access this function, so we make it globally available
-                window.klarnaInitiateCallback = async () => {
-                    console.log('🔄🔄🔄 INITIATE CALLBACK CALLED! 🔄🔄🔄');
-                    try {
-                        console.log('🔄 Initiating payment request...');
-                        console.log('Payment amount:', productPrice, 'EUR');
-                        console.log('Payment amount in cents:', Math.round(productPrice * 100));
-                        
-                        // Create payment request on server
-                        const paymentRequestRef = `kec-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-                        console.log('Payment request reference:', paymentRequestRef);
-                        
-                        const response = await fetch('/api/klarna/payment-request', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                amount: Math.round(productPrice * 100), // Convert to cents
-                                currency: 'EUR',
-                                paymentRequestReference: paymentRequestRef
-                            })
-                        });
-
-                        console.log('Response status:', response.status);
-                        console.log('Response ok:', response.ok);
-
-                        if (!response.ok) {
-                            const errorData = await response.json();
-                            console.error('❌ Payment request failed:', errorData);
-                            throw new Error(errorData.message || errorData.error || 'Failed to create payment request');
-                        }
-
-                        const data = await response.json();
-                        console.log('✅ Payment request created:', data);
-                        console.log('Payment request ID:', data.paymentRequestId);
-                        
-                        if (!data.paymentRequestId) {
-                            throw new Error('Payment request ID not returned from server');
-                        }
-                        
-                        const result = {
-                            paymentRequestId: data.paymentRequestId
-                        };
-                        console.log('Returning to Klarna SDK:', result);
-                        return result;
-                    } catch (error) {
-                        console.error('❌ Error initiating payment:', error);
-                        console.error('Error stack:', error.stack);
-                        document.getElementById('error-message').textContent = `Error: ${error.message}`;
-                        document.getElementById('error-message').style.display = 'block';
-                        throw error;
-                    }
-                };
-                
-                // Create payment button with initiate callback
+                // Create payment button with server-side payment request creation
+                // This is the recommended approach per Klarna documentation
                 const klarnaPaymentButton = klarna.Payment.button({
                     container: '#klarna-payment-button',
                     intents: ['PAY'],
-                    initiate: window.klarnaInitiateCallback,
+                    initiate: async () => {
+                        console.log('🔄 Initiating payment request (server-side)...');
+                        
+                        // Collect data to send to server
+                        const postData = {
+                            amount: Math.round(productPrice * 100), // Convert to cents
+                            currency: 'EUR',
+                            paymentRequestReference: `kec-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+                        };
+                        
+                        console.log('Sending to server:', postData);
+                        
+                        // Create payment request on server side (recommended approach)
+                        const resp = await fetch('/api/klarna/payment-request', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(postData)
+                        });
+                        
+                        if (!resp.ok) {
+                            const errorData = await resp.json();
+                            console.error('❌ Payment request failed:', errorData);
+                            throw new Error(errorData.message || errorData.error || 'Failed to create payment request');
+                        }
+                        
+                        const data = await resp.json();
+                        console.log('✅ Payment request created:', data);
+                        
+                        // Return payment request ID to Klarna SDK
+                        return { paymentRequestId: data.paymentRequestId };
+                    },
                     onComplete: async (paymentRequest) => {
                         console.log('Payment completed:', paymentRequest);
                         
@@ -299,39 +274,14 @@
                         console.log('✅ Klarna button element found after', attempts * 200, 'ms');
                         clearInterval(checkInterval);
                         
-                        // Add click event listener to debug
-                        klarnaButton.addEventListener('click', async (e) => {
+                        // Add click event listener for debugging
+                        klarnaButton.addEventListener('click', (e) => {
                             console.log('🖱️ Klarna button clicked!', e);
-                            
-                            // If the SDK isn't calling the callback, try to manually trigger it
-                            // Check if initiate callback exists and call it
-                            if (window.klarnaInitiateCallback) {
-                                console.log('⚠️ SDK callback not called, manually triggering initiate...');
-                                try {
-                                    const result = await window.klarnaInitiateCallback();
-                                    console.log('✅ Manual initiate result:', result);
-                                    
-                                    // Try to set the payment request ID on the button
-                                    if (klarnaButton.setAttribute) {
-                                        klarnaButton.setAttribute('data-payment-request-id', result.paymentRequestId);
-                                    }
-                                } catch (error) {
-                                    console.error('❌ Manual initiate failed:', error);
-                                }
-                            }
                         });
                         
                         // Listen for any errors
                         klarnaButton.addEventListener('error', (e) => {
                             console.error('❌ Klarna button error:', e);
-                        });
-                        
-                        // Listen for all custom events to see what Klarna SDK is doing
-                        const events = ['initiate', 'complete', 'error', 'loading', 'ready'];
-                        events.forEach(eventName => {
-                            klarnaButton.addEventListener(eventName, (e) => {
-                                console.log(`🔄 Klarna ${eventName} event:`, e);
-                            });
                         });
                     } else if (attempts >= maxAttempts) {
                         console.warn('⚠️ Klarna button element not found after', attempts * 200, 'ms');
