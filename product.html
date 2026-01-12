@@ -182,8 +182,14 @@
                 buttonContainer.classList.remove('loading');
                 
                 // Import and initialize Klarna SDK dynamically
-                console.log('Importing Klarna SDK...');
+                console.log('Importing Klarna SDK from: https://js.klarna.com/web-sdk/v2/klarna.mjs');
                 const KlarnaModule = await import('https://js.klarna.com/web-sdk/v2/klarna.mjs');
+                console.log('Klarna SDK version/type check:', {
+                    hasDefault: !!KlarnaModule.default,
+                    hasKlarnaSDK: !!KlarnaModule.KlarnaSDK,
+                    hasInitiateKlarnaWebSdk: !!KlarnaModule.initiateKlarnaWebSdk,
+                    moduleType: typeof KlarnaModule
+                });
                 console.log('Full KlarnaModule:', KlarnaModule);
                 console.log('KlarnaModule.default:', KlarnaModule.default);
                 console.log('KlarnaModule keys:', Object.keys(KlarnaModule));
@@ -285,6 +291,14 @@
                 });
                 console.log('Payment button created:', klarnaPaymentButton);
                 console.log('Button htmlElement:', klarnaPaymentButton.htmlElement);
+                console.log('Button initialConfig:', klarnaPaymentButton.initialConfig);
+                
+                // Check if the initiate callback is preserved
+                if (klarnaPaymentButton.initialConfig?.initiate) {
+                    console.log('✅ Initiate callback is in initialConfig:', typeof klarnaPaymentButton.initialConfig.initiate);
+                } else {
+                    console.warn('⚠️ Initiate callback not found in initialConfig');
+                }
                 
                 // The button might need to be manually appended or we need to wait for custom element
                 const container = document.getElementById('klarna-payment-button');
