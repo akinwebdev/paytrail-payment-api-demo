@@ -250,22 +250,36 @@
                     }
                 });
                 console.log('Payment button created:', klarnaPaymentButton);
+                console.log('Button htmlElement:', klarnaPaymentButton.htmlElement);
+                
+                // The button might need to be manually appended or we need to wait for custom element
+                const container = document.getElementById('klarna-payment-button');
+                
+                // Check if the button has an htmlElement that needs to be appended
+                if (klarnaPaymentButton.htmlElement) {
+                    // Clear container and append the button element
+                    container.innerHTML = '';
+                    container.appendChild(klarnaPaymentButton.htmlElement);
+                    console.log('Button element appended to container');
+                }
                 
                 // Wait a bit for button to render, then check
                 setTimeout(() => {
-                    const container = document.getElementById('klarna-payment-button');
-                    console.log('Button container element:', container);
-                    console.log('Button container HTML:', container?.innerHTML);
+                    console.log('Button container HTML after wait:', container?.innerHTML);
                     console.log('Button container children:', container?.children);
-                    console.log('Button container computed style:', window.getComputedStyle(container));
                     
                     // Check for Klarna button element
-                    const klarnaButton = container?.querySelector('klarna-payment-button');
+                    const klarnaButton = container?.querySelector('klarna-payment-button') || container?.querySelector('[is="klarna-payment-button"]');
                     console.log('Klarna button element:', klarnaButton);
                     if (klarnaButton) {
                         console.log('Klarna button computed style:', window.getComputedStyle(klarnaButton));
+                    } else {
+                        console.warn('Klarna button element not found in container');
+                        // Try to find it anywhere in the document
+                        const klarnaButtonAnywhere = document.querySelector('klarna-payment-button');
+                        console.log('Klarna button anywhere in document:', klarnaButtonAnywhere);
                     }
-                }, 1000);
+                }, 2000);
 
                 // Listen for payment complete event
                 klarna.Payment.on('complete', async (paymentRequest) => {
