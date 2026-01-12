@@ -325,13 +325,37 @@
                         console.log('✅ Klarna button element found after', attempts * 200, 'ms');
                         clearInterval(checkInterval);
                         
-                        // Don't intercept the click - let the SDK button handle it naturally
-                        // The button's initiate callback should work automatically
-                        console.log('✅ Klarna button ready. SDK will handle clicks automatically.');
-                        console.log('Button initialConfig:', {
-                            hasInitiate: !!klarnaPaymentButton.initialConfig?.initiate,
-                            initiateType: typeof klarnaPaymentButton.initialConfig?.initiate
-                        });
+                        // Intercept click to manually call the callback since SDK serializes it
+                        // But this time, we'll make sure the SDK gets the result properly
+                        console.log('✅ Klarna button ready. Setting up click handler...');
+                        
+                        klarnaButton.addEventListener('click', async (e) => {
+                            console.log('🖱️ Klarna button clicked');
+                            
+                            // Don't prevent default - let SDK handle UI state
+                            // But manually call the callback to ensure it executes
+                            try {
+                                console.log('🔄 Manually calling initiate callback...');
+                                const result = await window.klarnaInitiateCallback();
+                                console.log('✅ Initiate callback returned:', result);
+                                
+                                // Set the payment request ID on the button so SDK can continue
+                                if (result && result.paymentRequestId) {
+                                    klarnaButton.setAttribute('data-payment-request-id', result.paymentRequestId);
+                                    console.log('✅ Payment request ID set:', result.paymentRequestId);
+                                    
+                                    // Try to trigger SDK's internal flow by dispatching event
+                                    klarnaButton.dispatchEvent(new CustomEvent('payment-request-ready', {
+                                        detail: result,
+                                        bubbles: true,
+                                        cancelable: true
+                                    }));
+                                }
+                            } catch (error) {
+                                console.error('❌ Error in initiate callback:', error);
+                                // Let the SDK handle the error
+                            }
+                        }, { capture: false, once: false });
                         
                         // Also add listeners for debugging
                         const events = ['mousedown', 'mouseup', 'touchstart', 'touchend'];
