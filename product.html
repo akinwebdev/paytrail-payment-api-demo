@@ -201,8 +201,12 @@
                 // Create payment button
                 console.log('Creating payment button...');
                 
-                // Store initiate function reference for debugging
-                const initiateCallback = async () => {
+                // Create payment button with initiate callback
+                // The callback must be a function reference, not serialized
+                const klarnaPaymentButton = klarna.Payment.button({
+                    container: '#klarna-payment-button',
+                    intents: ['PAY'],
+                    initiate: async () => {
                         console.log('🔄🔄🔄 INITIATE CALLBACK CALLED! 🔄🔄🔄');
                         try {
                             console.log('🔄 Initiating payment request...');
@@ -254,13 +258,7 @@
                             document.getElementById('error-message').style.display = 'block';
                             throw error;
                         }
-                }
-                
-                // Update button config with the callback
-                const klarnaPaymentButton = klarna.Payment.button({
-                    container: '#klarna-payment-button',
-                    intents: ['PAY'],
-                    initiate: initiateCallback,
+                    },
                     onComplete: async (paymentRequest) => {
                         console.log('Payment completed:', paymentRequest);
                         
