@@ -518,17 +518,24 @@ app.post('/api/klarna/payment-request', async (req, res) => {
         const axios = require('axios');
         const { amount, currency } = req.body;
 
+        // Get the base URL for return_url
+        // Use the request origin or construct from headers
+        const protocol = req.protocol || (req.get('x-forwarded-proto') || 'https');
+        const host = req.get('host') || req.get('x-forwarded-host') || 'paytrail-payment-api-demo.vercel.app';
+        const returnUrl = `${protocol}://${host}/payment-success?paymentRequestId={klarna.payment_request.id}`;
+
         // Prepare minimal payment request payload per Klarna API specs
         const payload = {
             currency: currency || 'EUR',
             amount: amount || 1590, // Default to 15.90 EUR in cents
             customer_interaction_config: {
                 method: 'HANDOVER',
-                return_url: `${req.protocol}://${req.get('host')}/payment-success?paymentRequestId={klarna.payment_request.id}`
+                return_url: returnUrl
             }
         };
 
         console.log('📤 Sending to Klarna API:', JSON.stringify(payload, null, 2));
+        console.log('📤 Return URL:', returnUrl);
 
         // Create Basic Auth header using API key
         // For Klarna API, the API key is used as the username with empty password
@@ -603,11 +610,14 @@ app.post('/api/klarna/payment-request', async (req, res) => {
         });
     } catch (error) {
         console.error('❌ Error creating Klarna payment request:', error.message);
-        console.error('Error details:', error.response?.data);
+        console.error('Error response status:', error.response?.status);
+        console.error('Error response headers:', error.response?.headers);
+        console.error('Error response data:', JSON.stringify(error.response?.data, null, 2));
+        console.error('Request payload that failed:', JSON.stringify(payload, null, 2));
         
         res.status(error.response?.status || 500).json({
             error: 'Failed to create Klarna payment request',
-            message: error.response?.data?.message || error.message,
+            message: error.response?.data?.message || error.response?.data?.error || error.message,
             details: error.response?.data || null,
             timestamp: new Date().toISOString()
         });
