@@ -164,25 +164,36 @@
                 // Import and initialize Klarna SDK dynamically
                 console.log('Importing Klarna SDK...');
                 const KlarnaModule = await import('https://js.klarna.com/web-sdk/v2/klarna.mjs');
-                const Klarna = KlarnaModule.default || KlarnaModule;
-                console.log('Klarna module:', Klarna);
-                console.log('Klarna module type:', typeof Klarna);
-                console.log('Klarna module keys:', Object.keys(Klarna));
+                console.log('Full KlarnaModule:', KlarnaModule);
+                console.log('KlarnaModule.default:', KlarnaModule.default);
+                console.log('KlarnaModule keys:', Object.keys(KlarnaModule));
                 
-                // Initialize Klarna SDK - try different patterns
-                console.log('Initializing Klarna with clientId:', klarnaClientId);
-                let klarna;
+                // The Klarna SDK exports an object with init method
+                // Try different import patterns
+                let Klarna = KlarnaModule.default || KlarnaModule;
+                
+                // If it's still a function, it might be a factory
                 if (typeof Klarna === 'function') {
-                    // If Klarna is a function, it might be the init function itself
-                    klarna = Klarna({ clientId: klarnaClientId });
-                } else if (Klarna.init && typeof Klarna.init === 'function') {
-                    klarna = Klarna.init({ clientId: klarnaClientId });
-                } else if (Klarna.default && typeof Klarna.default.init === 'function') {
-                    klarna = Klarna.default.init({ clientId: klarnaClientId });
-                } else {
-                    // Try accessing Payment directly
-                    klarna = Klarna;
+                    console.log('Klarna is a function, trying as factory...');
+                    // Try calling it - might return the SDK object
+                    const result = Klarna();
+                    if (result && result.init) {
+                        Klarna = result;
+                    }
                 }
+                
+                console.log('Final Klarna object:', Klarna);
+                console.log('Klarna.init:', Klarna.init);
+                
+                // Initialize Klarna SDK
+                console.log('Initializing Klarna with clientId:', klarnaClientId);
+                if (!Klarna.init || typeof Klarna.init !== 'function') {
+                    throw new Error('Klarna.init is not a function. Available methods: ' + Object.keys(Klarna).join(', '));
+                }
+                
+                const klarna = Klarna.init({
+                    clientId: klarnaClientId
+                });
                 console.log('Klarna SDK initialized:', klarna);
 
                 // Create payment button
