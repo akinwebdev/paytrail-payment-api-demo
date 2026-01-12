@@ -493,6 +493,9 @@ app.get('/api/klarna/config', (req, res) => {
 
 // POST /api/klarna/payment-request - Create a Klarna payment request
 app.post('/api/klarna/payment-request', async (req, res) => {
+    let payload;
+    let endpointUrl;
+    
     try {
         console.log('🔄 Creating Klarna payment request...');
         console.log('Payment request data:', JSON.stringify(req.body, null, 2));
@@ -530,7 +533,7 @@ app.post('/api/klarna/payment-request', async (req, res) => {
         const crypto = require('crypto');
         const paymentRequestReference = `payment-reference-${crypto.randomUUID()}`;
         
-        const payload = {
+        payload = {
             currency: currency || 'EUR',
             amount: amount || 1590, // Default to 15.90 EUR in cents
             payment_request_reference: paymentRequestReference,
@@ -547,7 +550,7 @@ app.post('/api/klarna/payment-request', async (req, res) => {
         // For Klarna API, the API key is used as the username with empty password
         const auth = Buffer.from(`${KLARNA_API_KEY}:`).toString('base64');
 
-        const endpointUrl = `${KLARNA_API_URL}/v2/accounts/${KLARNA_PARTNER_ACCOUNT_ID}/payment/requests`;
+        endpointUrl = `${KLARNA_API_URL}/v2/accounts/${KLARNA_PARTNER_ACCOUNT_ID}/payment/requests`;
         console.log('📤 Klarna API endpoint:', endpointUrl);
         console.log('📤 Partner Account ID:', KLARNA_PARTNER_ACCOUNT_ID);
         console.log('📤 API URL:', KLARNA_API_URL);
@@ -670,18 +673,38 @@ app.post('/api/klarna/payment-request', async (req, res) => {
             });
         }
         
-        console.error('Request payload that failed:', JSON.stringify(payload, null, 2));
-        console.error('Endpoint URL:', endpointUrl);
+        if (payload) {
+            console.error('Request payload that failed:', JSON.stringify(payload, null, 2));
+        } else {
+            console.error('Request payload not created (error occurred before payload creation)');
+        }
+        if (endpointUrl) {
+            console.error('Endpoint URL:', endpointUrl);
+        } else {
+            console.error('Endpoint URL not created (error occurred before URL construction)');
+        }
         console.error('Partner Account ID:', KLARNA_PARTNER_ACCOUNT_ID);
+        console.error('Full error stack:', error.stack);
         
-        res.status(error.response?.status || 500).json({
+        // Return detailed error response
+        const errorResponse = {
             error: 'Failed to create Klarna payment request',
             message: error.response?.data?.message || error.response?.data?.error || error.message,
             details: error.response?.data || null,
             errorType: error.constructor.name,
             errorCode: error.code,
             timestamp: new Date().toISOString()
-        });
+        };
+        
+        // Add request details if available
+        if (payload) {
+            errorResponse.requestPayload = payload;
+        }
+        if (endpointUrl) {
+            errorResponse.endpointUrl = endpointUrl;
+        }
+        
+        res.status(error.response?.status || 500).json(errorResponse);
     }
 });
 
