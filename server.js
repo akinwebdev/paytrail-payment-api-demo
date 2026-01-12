@@ -46,8 +46,8 @@ function requireAuth(req, res, next) {
         return next();
     }
     
-    // Allow access to login page, logout, API endpoints, and health check
-    if (req.path === '/login' || req.path === '/logout' || req.path.startsWith('/api/') || req.path === '/health') {
+    // Allow access to login page, logout, API endpoints, health check, and product pages
+    if (req.path === '/login' || req.path === '/logout' || req.path.startsWith('/api/') || req.path === '/health' || req.path === '/product' || req.path === '/payment-success') {
         console.log('✅ Public route - allowing access');
         return next();
     }
