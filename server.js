@@ -439,8 +439,7 @@ app.get('/api/klarna/config', (req, res) => {
         console.log('🔍 Klarna config request - CLIENT_ID present:', !!KLARNA_WEBSDK_CLIENT_ID);
         console.log('🔍 Environment check:', {
             hasClientId: !!process.env.KLARNA_WEBSDK_CLIENT_ID,
-            hasUsername: !!process.env.KLARNA_WEBSDK_USERNAME,
-            hasPassword: !!process.env.KLARNA_WEBSDK_PASSWORD
+            hasApiKey: !!process.env.KLARNA_API_KEY
         });
         
         if (!KLARNA_WEBSDK_CLIENT_ID) {
