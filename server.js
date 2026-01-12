@@ -496,6 +496,7 @@ app.post('/api/klarna/payment-request', async (req, res) => {
     try {
         console.log('🔄 Creating Klarna payment request...');
         console.log('Payment request data:', JSON.stringify(req.body, null, 2));
+        console.log('Partner Account ID:', KLARNA_PARTNER_ACCOUNT_ID);
         
         if (!KLARNA_API_KEY) {
             console.error('❌ Klarna API key not configured');
@@ -543,6 +544,8 @@ app.post('/api/klarna/payment-request', async (req, res) => {
 
         const endpointUrl = `${KLARNA_API_URL}/v2/accounts/${KLARNA_PARTNER_ACCOUNT_ID}/payment/requests`;
         console.log('📤 Klarna API endpoint:', endpointUrl);
+        console.log('📤 Partner Account ID:', KLARNA_PARTNER_ACCOUNT_ID);
+        console.log('📤 API URL:', KLARNA_API_URL);
 
         const response = await axios({
             method: 'POST',
