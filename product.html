@@ -368,6 +368,7 @@
                                             
                                             const paymentData = await fetchResponse.json();
                                             console.log('✅ Payment request fetched:', paymentData);
+                                            console.log('🔍 Full payment request structure:', JSON.stringify(paymentData, null, 2));
                                             
                                             const redirectUrl = paymentData.redirectUrl;
                                             
@@ -377,12 +378,20 @@
                                             } else {
                                                 console.log('⚠️ No redirect URL found in payment request');
                                                 console.log('Payment request state:', paymentData.state);
-                                                console.log('Full payment request:', paymentData);
                                                 console.log('Debug info:', paymentData._debug);
+                                                
+                                                // Log the full response structure to help identify where the URL might be
+                                                if (paymentData.paymentRequest) {
+                                                    console.log('🔍 Payment request object keys:', Object.keys(paymentData.paymentRequest));
+                                                    console.log('🔍 Payment request actions:', paymentData.paymentRequest.actions);
+                                                    console.log('🔍 Payment request next_action:', paymentData.paymentRequest.next_action);
+                                                    console.log('🔍 Payment request state_context:', paymentData.paymentRequest.state_context);
+                                                }
                                                 
                                                 // If still no redirect URL, the payment might be in a state that requires waiting
                                                 // or the redirect URL might be available later
-                                                alert('Payment request created but no redirect URL available. Please check the console for details.');
+                                                console.error('❌ No redirect URL found. Full response:', paymentData);
+                                                alert('Payment request created but no redirect URL available. Please check the console for details. The full response has been logged.');
                                             }
                                         } catch (fetchError) {
                                             console.error('❌ Error fetching payment request:', fetchError);

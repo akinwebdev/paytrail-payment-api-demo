@@ -566,11 +566,32 @@ app.post('/api/klarna/payment-request', async (req, res) => {
         }
         
         // Check if the response contains a redirect URL or action URL
+        // Check multiple possible locations and nested structures
         const redirectUrl = response.data.redirect_url 
             || response.data.url 
             || response.data.action_url
+            || response.data.redirectUrl
+            || response.data.actionUrl
             || response.data.next_action?.url
-            || response.data.next_action?.redirect_url;
+            || response.data.next_action?.redirect_url
+            || response.data.next_action?.redirectUrl
+            || response.data.nextAction?.url
+            || response.data.nextAction?.redirectUrl
+            || response.data.actions?.find(a => a.type === 'redirect' || a.type === 'REDIRECT')?.url
+            || response.data.actions?.find(a => a.type === 'redirect' || a.type === 'REDIRECT')?.redirect_url
+            || response.data.actions?.find(a => a.type === 'redirect' || a.type === 'REDIRECT')?.redirectUrl
+            || response.data.state_context?.redirect_url
+            || response.data.state_context?.url
+            || response.data.stateContext?.redirectUrl
+            || response.data.stateContext?.url;
+        
+        console.log('🔍 Redirect URL search result:', redirectUrl || 'NOT FOUND');
+        console.log('🔍 Response structure:', {
+            hasActions: !!response.data.actions,
+            hasNextAction: !!response.data.next_action,
+            hasStateContext: !!response.data.state_context,
+            allKeys: Object.keys(response.data || {})
+        });
         
         res.status(201).json({
             paymentRequestId: response.data.payment_request_id,
@@ -579,7 +600,8 @@ app.post('/api/klarna/payment-request', async (req, res) => {
             // Include full response for debugging
             _debug: {
                 hasRedirectUrl: !!redirectUrl,
-                responseKeys: Object.keys(response.data || {})
+                responseKeys: Object.keys(response.data || {}),
+                fullResponse: response.data // Include full response for client-side debugging
             }
         });
     } catch (error) {
@@ -636,18 +658,43 @@ app.get('/api/klarna/payment-request/:paymentRequestId', async (req, res) => {
         console.log('Response data:', JSON.stringify(response.data, null, 2));
         
         // Extract redirect URL from various possible locations
+        // Check multiple possible locations and nested structures
         const redirectUrl = response.data.redirect_url 
             || response.data.url 
             || response.data.action_url
+            || response.data.redirectUrl
+            || response.data.actionUrl
             || response.data.next_action?.url
             || response.data.next_action?.redirect_url
-            || response.data.actions?.find(a => a.type === 'redirect')?.url;
+            || response.data.next_action?.redirectUrl
+            || response.data.nextAction?.url
+            || response.data.nextAction?.redirectUrl
+            || response.data.actions?.find(a => a.type === 'redirect' || a.type === 'REDIRECT')?.url
+            || response.data.actions?.find(a => a.type === 'redirect' || a.type === 'REDIRECT')?.redirect_url
+            || response.data.actions?.find(a => a.type === 'redirect' || a.type === 'REDIRECT')?.redirectUrl
+            || response.data.state_context?.redirect_url
+            || response.data.state_context?.url
+            || response.data.stateContext?.redirectUrl
+            || response.data.stateContext?.url;
+        
+        console.log('🔍 Redirect URL search result:', redirectUrl || 'NOT FOUND');
+        console.log('🔍 Response structure:', {
+            hasActions: !!response.data.actions,
+            hasNextAction: !!response.data.next_action,
+            hasStateContext: !!response.data.state_context,
+            allKeys: Object.keys(response.data || {})
+        });
         
         res.json({
             paymentRequestId: response.data.payment_request_id || paymentRequestId,
             state: response.data.state,
             redirectUrl: redirectUrl || null,
-            paymentRequest: response.data
+            paymentRequest: response.data,
+            _debug: {
+                hasRedirectUrl: !!redirectUrl,
+                responseKeys: Object.keys(response.data || {}),
+                fullResponse: response.data // Include full response for client-side debugging
+            }
         });
     } catch (error) {
         console.error('❌ Error fetching Klarna payment request:', error.message);
