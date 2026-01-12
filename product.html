@@ -228,10 +228,33 @@
                             console.log('🔄 Initiating payment request (server-side)...');
                             
                             // Collect data to send to server
+                            // Include proper line items and customer data for Klarna
                             const postData = {
                                 amount: Math.round(productPrice * 100), // Convert to cents
                                 currency: 'EUR',
-                                paymentRequestReference: `kec-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+                                paymentRequestReference: `kec-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                                supplementaryPurchaseData: {
+                                    purchase_reference: `kec-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                                    line_items: [
+                                        {
+                                            type: 'physical',
+                                            reference: 'demo-product',
+                                            name: 'Demo Product',
+                                            quantity: 1,
+                                            quantity_unit: 'pcs',
+                                            unit_price: Math.round(productPrice * 100),
+                                            tax_rate: 2400, // 24% in basis points
+                                            total_amount: Math.round(productPrice * 100),
+                                            total_tax_amount: Math.round(productPrice * 100 * 0.24 / 1.24) // VAT included
+                                        }
+                                    ],
+                                    shipping: [],
+                                    customer: {
+                                        customer_account: {
+                                            // Klarna will collect customer info during checkout
+                                        }
+                                    }
+                                }
                             };
                             
                             console.log('Sending to server:', postData);
@@ -346,68 +369,13 @@
                                     const result = await originalInitiate();
                                     console.log('✅ Initiate callback returned:', result);
                                     
+                                    // The button's initiate callback should return the payment request ID
+                                    // The SDK will handle the rest automatically
+                                    // We don't need to call Payment.initiate() manually
                                     if (result && result.paymentRequestId) {
-                                        console.log('🔄 Using Payment.initiate() with callback that returns payment request ID...');
-                                        console.log('Payment Request ID:', result.paymentRequestId);
-                                        
-                                        try {
-                                            // Payment.initiate() expects a callback function that returns payment request details
-                                            // Pass the callback that returns the payment request ID we already have
-                                            const paymentRequest = await window.klarnaInstance.Payment.initiate({
-                                                initiate: async () => {
-                                                    console.log('🔄 Payment.initiate() callback called, returning payment request ID');
-                                                    return {
-                                                        paymentRequestId: result.paymentRequestId
-                                                    };
-                                                }
-                                            });
-                                            
-                                            console.log('✅ Payment.initiate() completed:', paymentRequest);
-                                            
-                                            // The SDK should have handled the redirect, but check if we need to redirect manually
-                                            if (paymentRequest?.redirectUrl || paymentRequest?.url) {
-                                                const redirectUrl = paymentRequest.redirectUrl || paymentRequest.url;
-                                                console.log('🔄 Redirecting to Klarna:', redirectUrl);
-                                                window.location.href = redirectUrl;
-                                            } else {
-                                                console.log('✅ Payment flow initiated. SDK should handle redirect automatically.');
-                                                console.log('Payment request state:', paymentRequest?.state);
-                                            }
-                                        } catch (initiateError) {
-                                            console.error('❌ Error calling Payment.initiate():', initiateError);
-                                            console.error('Error details:', {
-                                                message: initiateError.message,
-                                                errorCode: initiateError.errorCode,
-                                                errorMessage: initiateError.errorMessage,
-                                                stack: initiateError.stack
-                                            });
-                                            
-                                            // Fallback: try to get redirect URL from server
-                                            console.log('🔄 Fallback: Fetching payment request from server...');
-                                            try {
-                                                const fetchResponse = await fetch(`/api/klarna/payment-request/${result.paymentRequestId}`);
-                                                if (fetchResponse.ok) {
-                                                    const paymentData = await fetchResponse.json();
-                                                    console.log('🔍 Payment data from server:', paymentData);
-                                                    
-                                                    // Try to find redirect URL in the full response
-                                                    const redirectUrl = paymentData.redirectUrl 
-                                                        || paymentData.paymentRequest?.redirect_url
-                                                        || paymentData.paymentRequest?.url
-                                                        || paymentData.paymentRequest?.next_action?.url;
-                                                    
-                                                    if (redirectUrl) {
-                                                        console.log('🔄 Redirecting to Klarna (fallback):', redirectUrl);
-                                                        window.location.href = redirectUrl;
-                                                    } else {
-                                                        console.error('❌ No redirect URL found even in fallback');
-                                                        console.log('Full payment data:', JSON.stringify(paymentData, null, 2));
-                                                    }
-                                                }
-                                            } catch (fallbackError) {
-                                                console.error('❌ Fallback also failed:', fallbackError);
-                                            }
-                                        }
+                                        console.log('✅ Payment request ID returned to SDK:', result.paymentRequestId);
+                                        console.log('🔄 SDK should handle the redirect automatically...');
+                                        // The SDK will handle everything from here
                                     }
                                 } catch (error) {
                                     console.error('❌ Error in payment initiation:', error);
