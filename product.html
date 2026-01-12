@@ -200,10 +200,9 @@
 
                 // Create payment button
                 console.log('Creating payment button...');
-                const klarnaPaymentButton = klarna.Payment.button({
-                    container: '#klarna-payment-button',
-                    intents: ['PAY'], // Valid intents: PAY, SUBSCRIBE, SIGNUP, SIGNIN, DONATE, ADD_TO_WALLET
-                    initiate: async () => {
+                
+                // Store initiate function reference for debugging
+                const initiateCallback = async () => {
                         try {
                             console.log('🔄 Initiating payment request...');
                             console.log('Payment amount:', productPrice, 'EUR');
@@ -254,7 +253,13 @@
                             document.getElementById('error-message').style.display = 'block';
                             throw error;
                         }
-                    },
+                }
+                
+                // Update button config with the callback
+                const klarnaPaymentButton = klarna.Payment.button({
+                    container: '#klarna-payment-button',
+                    intents: ['PAY'],
+                    initiate: initiateCallback,
                     onComplete: async (paymentRequest) => {
                         console.log('Payment completed:', paymentRequest);
                         
