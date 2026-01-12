@@ -326,42 +326,13 @@
                         console.log('✅ Klarna button element found after', attempts * 200, 'ms');
                         clearInterval(checkInterval);
                         
-                        // Use the SDK's Payment.initiate method directly after getting payment request ID
-                        // The button's initiate callback is serialized, so we'll handle it manually
-                        const originalInitiate = klarnaPaymentButton.initialConfig?.initiate;
-                        
-                        if (originalInitiate && typeof originalInitiate === 'function') {
-                            console.log('✅ Found initiate callback, setting up Payment.initiate integration');
-                            
-                            // Listen for button click and use Payment.initiate directly
-                            klarnaButton.addEventListener('click', async (e) => {
-                                console.log('🖱️ Klarna button clicked - using Payment.initiate');
-                                
-                                // Prevent default to avoid SDK's broken handler
-                                e.preventDefault();
-                                e.stopPropagation();
-                                
-                                try {
-                                    // Call the initiate callback to get payment request ID
-                                    console.log('🔄 Calling initiate callback to get payment request ID...');
-                                    const result = await originalInitiate();
-                                    console.log('✅ Initiate callback returned:', result);
-                                    
-                                    // The button's initiate callback should return the payment request ID
-                                    // The SDK will handle the rest automatically
-                                    // We don't need to call Payment.initiate() manually
-                                    if (result && result.paymentRequestId) {
-                                        console.log('✅ Payment request ID returned to SDK:', result.paymentRequestId);
-                                        console.log('🔄 SDK should handle the redirect automatically...');
-                                        // The SDK will handle everything from here
-                                    }
-                                } catch (error) {
-                                    console.error('❌ Error in payment initiation:', error);
-                                }
-                            }, { capture: true, once: false });
-                        } else {
-                            console.warn('⚠️ Initiate callback not found or not a function');
-                        }
+                        // Don't intercept the click - let the SDK button handle it naturally
+                        // The button's initiate callback should work automatically
+                        console.log('✅ Klarna button ready. SDK will handle clicks automatically.');
+                        console.log('Button initialConfig:', {
+                            hasInitiate: !!klarnaPaymentButton.initialConfig?.initiate,
+                            initiateType: typeof klarnaPaymentButton.initialConfig?.initiate
+                        });
                         
                         // Also add listeners for debugging
                         const events = ['mousedown', 'mouseup', 'touchstart', 'touchend'];
