@@ -347,14 +347,19 @@
                                     console.log('✅ Initiate callback returned:', result);
                                     
                                     if (result && result.paymentRequestId) {
-                                        console.log('🔄 Using Payment.initiate() with payment request ID...');
+                                        console.log('🔄 Using Payment.initiate() with callback that returns payment request ID...');
                                         console.log('Payment Request ID:', result.paymentRequestId);
                                         
                                         try {
-                                            // Use Payment.initiate() directly with the payment request ID
-                                            // The SDK should handle the redirect automatically
+                                            // Payment.initiate() expects a callback function that returns payment request details
+                                            // Pass the callback that returns the payment request ID we already have
                                             const paymentRequest = await window.klarnaInstance.Payment.initiate({
-                                                paymentRequestId: result.paymentRequestId
+                                                initiate: async () => {
+                                                    console.log('🔄 Payment.initiate() callback called, returning payment request ID');
+                                                    return {
+                                                        paymentRequestId: result.paymentRequestId
+                                                    };
+                                                }
                                             });
                                             
                                             console.log('✅ Payment.initiate() completed:', paymentRequest);
@@ -383,9 +388,20 @@
                                                 const fetchResponse = await fetch(`/api/klarna/payment-request/${result.paymentRequestId}`);
                                                 if (fetchResponse.ok) {
                                                     const paymentData = await fetchResponse.json();
-                                                    if (paymentData.redirectUrl) {
-                                                        console.log('🔄 Redirecting to Klarna (fallback):', paymentData.redirectUrl);
-                                                        window.location.href = paymentData.redirectUrl;
+                                                    console.log('🔍 Payment data from server:', paymentData);
+                                                    
+                                                    // Try to find redirect URL in the full response
+                                                    const redirectUrl = paymentData.redirectUrl 
+                                                        || paymentData.paymentRequest?.redirect_url
+                                                        || paymentData.paymentRequest?.url
+                                                        || paymentData.paymentRequest?.next_action?.url;
+                                                    
+                                                    if (redirectUrl) {
+                                                        console.log('🔄 Redirecting to Klarna (fallback):', redirectUrl);
+                                                        window.location.href = redirectUrl;
+                                                    } else {
+                                                        console.error('❌ No redirect URL found even in fallback');
+                                                        console.log('Full payment data:', JSON.stringify(paymentData, null, 2));
                                                     }
                                                 }
                                             } catch (fallbackError) {
