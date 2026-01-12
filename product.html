@@ -230,26 +230,36 @@
                                 body: JSON.stringify(postData)
                             });
                             
-                            console.log('Response received, status:', resp.status);
-                            
-                            if (!resp.ok) {
-                                const errorData = await resp.json();
-                                console.error('❌ Payment request failed:', errorData);
-                                console.error('Full error response:', JSON.stringify(errorData, null, 2));
+                        console.log('Response received, status:', resp.status);
+                        
+                        if (!resp.ok) {
+                            const errorText = await resp.text();
+                            console.error('❌ Payment request failed - Status:', resp.status);
+                            console.error('❌ Error response text:', errorText);
+                            try {
+                                const errorData = JSON.parse(errorText);
+                                console.error('❌ Error response JSON:', JSON.stringify(errorData, null, 2));
                                 throw new Error(errorData.message || errorData.error || 'Failed to create payment request');
+                            } catch (parseError) {
+                                throw new Error(`Failed to create payment request: ${errorText}`);
                             }
-                            
-                            const data = await resp.json();
-                            console.log('✅ Payment request created:', data);
-                            
-                            if (!data.paymentRequestId) {
-                                throw new Error('Payment request ID not returned from server');
-                            }
-                            
-                            // Return payment request ID to Klarna SDK
-                            const result = { paymentRequestId: data.paymentRequestId };
-                            console.log('Returning to Klarna SDK:', result);
-                            return result;
+                        }
+                        
+                        const data = await resp.json();
+                        console.log('✅ Payment request created:', data);
+                        console.log('✅ Full response data:', JSON.stringify(data, null, 2));
+                        
+                        if (!data.paymentRequestId) {
+                            console.error('❌ Payment request ID missing from response');
+                            console.error('Response data:', data);
+                            throw new Error('Payment request ID not returned from server');
+                        }
+                        
+                        // Return payment request ID to Klarna SDK
+                        const result = { paymentRequestId: data.paymentRequestId };
+                        console.log('✅ Returning to Klarna SDK:', result);
+                        console.log('✅ Payment Request ID:', data.paymentRequestId);
+                        return result;
                         } catch (error) {
                             console.error('❌ Error in initiate callback:', error);
                             throw error;
