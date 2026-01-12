@@ -141,7 +141,25 @@ app.use((req, res, next) => {
                          req.path === '/favicon.svg';
     
     if (isStaticAsset) {
-        return express.static(__dirname, { index: false })(req, res, next);
+        const filePath = path.join(__dirname, req.path);
+        const fs = require('fs');
+        if (fs.existsSync(filePath)) {
+            // Set correct MIME type based on file extension
+            const ext = path.extname(filePath).toLowerCase();
+            const mimeTypes = {
+                '.css': 'text/css',
+                '.js': 'application/javascript',
+                '.svg': 'image/svg+xml',
+                '.png': 'image/png',
+                '.jpg': 'image/jpeg',
+                '.jpeg': 'image/jpeg',
+                '.woff': 'font/woff',
+                '.woff2': 'font/woff2',
+                '.ttf': 'font/ttf'
+            };
+            res.type(mimeTypes[ext] || 'text/plain');
+            return res.sendFile(filePath);
+        }
     }
     next();
 });
