@@ -330,7 +330,7 @@
                     shape: "pill",
                     theme: "default",
                     intents: ["PAY"],
-                    initiationMode: "DEVICE_BEST",
+                    initiationMode: "REDIRECT", // Use REDIRECT for HANDOVER method instead of DEVICE_BEST (which tries popup)
                     initiate: initiateCallback
                 });
                 
