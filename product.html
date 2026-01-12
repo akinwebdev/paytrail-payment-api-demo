@@ -136,6 +136,20 @@
                 <div class="product-description">
                     <p>This is a demo product for testing Klarna Express Checkout integration. The product details and pricing can be customized as needed.</p>
                 </div>
+                <div style="margin-top: 1.5rem; margin-bottom: 1rem;">
+                    <label for="payment-request-id-input" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #0B051D;">
+                        Payment Request ID (optional - for testing):
+                    </label>
+                    <input 
+                        type="text" 
+                        id="payment-request-id-input" 
+                        placeholder="Enter payment request ID to use existing request"
+                        style="width: 100%; padding: 0.75rem; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 0.875rem; font-family: 'Klarna Text', -apple-system, BlinkMacSystemFont, sans-serif;"
+                    />
+                    <p style="margin-top: 0.5rem; font-size: 0.75rem; color: #6B7280;">
+                        Leave empty to create a new payment request
+                    </p>
+                </div>
                 <div id="klarna-payment-button" class="loading" style="margin-top: 1.5rem;">
                     Loading Klarna payment button...
                 </div>
