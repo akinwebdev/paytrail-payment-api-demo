@@ -202,10 +202,22 @@
             border-left: 4px solid #FEF3C7;
         }
 
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
         .result-method {
             font-weight: 600;
             color: #0B051D;
             font-size: 0.9rem;
+            flex: 1;
+            min-width: 0;
+            word-break: break-word;
         }
 
         .result-status {
@@ -213,11 +225,13 @@
             border-radius: 15px;
             font-size: 0.75rem;
             font-weight: 500;
+            flex-shrink: 0;
+            white-space: nowrap;
         }
 
         .result-status.success {
-            background: #E6FFA9;
-            color: #0B051D;
+            background: #4A5568;
+            color: #FFFFFF;
         }
 
         .result-status.error {
@@ -465,8 +479,110 @@
             display: flex;
             justify-content: flex-end;
             align-items: center;
+            gap: 0.5rem;
             padding: 0.75rem 1.5rem 0 1.5rem;
             background: white;
+        }
+
+        .api-response-btn {
+            background: transparent;
+            border: none;
+            padding: 0.5rem;
+            cursor: pointer;
+            color: #0B051D;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .api-response-btn:hover {
+            background: #F9F8F5;
+            color: #4A5568;
+        }
+
+        /* Modal Styles */
+        .payment-response-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .payment-response-modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid #E4E3DF;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #0B051D;
+        }
+
+        .modal-close-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: #0B051D;
+            padding: 0.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .modal-close-btn:hover {
+            background: #F9F8F5;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-json {
+            background: #F9F8F5;
+            border: 1px solid #E4E3DF;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Klarna Mono', 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.875rem;
+            line-height: 1.6;
+            color: #0B051D;
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-height: 60vh;
+            overflow-y: auto;
         }
 
         .payment-logo {
@@ -1148,15 +1264,15 @@
         <main class="main-content">
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 2rem;">
                 <div style="display: flex; align-items: center; justify-content: center; gap: 1.25rem; flex-wrap: wrap;">
-                    <img src="/images/paytrail-logo.svg" alt="Paytrail" style="height: 50px; max-width: 250px; object-fit: contain; display: block;">
-                    <span style="font-size: 1.5rem; color: #0B051D; font-weight: 300; margin: 0;">×</span>
+                    <img src="/images/paytrail-logo.svg" alt="Paytrail" style="height: 65px; max-width: 300px; object-fit: contain; display: block;">
+                    <span style="font-family: 'Klarna Title', 'Klarna Text', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 2rem; color: #0B051D; font-weight: 300; margin: 0;">×</span>
                     <img src="/images/klarna-logo.svg" alt="Klarna" style="height: 50px; max-width: 250px; object-fit: contain; display: block;" onerror="this.onerror=null; this.src='/images/klarna-logo.png'; this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='block';">
                     <svg width="120" height="50" viewBox="0 0 120 50" xmlns="http://www.w3.org/2000/svg" style="display: none;">
                         <text x="0" y="35" font-family="Arial, Helvetica, sans-serif" font-size="36" font-weight="bold" fill="#0B051D" letter-spacing="-1px">Klarna</text>
                     </svg>
                 </div>
                 <div style="text-align: center;">
-                    <span style="font-size: 1.1rem; color: #0B051D; font-weight: 500; letter-spacing: 0.5px;">Network Demo Store</span>
+                    <span style="font-family: 'Klarna Title', 'Klarna Text', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 2.5rem; color: #0B051D; font-weight: 700;">Demo Store</span>
                 </div>
         </div>
 
@@ -1193,13 +1309,17 @@
 
         <!-- Payment Summary Box -->
         <div id="payment-summary-box" style="background: #ffffff; border: 1px solid #E4E3DF; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
-                <h3 style="font-size: 1rem; font-weight: 600; color: #0B051D; margin: 0;">Payment Summary</h3>
-                <button type="button" id="edit-payload-btn" class="btn" style="padding: 0.5rem 1rem; font-size: 0.875rem; background: #0B051D; color: white; border: none; border-radius: 6px; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#1a1a2e';" onmouseout="this.style.background='#0B051D';">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 style="font-size: 1.25rem; font-weight: 600; color: #0B051D; margin: 0;">Payment Summary</h3>
+                <button type="button" id="edit-payload-btn" class="btn" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; font-size: 0.875rem; background: white; color: #0B051D; border: 1px solid #0B051D; border-radius: 6px; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#F9F8F5';" onmouseout="this.style.background='white';">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
                     Edit Payload
                 </button>
             </div>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.5rem;">
                 <div>
                     <strong style="color: #7f8c8d; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Amount</strong>
                     <p style="margin: 0.25rem 0 0 0; font-size: 1rem; color: #0B051D; font-weight: 500;" id="summary-amount">€15.90</p>
@@ -1209,6 +1329,14 @@
                     <p style="margin: 0.25rem 0 0 0; font-size: 1rem; color: #0B051D; font-weight: 500;" id="summary-currency">EUR</p>
                 </div>
                 <div>
+                    <strong style="color: #7f8c8d; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Language</strong>
+                    <p style="margin: 0.25rem 0 0 0; font-size: 1rem; color: #0B051D; font-weight: 500;" id="summary-language">EN</p>
+                </div>
+                <div>
+                    <strong style="color: #7f8c8d; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Reference</strong>
+                    <p style="margin: 0.25rem 0 0 0; font-size: 1rem; color: #0B051D; font-weight: 500;" id="summary-reference">ref-12345678</p>
+                </div>
+                <div>
                     <strong style="color: #7f8c8d; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Customer Email</strong>
                     <p style="margin: 0.25rem 0 0 0; font-size: 1rem; color: #0B051D; font-weight: 500;" id="summary-email">customer@email.fi</p>
                 </div>
@@ -1216,6 +1344,22 @@
                     <strong style="color: #7f8c8d; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Customer Name</strong>
                     <p style="margin: 0.25rem 0 0 0; font-size: 1rem; color: #0B051D; font-weight: 500;" id="summary-name">Test Person-fi</p>
                 </div>
+                <div>
+                    <strong style="color: #7f8c8d; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Phone</strong>
+                    <p style="margin: 0.25rem 0 0 0; font-size: 1rem; color: #0B051D; font-weight: 500;" id="summary-phone">+358401234567</p>
+                </div>
+                <div>
+                    <strong style="color: #7f8c8d; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Delivery Address</strong>
+                    <p style="margin: 0.25rem 0 0 0; font-size: 0.9rem; color: #0B051D; font-weight: 500; line-height: 1.4;" id="summary-delivery">Mannerheimintie 34, 00100 Helsinki, FI</p>
+                </div>
+                <div>
+                    <strong style="color: #7f8c8d; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Invoice Address</strong>
+                    <p style="margin: 0.25rem 0 0 0; font-size: 0.9rem; color: #0B051D; font-weight: 500; line-height: 1.4;" id="summary-invoice">Mannerheimintie 34, 00100 Helsinki, FI</p>
+                </div>
+            </div>
+            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #E4E3DF;">
+                <strong style="color: #7f8c8d; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Klarna Provider Details</strong>
+                <p style="margin: 0.25rem 0 0 0; font-size: 0.9rem; color: #0B051D; font-weight: 500; line-height: 1.4;" id="summary-klarna">No Klarna Network Session Token or Data provided</p>
             </div>
         </div>
 
@@ -1496,18 +1640,53 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-create" id="create-btn">
-                    💳 Create Payment & Show Providers
-                </button>
+                <!-- Klarna Provider Details -->
+                <h3 style="font-size: 1rem; font-weight: 600; margin: 1.5rem 0 1rem 0; color: #0B051D;">Klarna Provider Details (Optional)</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="klarnaSessionToken">Klarna Network Session Token</label>
+                        <input type="text" id="klarnaSessionToken" value="" maxlength="8192" placeholder="Klarna Network session token (1-8192 characters)">
+                        <small style="color: #7f8c8d;">Min: 1, Max: 8192 characters</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="klarnaData">Klarna Network Data</label>
+                        <textarea id="klarnaData" rows="3" maxlength="10240" placeholder="Klarna Network data (1-10240 characters)" style="width: 100%; padding: 0.5rem; border: 1px solid #E4E3DF; border-radius: 4px; font-family: inherit; resize: vertical;"></textarea>
+                        <small style="color: #7f8c8d;">Min: 1, Max: 10240 characters</small>
+                    </div>
+                </div>
             </form>
+        </div>
+
+        <!-- Manual Capture Toggle and Create Payment Button -->
+        <div style="margin-top: 1.5rem;">
+            <div style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                <input type="checkbox" id="enableManualCapture" style="width: 18px; height: 18px; cursor: pointer;">
+                <label for="enableManualCapture" style="font-size: 0.9rem; color: #0B051D; cursor: pointer; user-select: none;">
+                    Enable manual capture
+                </label>
+            </div>
+            <div style="text-align: center;">
+                <button type="button" class="btn btn-create" id="create-btn" onclick="createPaymentFlow()">
+                    💳 Create Paytrail Payment Session
+                </button>
+            </div>
         </div>
 
         <!-- Payment Response Section -->
         <div id="payment-response-section" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; background: #F9F8F5; overflow-y: auto; padding: 2rem 0;">
             <!-- Payment Selection UI -->
             <div class="payment-selection-ui">
-                <!-- Header with close button only -->
+                <!-- Header with close button and API response icon -->
                 <div class="payment-header">
+                    <button class="api-response-btn" onclick="showPaymentResponseModal()" title="View API Response">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                    </button>
                     <button class="close-payment-btn" onclick="createNewPayment()" title="Close">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -1575,37 +1754,40 @@
             </button>
             </div>
         </div>
+
+        <!-- Payment Response Modal -->
+        <div id="payment-response-modal" class="payment-response-modal" onclick="if(event.target === this) closePaymentResponseModal()">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Paytrail /payments API Response</h3>
+                    <button class="modal-close-btn" onclick="closePaymentResponseModal()" title="Close">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="modal-json-content" class="modal-json">Loading...</div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Conversion Boosters Section -->
     <div class="payment-flow-section" style="margin-top: 2rem;">
         <h2>3. Conversion Boosters</h2>
         
-        <div style="margin-bottom: 2rem;">
-            <h3 style="font-size: 1.1rem; font-weight: 600; color: #0B051D; margin-bottom: 1rem;">Using dedicated Interoperability endpoints</h3>
-            <div class="button-section">
-                <button class="api-button btn-providers" onclick="alert('KEC 1-step - Coming soon')">
-                    KEC 1-step
-                </button>
-                <button class="api-button btn-grouped" onclick="alert('KEC multi-step - Coming soon')">
-                    KEC multi-step
-                </button>
-            </div>
-        </div>
-
-        <div style="margin-bottom: 2rem;">
-            <h3 style="font-size: 1.1rem; font-weight: 600; color: #0B051D; margin-bottom: 1rem;">Using the regular /payments endpoint (with redirection)</h3>
-            <div class="button-section">
-                <button class="api-button btn-payment" onclick="alert('KEC - Coming soon')">
-                    KEC
-                </button>
-                <button class="api-button btn-providers" onclick="alert('OSM - Coming soon')">
-                    OSM
-                </button>
-                <button class="api-button btn-grouped" onclick="alert('SIWK - Coming soon')" style="opacity: 0.6; cursor: not-allowed;">
-                    SIWK (coming soon)
-                </button>
-            </div>
+        <div class="button-section">
+            <button class="api-button btn-providers" onclick="window.location.href='/product'">
+                Klarna Express Checkout
+            </button>
+            <button class="api-button btn-grouped" onclick="alert('On-site Messaging - Coming soon')" style="opacity: 0.6; cursor: not-allowed;">
+                On-site Messaging (coming soon)
+            </button>
+            <button class="api-button btn-payment" onclick="alert('Sign-in with Klarna - Coming soon')" style="opacity: 0.6; cursor: not-allowed;">
+                Sign-in with Klarna (coming soon)
+            </button>
         </div>
     </div>
 
@@ -2362,29 +2544,22 @@
                 const redirectSuccess = document.getElementById('redirectSuccess').value || window.location.origin + '/payment-success.html';
                 const redirectCancel = document.getElementById('redirectCancel').value || window.location.origin + '/payment-cancel.html';
 
-                // Generate UUIDs and append to ID/reference fields
-                const uuid = generateUUID();
-                const shortUuid = uuid.substring(0, 8);
+                // Use stamp and reference values directly from form (already have UUIDs from page load)
+                const stamp = document.getElementById('stamp').value || `payment-flow-${Date.now()}`;
+                const reference = document.getElementById('reference').value || `ref-${Date.now()}`;
                 
-                // Append UUID to stamp and reference
-                const stampValue = document.getElementById('stamp').value;
-                const referenceValue = document.getElementById('reference').value;
-                const stamp = stampValue ? `${stampValue}-${shortUuid}` : `payment-flow-${shortUuid}`;
-                const reference = referenceValue ? `${referenceValue}-${shortUuid}` : `ref-${shortUuid}`;
-                
-                // Add UUID to item stamp and reference
+                // Use item stamp and reference from form or generate if missing
                 if (!item.stamp) {
-                    item.stamp = uuid;
-                } else {
-                    item.stamp = `${item.stamp}-${shortUuid}`;
+                    item.stamp = generateUUID();
                 }
                 const itemRefValue = document.getElementById('itemReference').value;
                 if (!item.reference) {
-                    item.reference = itemRefValue ? `${itemRefValue}-${shortUuid}` : `item-ref-${shortUuid}`;
-                } else {
-                    item.reference = `${item.reference}-${shortUuid}`;
+                    item.reference = itemRefValue || `item-ref-${Date.now()}`;
                 }
 
+                // Store reference for comparison in modal
+                requestReference = reference;
+                
                 // Build payment data
                 const paymentData = {
                     stamp: stamp,
@@ -2410,7 +2585,12 @@
                 if (invoicingAddress) {
                     paymentData.invoicingAddress = invoicingAddress;
                 }
-                if (document.getElementById('manualInvoiceActivation').value === 'true') {
+                // Manual invoice activation - prioritize checkbox above button over form field
+                const manualCaptureCheckbox = document.getElementById('enableManualCapture');
+                const manualInvoiceField = document.getElementById('manualInvoiceActivation');
+                if (manualCaptureCheckbox && manualCaptureCheckbox.checked) {
+                    paymentData.manualInvoiceActivation = true;
+                } else if (manualInvoiceField && manualInvoiceField.value === 'true') {
                     paymentData.manualInvoiceActivation = true;
                 }
                 if (document.getElementById('callbackSuccess').value || document.getElementById('callbackCancel').value) {
@@ -2431,6 +2611,26 @@
                 if (document.getElementById('usePricesWithoutVat').value === 'true') {
                     paymentData.usePricesWithoutVat = true;
                 }
+                
+                // Check manual capture toggle
+                if (document.getElementById('enableManualCapture').checked) {
+                    paymentData.manualInvoiceActivation = true;
+                }
+
+                // Add Klarna provider details if provided
+                const klarnaSessionToken = document.getElementById('klarnaSessionToken').value.trim();
+                const klarnaData = document.getElementById('klarnaData').value.trim();
+                if (klarnaSessionToken || klarnaData) {
+                    paymentData.providerDetails = {
+                        klarna: {}
+                    };
+                    if (klarnaSessionToken) {
+                        paymentData.providerDetails.klarna.sessionToken = klarnaSessionToken;
+                    }
+                    if (klarnaData) {
+                        paymentData.providerDetails.klarna.data = klarnaData;
+                    }
+                }
 
                 const response = await fetch('/api/payments', {
                     method: 'POST',
@@ -2443,6 +2643,19 @@
                 const data = await response.json();
 
                 if (response.ok) {
+                // Log reference comparison
+                console.log('📋 Reference Field Comparison:');
+                console.log('  ⚠️  NOTE: Paytrail returns their checkout reference in the "reference" field, not the merchant reference');
+                console.log('  Merchant reference sent:', reference);
+                console.log('  Paytrail checkout reference (in response.reference):', data.reference);
+                console.log('  Response transactionId:', data.transactionId);
+                if (data.checkoutReference) {
+                    console.log('  Response checkoutReference:', data.checkoutReference);
+                }
+                console.log('  ℹ️  The merchant reference you sent is stored by Paytrail but not returned in the immediate response.');
+                console.log('  ℹ️  You can retrieve it later using the transactionId or by querying payment reports.');
+                console.log('  Full response data:', data);
+                    
                     currentPaymentData = data;
                     showPaymentResponse(data);
                 } else {
@@ -2465,7 +2678,7 @@
                 alert('Error creating payment:\n\n' + errorMsg);
             } finally {
                 createBtn.disabled = false;
-                createBtn.textContent = '💳 Create Payment & Show Providers';
+                createBtn.textContent = '💳 Create Paytrail Payment Session';
             }
         }
 
@@ -2474,6 +2687,9 @@
             document.getElementById('payment-form-section').style.display = 'none';
             document.getElementById('payment-summary-box').style.display = 'none';
             document.getElementById('payment-response-section').style.display = 'block';
+            
+            // Store payment data for modal
+            currentPaymentData = paymentData;
 
             // Update transaction info
             document.getElementById('transaction-id').textContent = paymentData.transactionId;
@@ -2931,21 +3147,114 @@
             updatePaymentSummary();
         }
 
+        // Store the request reference for comparison
+        let requestReference = null;
+
+        function showPaymentResponseModal() {
+            const modal = document.getElementById('payment-response-modal');
+            const jsonContent = document.getElementById('modal-json-content');
+            
+            if (currentPaymentData) {
+                // Create a comparison object showing request vs response
+                const comparison = {
+                    note: '⚠️ IMPORTANT: Paytrail returns their checkout reference in the "reference" field, NOT your merchant reference',
+                    request: {
+                        merchantReference: requestReference || 'Not available',
+                        note: 'Your merchant reference sent in the /payments request'
+                    },
+                    response: {
+                        reference: currentPaymentData.reference || 'Not in response',
+                        note: '⚠️ This is Paytrail\'s checkout reference (e.g., "8963228992"), NOT your merchant reference',
+                        transactionId: currentPaymentData.transactionId || 'Not in response',
+                        note2: 'Use transactionId to query payment status or reports to retrieve your original merchant reference',
+                        checkoutReference: currentPaymentData.checkoutReference || 'Not in response (if present, this is also Paytrail\'s reference)'
+                    },
+                    fullResponse: currentPaymentData
+                };
+                
+                // Format the comparison with proper indentation
+                jsonContent.textContent = JSON.stringify(comparison, null, 2);
+                modal.classList.add('active');
+            } else {
+                jsonContent.textContent = 'No payment data available. Please create a payment first.';
+                modal.classList.add('active');
+            }
+        }
+
+        function closePaymentResponseModal() {
+            const modal = document.getElementById('payment-response-modal');
+            modal.classList.remove('active');
+        }
+
         // Function to update payment summary box
         function updatePaymentSummary() {
             const amount = document.getElementById('amount').value || 0;
             const currency = document.getElementById('currency').value || 'EUR';
+            const language = document.getElementById('language').value || 'EN';
+            const reference = document.getElementById('reference').value || '';
             const email = document.getElementById('email').value || '';
             const firstName = document.getElementById('firstName').value || '';
             const lastName = document.getElementById('lastName').value || '';
+            const phone = document.getElementById('phone').value || '';
+            
+            // Delivery address fields
+            const deliveryStreet = document.getElementById('deliveryStreetAddress').value || '';
+            const deliveryPostal = document.getElementById('deliveryPostalCode').value || '';
+            const deliveryCity = document.getElementById('deliveryCity').value || '';
+            const deliveryCountry = document.getElementById('deliveryCountry').value || '';
+            
+            // Invoice address fields
+            const invoiceStreet = document.getElementById('invoicingStreetAddress').value || '';
+            const invoicePostal = document.getElementById('invoicingPostalCode').value || '';
+            const invoiceCity = document.getElementById('invoicingCity').value || '';
+            const invoiceCountry = document.getElementById('invoicingCountry').value || '';
             
             // Format amount as currency
             const amountInEuros = (parseInt(amount) / 100).toFixed(2);
             
+            // Format delivery address
+            const deliveryParts = [];
+            if (deliveryStreet) deliveryParts.push(deliveryStreet);
+            if (deliveryPostal) deliveryParts.push(deliveryPostal);
+            if (deliveryCity) deliveryParts.push(deliveryCity);
+            if (deliveryCountry) deliveryParts.push(deliveryCountry);
+            const delivery = deliveryParts.length > 0 ? deliveryParts.join(', ') : 'Not set';
+            
+            // Format invoice address
+            const invoiceParts = [];
+            if (invoiceStreet) invoiceParts.push(invoiceStreet);
+            if (invoicePostal) invoiceParts.push(invoicePostal);
+            if (invoiceCity) invoiceParts.push(invoiceCity);
+            if (invoiceCountry) invoiceParts.push(invoiceCountry);
+            const invoice = invoiceParts.length > 0 ? invoiceParts.join(', ') : 'Not set';
+            
             document.getElementById('summary-amount').textContent = `€${amountInEuros}`;
             document.getElementById('summary-currency').textContent = currency;
+            document.getElementById('summary-language').textContent = language;
+            document.getElementById('summary-reference').textContent = reference || 'Not set';
             document.getElementById('summary-email').textContent = email || 'Not set';
             document.getElementById('summary-name').textContent = `${firstName} ${lastName}`.trim() || 'Not set';
+            document.getElementById('summary-phone').textContent = phone || 'Not set';
+            document.getElementById('summary-delivery').textContent = delivery;
+            document.getElementById('summary-invoice').textContent = invoice;
+            
+            // Klarna Network fields
+            const klarnaSessionToken = document.getElementById('klarnaSessionToken').value.trim();
+            const klarnaData = document.getElementById('klarnaData').value.trim();
+            if (klarnaSessionToken || klarnaData) {
+                let klarnaInfo = [];
+                if (klarnaSessionToken) {
+                    const truncatedToken = klarnaSessionToken.length > 50 ? klarnaSessionToken.substring(0, 50) + '...' : klarnaSessionToken;
+                    klarnaInfo.push(`Klarna Network Session Token: ${truncatedToken}`);
+                }
+                if (klarnaData) {
+                    const truncatedData = klarnaData.length > 50 ? klarnaData.substring(0, 50) + '...' : klarnaData;
+                    klarnaInfo.push(`Klarna Network Data: ${truncatedData}`);
+                }
+                document.getElementById('summary-klarna').innerHTML = klarnaInfo.join('<br>');
+            } else {
+                document.getElementById('summary-klarna').textContent = 'No Klarna Network Session Token or Data provided';
+            }
         }
 
         // Toggle form visibility
@@ -2994,7 +3303,7 @@
             }
 
             // Update summary when form fields change
-            const formFields = ['amount', 'currency', 'email', 'firstName', 'lastName'];
+            const formFields = ['amount', 'currency', 'language', 'reference', 'email', 'firstName', 'lastName', 'phone', 'deliveryStreetAddress', 'deliveryPostalCode', 'deliveryCity', 'deliveryCountry', 'invoicingStreetAddress', 'invoicingPostalCode', 'invoicingCity', 'invoicingCountry', 'klarnaSessionToken', 'klarnaData'];
             formFields.forEach(fieldId => {
                 const field = document.getElementById(fieldId);
                 if (field) {

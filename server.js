@@ -112,6 +112,12 @@ const PAYTRAIL_API_URL = process.env.PAYTRAIL_API_URL || 'https://services.paytr
 const MERCHANT_ID = process.env.PAYTRAIL_MERCHANT_ID;
 const SECRET_KEY = process.env.PAYTRAIL_SECRET_KEY;
 
+// Klarna WebSDK configuration
+const KLARNA_WEBSDK_CLIENT_ID = process.env.KLARNA_WEBSDK_CLIENT_ID;
+const KLARNA_WEBSDK_USERNAME = process.env.KLARNA_WEBSDK_USERNAME;
+const KLARNA_WEBSDK_PASSWORD = process.env.KLARNA_WEBSDK_PASSWORD;
+const KLARNA_API_URL = process.env.KLARNA_API_URL || 'https://api.klarna.com';
+
 // Validate required environment variables
 if (!MERCHANT_ID || !SECRET_KEY) {
     console.error('❌ Error: PAYTRAIL_MERCHANT_ID and PAYTRAIL_SECRET_KEY environment variables are required');
@@ -360,6 +366,124 @@ app.get('/api/merchants/grouped-payment-providers', async (req, res) => {
     }
 });
 
+// GET /api/klarna/config - Return Klarna WebSDK configuration
+app.get('/api/klarna/config', (req, res) => {
+    try {
+        if (!KLARNA_WEBSDK_CLIENT_ID) {
+            return res.status(500).json({
+                error: 'Klarna WebSDK Client ID not configured',
+                timestamp: new Date().toISOString()
+            });
+        }
+        
+        res.json({
+            clientId: KLARNA_WEBSDK_CLIENT_ID
+        });
+    } catch (error) {
+        console.error('❌ Error getting Klarna config:', error.message);
+        res.status(500).json({
+            error: 'Failed to get Klarna configuration',
+            message: error.message,
+            timestamp: new Date().toISOString()
+        });
+    }
+});
+
+// POST /api/klarna/payment-request - Create a Klarna payment request
+app.post('/api/klarna/payment-request', async (req, res) => {
+    try {
+        console.log('🔄 Creating Klarna payment request...');
+        console.log('Payment request data:', JSON.stringify(req.body, null, 2));
+        
+        if (!KLARNA_WEBSDK_USERNAME || !KLARNA_WEBSDK_PASSWORD) {
+            return res.status(500).json({
+                error: 'Klarna WebSDK credentials not configured',
+                timestamp: new Date().toISOString()
+            });
+        }
+
+        const axios = require('axios');
+        const { amount, currency, paymentRequestReference, supplementaryPurchaseData } = req.body;
+
+        // Prepare the payment request payload
+        const payload = {
+            currency: currency || 'EUR',
+            amount: amount || 1590, // Default to 15.90 EUR in cents
+            payment_request_reference: paymentRequestReference || `kec-${Date.now()}`,
+            supplementary_purchase_data: supplementaryPurchaseData || {
+                purchase_reference: paymentRequestReference || `kec-${Date.now()}`,
+                line_items: [],
+                shipping: [],
+                customer: {}
+            }
+        };
+
+        // Create Basic Auth header
+        const auth = Buffer.from(`${KLARNA_WEBSDK_USERNAME}:${KLARNA_WEBSDK_PASSWORD}`).toString('base64');
+
+        const response = await axios({
+            method: 'POST',
+            url: `${KLARNA_API_URL}/v2/payment/requests`,
+            headers: {
+                'Authorization': `Basic ${auth}`,
+                'Content-Type': 'application/json'
+            },
+            data: payload
+        });
+
+        console.log('✅ Klarna payment request created successfully');
+        console.log('Payment request ID:', response.data.payment_request_id);
+        
+        res.status(201).json({
+            paymentRequestId: response.data.payment_request_id,
+            state: response.data.state
+        });
+    } catch (error) {
+        console.error('❌ Error creating Klarna payment request:', error.message);
+        console.error('Error details:', error.response?.data);
+        
+        res.status(error.response?.status || 500).json({
+            error: 'Failed to create Klarna payment request',
+            message: error.response?.data?.message || error.message,
+            details: error.response?.data || null,
+            timestamp: new Date().toISOString()
+        });
+    }
+});
+
+// POST /api/klarna/webhook - Handle Klarna webhooks
+app.post('/api/klarna/webhook', async (req, res) => {
+    try {
+        console.log('📥 Received Klarna webhook');
+        console.log('Webhook payload:', JSON.stringify(req.body, null, 2));
+        
+        const { metadata, data } = req.body;
+        
+        if (metadata?.event_type === 'payment.request.state-change.completed') {
+            const interoperabilityToken = data?.state_context?.interoperability_token;
+            const paymentRequestId = data?.payment_request_id;
+            
+            console.log('✅ Payment request completed');
+            console.log('Payment Request ID:', paymentRequestId);
+            console.log('Interoperability Token:', interoperabilityToken);
+            
+            // Store the interoperability token for later use
+            // In a real implementation, you would store this in a database
+            // and associate it with the payment request ID
+            
+            // For now, we'll log it and the frontend will handle authorization
+            // when the payment completes
+        }
+        
+        // Always return 200 to acknowledge receipt
+        res.status(200).json({ received: true });
+    } catch (error) {
+        console.error('❌ Error processing Klarna webhook:', error.message);
+        // Still return 200 to prevent Klarna from retrying
+        res.status(200).json({ received: true, error: error.message });
+    }
+});
+
 // POST /payments
 app.post('/api/payments', async (req, res) => {
     try {
@@ -380,8 +504,27 @@ app.post('/api/payments', async (req, res) => {
             });
         }
 
+        // Log the reference being sent
+        console.log('📤 Sending to Paytrail API:');
+        console.log('  Reference in request:', paymentData.reference);
+        console.log('  Stamp in request:', paymentData.stamp);
+        
+        // Log Klarna interoperability token if present
+        if (paymentData.providerDetails?.klarna?.networkSessionToken) {
+            console.log('  Klarna Network Session Token (interoperability_token):', paymentData.providerDetails.klarna.networkSessionToken);
+        }
+        
         // Make real API call to Paytrail
         const response = await makePaytrailRequest('POST', '/payments', paymentData);
+        
+        // Log the reference received
+        console.log('📥 Received from Paytrail API:');
+        console.log('  Reference in response:', response.reference);
+        console.log('  TransactionId in response:', response.transactionId);
+        if (response.checkoutReference) {
+            console.log('  CheckoutReference in response:', response.checkoutReference);
+        }
+        console.log('  Full response:', JSON.stringify(response, null, 2));
         
         console.log('✅ Payment created successfully with Paytrail');
         res.status(201).json(response);
@@ -409,6 +552,16 @@ app.use((req, res, next) => {
         return next();
     }
     express.static(__dirname, { index: false })(req, res, next);
+});
+
+// Serve product detail page
+app.get('/product', (req, res) => {
+    res.sendFile(path.join(__dirname, 'product.html'));
+});
+
+// Serve payment success page
+app.get('/payment-success', (req, res) => {
+    res.sendFile(path.join(__dirname, 'payment-success.html'));
 });
 
 // Serve main page
