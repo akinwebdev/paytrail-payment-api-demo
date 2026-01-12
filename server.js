@@ -64,7 +64,7 @@ app.get('/login', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-    const { password } = req.body;
+    const { password, returnUrl } = req.body;
     
     if (password === DEMO_PASSWORD) {
         // Create session
@@ -78,12 +78,19 @@ app.post('/login', (req, res) => {
         res.cookie('sessionId', sessionId, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            maxAge: 24 * 60 * 60 * 1000 // 24 hours
+            maxAge: 24 * 60 * 60 * 1000, // 24 hours
+            sameSite: 'lax' // Allow cookie to be sent on navigation
         });
         
-        res.redirect('/');
+        // Redirect to returnUrl if provided and valid, otherwise to homepage
+        const redirectTo = returnUrl && returnUrl !== '/login' && returnUrl.startsWith('/') 
+            ? decodeURIComponent(returnUrl) 
+            : '/';
+        console.log('✅ Login successful, redirecting to:', redirectTo);
+        res.redirect(redirectTo);
     } else {
-        res.redirect('/login?error=1');
+        const errorUrl = returnUrl ? `/login?error=1&returnUrl=${encodeURIComponent(returnUrl)}` : '/login?error=1';
+        res.redirect(errorUrl);
     }
 });
 
