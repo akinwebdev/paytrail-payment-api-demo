@@ -281,32 +281,43 @@
                     console.log('Button element appended to container');
                 }
                 
-                // Wait a bit for button to render, then check
+                // Wait for custom element to be defined and add click listener
                 setTimeout(() => {
-                    console.log('Button container HTML after wait:', container?.innerHTML);
-                    console.log('Button container children:', container?.children);
-                    
-                    // Check for Klarna button element
-                    const klarnaButton = container?.querySelector('klarna-payment-button') || container?.querySelector('[is="klarna-payment-button"]');
-                    console.log('Klarna button element:', klarnaButton);
+                    const klarnaButton = container?.querySelector('klarna-payment-button');
                     if (klarnaButton) {
-                        console.log('Klarna button computed style:', window.getComputedStyle(klarnaButton));
+                        console.log('✅ Klarna button element found');
+                        
+                        // Add click event listener to debug
+                        klarnaButton.addEventListener('click', (e) => {
+                            console.log('🖱️ Klarna button clicked!', e);
+                        });
+                        
+                        // Listen for any errors
+                        klarnaButton.addEventListener('error', (e) => {
+                            console.error('❌ Klarna button error:', e);
+                        });
                     } else {
-                        console.warn('Klarna button element not found in container');
-                        // Try to find it anywhere in the document
-                        const klarnaButtonAnywhere = document.querySelector('klarna-payment-button');
-                        console.log('Klarna button anywhere in document:', klarnaButtonAnywhere);
+                        console.warn('⚠️ Klarna button element not found');
                     }
-                }, 2000);
+                }, 1000);
 
-                // Listen for payment complete event
+                // Listen for payment events
                 klarna.Payment.on('complete', async (paymentRequest) => {
-                    console.log('Payment complete event received:', paymentRequest);
+                    console.log('✅ Payment complete event received:', paymentRequest);
                     
                     if (paymentRequest.state === 'COMPLETED' && paymentRequest.stateContext?.interoperabilityToken) {
                         // If we have the token directly, we can proceed
                         await authorizePayment(paymentRequest.stateContext.interoperabilityToken, paymentRequest);
                     }
+                });
+                
+                // Listen for other payment events for debugging
+                klarna.Payment.on('error', (error) => {
+                    console.error('❌ Klarna Payment error event:', error);
+                });
+                
+                klarna.Payment.on('state-change', (state) => {
+                    console.log('🔄 Klarna Payment state change:', state);
                 });
 
             } catch (error) {
