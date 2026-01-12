@@ -143,6 +143,7 @@ app.use((req, res, next) => {
     if (isStaticAsset) {
         const filePath = path.join(__dirname, req.path);
         const fs = require('fs');
+        console.log('📁 Serving static file:', req.path, 'Exists:', fs.existsSync(filePath));
         if (fs.existsSync(filePath)) {
             // Set correct MIME type based on file extension
             const ext = path.extname(filePath).toLowerCase();
@@ -157,8 +158,17 @@ app.use((req, res, next) => {
                 '.woff2': 'font/woff2',
                 '.ttf': 'font/ttf'
             };
-            res.type(mimeTypes[ext] || 'text/plain');
-            return res.sendFile(filePath);
+            const mimeType = mimeTypes[ext] || 'text/plain';
+            console.log('📄 Setting MIME type:', mimeType, 'for', req.path);
+            res.type(mimeType);
+            return res.sendFile(filePath, (err) => {
+                if (err) {
+                    console.error('❌ Error sending file:', err);
+                    next();
+                }
+            });
+        } else {
+            console.error('❌ Static file not found:', filePath);
         }
     }
     next();
