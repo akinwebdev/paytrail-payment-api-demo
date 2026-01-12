@@ -124,8 +124,6 @@
     </div>
 
     <script type="module">
-        import Klarna from 'https://js.klarna.com/web-sdk/v2/klarna.mjs';
-
         // Get Klarna credentials from server
         let klarnaClientId;
         let productPrice = 15.90; // Default price in EUR
@@ -162,6 +160,12 @@
                 const buttonContainer = document.getElementById('klarna-payment-button');
                 buttonContainer.innerHTML = '';
                 buttonContainer.classList.remove('loading');
+                
+                // Import and initialize Klarna SDK dynamically
+                console.log('Importing Klarna SDK...');
+                const KlarnaModule = await import('https://js.klarna.com/web-sdk/v2/klarna.mjs');
+                const Klarna = KlarnaModule.default || KlarnaModule;
+                console.log('Klarna module:', Klarna);
                 
                 // Initialize Klarna SDK
                 console.log('Initializing Klarna with clientId:', klarnaClientId);
