@@ -124,55 +124,27 @@ app.get('/logout', (req, res) => {
 });
 
 // Serve static files BEFORE authentication (CSS, JS, fonts, images, etc.)
-app.use((req, res, next) => {
-    // Check if this is a static asset request
-    const isStaticAsset = req.path.endsWith('.css') || 
-                         req.path.endsWith('.js') || 
-                         req.path.endsWith('.svg') || 
-                         req.path.endsWith('.png') || 
-                         req.path.endsWith('.jpg') || 
-                         req.path.endsWith('.jpeg') || 
-                         req.path.endsWith('.woff') || 
-                         req.path.endsWith('.woff2') || 
-                         req.path.endsWith('.ttf') ||
-                         req.path.startsWith('/fonts/') ||
-                         req.path.startsWith('/images/') ||
-                         req.path === '/styles.css' ||
-                         req.path === '/favicon.svg';
-    
-    if (isStaticAsset) {
-        const filePath = path.join(__dirname, req.path);
-        const fs = require('fs');
-        console.log('📁 Serving static file:', req.path, 'Exists:', fs.existsSync(filePath));
-        if (fs.existsSync(filePath)) {
-            // Set correct MIME type based on file extension
-            const ext = path.extname(filePath).toLowerCase();
-            const mimeTypes = {
-                '.css': 'text/css',
-                '.js': 'application/javascript',
-                '.svg': 'image/svg+xml',
-                '.png': 'image/png',
-                '.jpg': 'image/jpeg',
-                '.jpeg': 'image/jpeg',
-                '.woff': 'font/woff',
-                '.woff2': 'font/woff2',
-                '.ttf': 'font/ttf'
-            };
-            const mimeType = mimeTypes[ext] || 'text/plain';
-            console.log('📄 Setting MIME type:', mimeType, 'for', req.path);
-            res.type(mimeType);
-            return res.sendFile(filePath, (err) => {
-                if (err) {
-                    console.error('❌ Error sending file:', err);
-                    next();
-                }
-            });
-        } else {
-            console.error('❌ Static file not found:', filePath);
+// This must be registered BEFORE the authentication middleware
+app.use(express.static(__dirname, {
+    index: false,
+    setHeaders: (res, filePath) => {
+        const ext = path.extname(filePath).toLowerCase();
+        const mimeTypes = {
+            '.css': 'text/css',
+            '.js': 'application/javascript',
+            '.svg': 'image/svg+xml',
+            '.png': 'image/png',
+            '.jpg': 'image/jpeg',
+            '.jpeg': 'image/jpeg',
+            '.woff': 'font/woff',
+            '.woff2': 'font/woff2',
+            '.ttf': 'font/ttf'
+        };
+        if (mimeTypes[ext]) {
+            res.type(mimeTypes[ext]);
         }
     }
-    next();
-});
+}));
 
 // Apply authentication to all routes except login, logout, and API endpoints
 app.use(requireAuth);

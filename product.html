@@ -168,30 +168,19 @@
                 console.log('KlarnaModule.default:', KlarnaModule.default);
                 console.log('KlarnaModule keys:', Object.keys(KlarnaModule));
                 
-                // Try to get Klarna from the module - check all possible exports
-                let Klarna = KlarnaModule.Klarna || KlarnaModule.default || KlarnaModule;
-                
-                // If it's still undefined, check if it's a function that needs to be called
-                if (!Klarna && typeof KlarnaModule === 'function') {
-                    Klarna = KlarnaModule;
-                }
-                
-                console.log('Klarna object:', Klarna);
+                // The default export is a function - this is the init function
+                const Klarna = KlarnaModule.default || KlarnaModule;
+                console.log('Klarna function:', Klarna);
                 console.log('Klarna type:', typeof Klarna);
-                console.log('Klarna keys:', Klarna ? Object.keys(Klarna) : 'null');
                 
-                // Initialize Klarna SDK
+                // Initialize Klarna SDK - call the function directly with clientId
                 console.log('Initializing Klarna with clientId:', klarnaClientId);
-                if (!Klarna) {
-                    throw new Error('Klarna is undefined. Module exports: ' + JSON.stringify(Object.keys(KlarnaModule)));
+                if (!Klarna || typeof Klarna !== 'function') {
+                    throw new Error('Klarna is not a function. Module exports: ' + JSON.stringify(Object.keys(KlarnaModule)));
                 }
                 
-                if (!Klarna.init || typeof Klarna.init !== 'function') {
-                    console.error('Klarna structure:', Klarna);
-                    throw new Error('Klarna.init is not available. Klarna object: ' + JSON.stringify(Klarna));
-                }
-                
-                const klarna = Klarna.init({
+                // Call Klarna function with clientId to initialize
+                const klarna = Klarna({
                     clientId: klarnaClientId
                 });
                 console.log('Klarna SDK initialized:', klarna);
