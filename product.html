@@ -325,79 +325,67 @@
                         console.log('✅ Klarna button element found after', attempts * 200, 'ms');
                         clearInterval(checkInterval);
                         
-                        // Intercept click to manually handle the flow
-                        // SDK can't execute serialized callbacks, so we'll do it manually
-                        console.log('✅ Klarna button ready. Setting up manual click handler...');
+                        // The SDK should call the initiate callback automatically when button is clicked
+                        // But since it serializes the callback, we need to intercept and call it manually
+                        // Then we need to make sure the SDK gets the result
+                        console.log('✅ Klarna button ready. SDK should call initiate callback on click.');
+                        console.log('Button initialConfig:', {
+                            hasInitiate: !!klarnaPaymentButton.initialConfig?.initiate,
+                            initiateType: typeof klarnaPaymentButton.initialConfig?.initiate
+                        });
                         
+                        // Intercept click to manually execute the callback since SDK can't execute serialized functions
                         klarnaButton.addEventListener('click', async (e) => {
-                            console.log('🖱️ Klarna button clicked - handling manually');
+                            console.log('🖱️ Klarna button clicked');
                             
-                            // Prevent SDK's broken handler
+                            // Prevent SDK's handler (which can't execute the serialized callback)
                             e.preventDefault();
                             e.stopPropagation();
                             
                             try {
-                                // Manually call the callback to get payment request ID
-                                console.log('🔄 Creating payment request...');
+                                // Manually execute the initiate callback
+                                // This callback should:
+                                // 1. Call server-side endpoint to create payment request
+                                // 2. Return { paymentRequestId: '...' }
+                                console.log('🔄 Executing initiate callback...');
                                 const result = await window.klarnaInitiateCallback();
-                                console.log('✅ Payment request created:', result);
+                                console.log('✅ Initiate callback returned:', result);
                                 
                                 if (result && result.paymentRequestId) {
-                                    console.log('🔄 Using Payment.initiate() with payment request ID...');
+                                    // Now we have the payment request ID
+                                    // The SDK needs this to continue the flow
+                                    // Try to use Payment.initiate() to let SDK handle the redirect
+                                    console.log('🔄 Calling Payment.initiate() with payment request ID...');
                                     
-                                    // Use Payment.initiate() directly with a callback that returns our payment request ID
                                     try {
                                         const paymentRequest = await window.klarnaInstance.Payment.initiate({
                                             initiate: async () => {
-                                                console.log('🔄 Payment.initiate() callback called');
-                                                return {
-                                                    paymentRequestId: result.paymentRequestId
-                                                };
+                                                // Return the payment request ID we already have
+                                                return { paymentRequestId: result.paymentRequestId };
                                             }
                                         });
                                         
                                         console.log('✅ Payment.initiate() completed:', paymentRequest);
                                         
-                                        // Check if we need to redirect manually
+                                        // SDK should handle redirect, but check if we need to do it manually
                                         if (paymentRequest?.redirectUrl || paymentRequest?.url) {
-                                            const redirectUrl = paymentRequest.redirectUrl || paymentRequest.url;
-                                            console.log('🔄 Redirecting to Klarna:', redirectUrl);
-                                            window.location.href = redirectUrl;
-                                        } else {
-                                            console.log('✅ Payment flow initiated. SDK should handle redirect.');
+                                            window.location.href = paymentRequest.redirectUrl || paymentRequest.url;
                                         }
                                     } catch (initiateError) {
-                                        console.error('❌ Error in Payment.initiate():', initiateError);
-                                        
-                                        // Fallback: fetch payment request and get redirect URL
-                                        console.log('🔄 Fallback: Fetching payment request from server...');
-                                        try {
-                                            const fetchResponse = await fetch(`/api/klarna/payment-request/${result.paymentRequestId}`);
-                                            if (fetchResponse.ok) {
-                                                const paymentData = await fetchResponse.json();
-                                                console.log('🔍 Payment data:', paymentData);
-                                                
-                                                // Look for redirect URL in response
-                                                const redirectUrl = paymentData.redirectUrl 
-                                                    || paymentData.paymentRequest?.redirect_url
-                                                    || paymentData.paymentRequest?.url
-                                                    || paymentData.paymentRequest?.next_action?.url;
-                                                
-                                                if (redirectUrl) {
-                                                    console.log('🔄 Redirecting to Klarna (fallback):', redirectUrl);
-                                                    window.location.href = redirectUrl;
-                                                } else {
-                                                    console.error('❌ No redirect URL found');
-                                                    console.log('Full payment data:', JSON.stringify(paymentData, null, 2));
-                                                }
+                                        console.error('❌ Payment.initiate() failed:', initiateError);
+                                        // Fallback: try to get redirect URL from server
+                                        const fetchResponse = await fetch(`/api/klarna/payment-request/${result.paymentRequestId}`);
+                                        if (fetchResponse.ok) {
+                                            const paymentData = await fetchResponse.json();
+                                            const redirectUrl = paymentData.redirectUrl || paymentData.paymentRequest?.redirect_url || paymentData.paymentRequest?.url;
+                                            if (redirectUrl) {
+                                                window.location.href = redirectUrl;
                                             }
-                                        } catch (fetchError) {
-                                            console.error('❌ Fallback also failed:', fetchError);
                                         }
                                     }
                                 }
                             } catch (error) {
-                                console.error('❌ Error in payment initiation:', error);
+                                console.error('❌ Error in initiate callback:', error);
                             }
                         }, { capture: true, once: false });
                         
