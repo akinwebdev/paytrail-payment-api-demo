@@ -347,35 +347,52 @@
                                     console.log('✅ Initiate callback returned:', result);
                                     
                                     if (result && result.paymentRequestId) {
-                                        console.log('🔄 Starting payment flow with Payment.initiate...');
+                                        console.log('🔄 Fetching payment request details...');
                                         console.log('Payment Request ID:', result.paymentRequestId);
                                         
-                                        // Use the SDK's Payment.initiate method directly
-                                        // This should handle the redirect to Klarna's purchase flow
+                                        // Fetch the payment request to get redirect URL
                                         try {
-                                            const paymentRequest = await window.klarnaInstance.Payment.initiate({
+                                            const paymentRequest = await window.klarnaInstance.Payment.fetch({
                                                 paymentRequestId: result.paymentRequestId
                                             });
                                             
-                                            console.log('✅ Payment.initiate returned:', paymentRequest);
+                                            console.log('✅ Payment.fetch returned:', paymentRequest);
                                             
-                                            // Check if we need to redirect manually
-                                            if (paymentRequest?.redirectUrl) {
-                                                console.log('🔄 Redirecting to Klarna:', paymentRequest.redirectUrl);
-                                                window.location.href = paymentRequest.redirectUrl;
-                                            } else if (paymentRequest?.url) {
-                                                console.log('🔄 Redirecting to Klarna (url):', paymentRequest.url);
-                                                window.location.href = paymentRequest.url;
+                                            // Check for redirect URL in various possible locations
+                                            const redirectUrl = paymentRequest?.redirectUrl 
+                                                || paymentRequest?.url 
+                                                || paymentRequest?.actionUrl
+                                                || paymentRequest?.nextAction?.url
+                                                || paymentRequest?.nextAction?.redirectUrl;
+                                            
+                                            if (redirectUrl) {
+                                                console.log('🔄 Redirecting to Klarna:', redirectUrl);
+                                                window.location.href = redirectUrl;
                                             } else {
-                                                console.log('⚠️ No redirect URL in payment request, checking state...');
+                                                console.log('⚠️ No redirect URL found in payment request');
                                                 console.log('Payment request state:', paymentRequest?.state);
                                                 console.log('Full payment request:', paymentRequest);
+                                                
+                                                // If no redirect URL, try using Payment.initiate with the button's callback
+                                                // But this time, let the SDK handle it properly
+                                                console.log('🔄 Attempting to use button\'s built-in flow...');
+                                                
+                                                // Set the payment request ID on the button so SDK can use it
+                                                klarnaButton.setAttribute('data-payment-request-id', result.paymentRequestId);
+                                                
+                                                // Try to trigger the button's internal initiate flow
+                                                // by dispatching a custom event that the SDK might listen for
+                                                klarnaButton.dispatchEvent(new CustomEvent('klarna:payment:initiate', {
+                                                    detail: { paymentRequestId: result.paymentRequestId },
+                                                    bubbles: true,
+                                                    cancelable: true
+                                                }));
                                             }
-                                        } catch (initiateError) {
-                                            console.error('❌ Error calling Payment.initiate:', initiateError);
+                                        } catch (fetchError) {
+                                            console.error('❌ Error fetching payment request:', fetchError);
                                             console.error('Error details:', {
-                                                message: initiateError.message,
-                                                stack: initiateError.stack
+                                                message: fetchError.message,
+                                                stack: fetchError.stack
                                             });
                                         }
                                     }
