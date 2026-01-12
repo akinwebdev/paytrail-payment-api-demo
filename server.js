@@ -125,26 +125,35 @@ app.get('/logout', (req, res) => {
 
 // Serve static files BEFORE authentication (CSS, JS, fonts, images, etc.)
 // This must be registered BEFORE the authentication middleware
-app.use(express.static(__dirname, {
-    index: false,
-    setHeaders: (res, filePath) => {
-        const ext = path.extname(filePath).toLowerCase();
-        const mimeTypes = {
-            '.css': 'text/css',
-            '.js': 'application/javascript',
-            '.svg': 'image/svg+xml',
-            '.png': 'image/png',
-            '.jpg': 'image/jpeg',
-            '.jpeg': 'image/jpeg',
-            '.woff': 'font/woff',
-            '.woff2': 'font/woff2',
-            '.ttf': 'font/ttf'
-        };
-        if (mimeTypes[ext]) {
-            res.type(mimeTypes[ext]);
-        }
+app.use((req, res, next) => {
+    // Only serve static files, skip API routes and other paths
+    if (req.path.startsWith('/api/') || req.path === '/login' || req.path === '/logout' || 
+        req.path === '/health' || req.path === '/documentation' || req.path.startsWith('/api-documentation_rev1')) {
+        return next();
     }
-}));
+    
+    // Use express.static for all other paths
+    express.static(__dirname, {
+        index: false,
+        setHeaders: (res, filePath) => {
+            const ext = path.extname(filePath).toLowerCase();
+            const mimeTypes = {
+                '.css': 'text/css',
+                '.js': 'application/javascript',
+                '.svg': 'image/svg+xml',
+                '.png': 'image/png',
+                '.jpg': 'image/jpeg',
+                '.jpeg': 'image/jpeg',
+                '.woff': 'font/woff',
+                '.woff2': 'font/woff2',
+                '.ttf': 'font/ttf'
+            };
+            if (mimeTypes[ext]) {
+                res.type(mimeTypes[ext]);
+            }
+        }
+    })(req, res, next);
+});
 
 // Apply authentication to all routes except login, logout, and API endpoints
 app.use(requireAuth);

@@ -179,11 +179,13 @@
                     throw new Error('Klarna is not a function. Module exports: ' + JSON.stringify(Object.keys(KlarnaModule)));
                 }
                 
-                // Call Klarna function with clientId to initialize
-                const klarna = Klarna({
+                // Call Klarna function with clientId to initialize (returns a Promise)
+                const klarna = await Klarna({
                     clientId: klarnaClientId
                 });
                 console.log('Klarna SDK initialized:', klarna);
+                console.log('Klarna object keys:', Object.keys(klarna));
+                console.log('Klarna.Payment:', klarna.Payment);
 
                 // Create payment button
                 console.log('Creating payment button...');
