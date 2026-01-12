@@ -209,7 +209,8 @@ const SECRET_KEY = process.env.PAYTRAIL_SECRET_KEY;
 // Klarna WebSDK configuration
 const KLARNA_WEBSDK_CLIENT_ID = process.env.KLARNA_WEBSDK_CLIENT_ID;
 const KLARNA_API_KEY = process.env.KLARNA_API_KEY; // API key for Basic Auth
-const KLARNA_API_URL = process.env.KLARNA_API_URL || 'https://api.klarna.com';
+const KLARNA_PARTNER_ACCOUNT_ID = process.env.KLARNA_PARTNER_ACCOUNT_ID; // Partner account ID for API requests
+const KLARNA_API_URL = process.env.KLARNA_API_URL || 'https://api-global.test.klarna.com';
 
 // Validate required environment variables
 if (!MERCHANT_ID || !SECRET_KEY) {
@@ -505,6 +506,15 @@ app.post('/api/klarna/payment-request', async (req, res) => {
             });
         }
 
+        if (!KLARNA_PARTNER_ACCOUNT_ID) {
+            console.error('❌ Klarna Partner Account ID not configured');
+            return res.status(500).json({
+                error: 'Klarna Partner Account ID not configured',
+                message: 'Please set KLARNA_PARTNER_ACCOUNT_ID environment variable',
+                timestamp: new Date().toISOString()
+            });
+        }
+
         const axios = require('axios');
         const { amount, currency, paymentRequestReference, supplementaryPurchaseData } = req.body;
 
@@ -527,9 +537,12 @@ app.post('/api/klarna/payment-request', async (req, res) => {
         // For Klarna API, the API key is used as the username with empty password
         const auth = Buffer.from(`${KLARNA_API_KEY}:`).toString('base64');
 
+        const endpointUrl = `${KLARNA_API_URL}/v2/accounts/${KLARNA_PARTNER_ACCOUNT_ID}/payment/requests`;
+        console.log('📤 Klarna API endpoint:', endpointUrl);
+
         const response = await axios({
             method: 'POST',
-            url: `${KLARNA_API_URL}/v2/payment/requests`,
+            url: endpointUrl,
             headers: {
                 'Authorization': `Basic ${auth}`,
                 'Content-Type': 'application/json'
