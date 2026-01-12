@@ -347,58 +347,50 @@
                                     console.log('✅ Initiate callback returned:', result);
                                     
                                     if (result && result.paymentRequestId) {
-                                        console.log('🔄 Getting redirect URL for payment request...');
+                                        console.log('🔄 Using Payment.initiate() with payment request ID...');
                                         console.log('Payment Request ID:', result.paymentRequestId);
                                         
-                                        // First check if the initiate response already has a redirect URL
-                                        if (result.redirectUrl) {
-                                            console.log('✅ Redirect URL from initiate response:', result.redirectUrl);
-                                            window.location.href = result.redirectUrl;
-                                            return;
-                                        }
-                                        
-                                        // Otherwise, fetch payment request details from server
                                         try {
-                                            const fetchResponse = await fetch(`/api/klarna/payment-request/${result.paymentRequestId}`);
+                                            // Use Payment.initiate() directly with the payment request ID
+                                            // The SDK should handle the redirect automatically
+                                            const paymentRequest = await window.klarnaInstance.Payment.initiate({
+                                                paymentRequestId: result.paymentRequestId
+                                            });
                                             
-                                            if (!fetchResponse.ok) {
-                                                const errorData = await fetchResponse.json();
-                                                throw new Error(errorData.message || 'Failed to fetch payment request');
-                                            }
+                                            console.log('✅ Payment.initiate() completed:', paymentRequest);
                                             
-                                            const paymentData = await fetchResponse.json();
-                                            console.log('✅ Payment request fetched:', paymentData);
-                                            console.log('🔍 Full payment request structure:', JSON.stringify(paymentData, null, 2));
-                                            
-                                            const redirectUrl = paymentData.redirectUrl;
-                                            
-                                            if (redirectUrl) {
+                                            // The SDK should have handled the redirect, but check if we need to redirect manually
+                                            if (paymentRequest?.redirectUrl || paymentRequest?.url) {
+                                                const redirectUrl = paymentRequest.redirectUrl || paymentRequest.url;
                                                 console.log('🔄 Redirecting to Klarna:', redirectUrl);
                                                 window.location.href = redirectUrl;
                                             } else {
-                                                console.log('⚠️ No redirect URL found in payment request');
-                                                console.log('Payment request state:', paymentData.state);
-                                                console.log('Debug info:', paymentData._debug);
-                                                
-                                                // Log the full response structure to help identify where the URL might be
-                                                if (paymentData.paymentRequest) {
-                                                    console.log('🔍 Payment request object keys:', Object.keys(paymentData.paymentRequest));
-                                                    console.log('🔍 Payment request actions:', paymentData.paymentRequest.actions);
-                                                    console.log('🔍 Payment request next_action:', paymentData.paymentRequest.next_action);
-                                                    console.log('🔍 Payment request state_context:', paymentData.paymentRequest.state_context);
-                                                }
-                                                
-                                                // If still no redirect URL, the payment might be in a state that requires waiting
-                                                // or the redirect URL might be available later
-                                                console.error('❌ No redirect URL found. Full response:', paymentData);
-                                                alert('Payment request created but no redirect URL available. Please check the console for details. The full response has been logged.');
+                                                console.log('✅ Payment flow initiated. SDK should handle redirect automatically.');
+                                                console.log('Payment request state:', paymentRequest?.state);
                                             }
-                                        } catch (fetchError) {
-                                            console.error('❌ Error fetching payment request:', fetchError);
+                                        } catch (initiateError) {
+                                            console.error('❌ Error calling Payment.initiate():', initiateError);
                                             console.error('Error details:', {
-                                                message: fetchError.message,
-                                                stack: fetchError.stack
+                                                message: initiateError.message,
+                                                errorCode: initiateError.errorCode,
+                                                errorMessage: initiateError.errorMessage,
+                                                stack: initiateError.stack
                                             });
+                                            
+                                            // Fallback: try to get redirect URL from server
+                                            console.log('🔄 Fallback: Fetching payment request from server...');
+                                            try {
+                                                const fetchResponse = await fetch(`/api/klarna/payment-request/${result.paymentRequestId}`);
+                                                if (fetchResponse.ok) {
+                                                    const paymentData = await fetchResponse.json();
+                                                    if (paymentData.redirectUrl) {
+                                                        console.log('🔄 Redirecting to Klarna (fallback):', paymentData.redirectUrl);
+                                                        window.location.href = paymentData.redirectUrl;
+                                                    }
+                                                }
+                                            } catch (fallbackError) {
+                                                console.error('❌ Fallback also failed:', fallbackError);
+                                            }
                                         }
                                     }
                                 } catch (error) {
