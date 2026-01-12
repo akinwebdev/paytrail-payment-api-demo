@@ -525,10 +525,14 @@ app.post('/api/klarna/payment-request', async (req, res) => {
         const host = req.get('host') || req.get('x-forwarded-host') || 'paytrail-payment-api-demo.vercel.app';
         const returnUrl = `${protocol}://${host}/payment-success?paymentRequestId={klarna.payment_request.id}`;
 
-        // Prepare minimal payment request payload per Klarna API specs
+        // Prepare payment request payload matching Postman working request
+        const crypto = require('crypto');
+        const paymentRequestReference = `payment-reference-${crypto.randomUUID()}`;
+        
         const payload = {
             currency: currency || 'EUR',
             amount: amount || 1590, // Default to 15.90 EUR in cents
+            payment_request_reference: paymentRequestReference,
             customer_interaction_config: {
                 method: 'HANDOVER',
                 return_url: returnUrl
