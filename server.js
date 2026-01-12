@@ -565,9 +565,22 @@ app.post('/api/klarna/payment-request', async (req, res) => {
             });
         }
         
+        // Check if the response contains a redirect URL or action URL
+        const redirectUrl = response.data.redirect_url 
+            || response.data.url 
+            || response.data.action_url
+            || response.data.next_action?.url
+            || response.data.next_action?.redirect_url;
+        
         res.status(201).json({
             paymentRequestId: response.data.payment_request_id,
-            state: response.data.state
+            state: response.data.state,
+            redirectUrl: redirectUrl || null,
+            // Include full response for debugging
+            _debug: {
+                hasRedirectUrl: !!redirectUrl,
+                responseKeys: Object.keys(response.data || {})
+            }
         });
     } catch (error) {
         console.error('❌ Error creating Klarna payment request:', error.message);
@@ -575,6 +588,73 @@ app.post('/api/klarna/payment-request', async (req, res) => {
         
         res.status(error.response?.status || 500).json({
             error: 'Failed to create Klarna payment request',
+            message: error.response?.data?.message || error.message,
+            details: error.response?.data || null,
+            timestamp: new Date().toISOString()
+        });
+    }
+});
+
+// GET /api/klarna/payment-request/:paymentRequestId - Get payment request details and redirect URL
+app.get('/api/klarna/payment-request/:paymentRequestId', async (req, res) => {
+    try {
+        const { paymentRequestId } = req.params;
+        console.log('🔍 Fetching Klarna payment request:', paymentRequestId);
+        
+        if (!KLARNA_API_KEY) {
+            return res.status(500).json({
+                error: 'Klarna API key not configured',
+                message: 'Please set KLARNA_API_KEY environment variable',
+                timestamp: new Date().toISOString()
+            });
+        }
+
+        if (!KLARNA_PARTNER_ACCOUNT_ID) {
+            return res.status(500).json({
+                error: 'Klarna Partner Account ID not configured',
+                message: 'Please set KLARNA_PARTNER_ACCOUNT_ID environment variable',
+                timestamp: new Date().toISOString()
+            });
+        }
+
+        const axios = require('axios');
+        const auth = Buffer.from(`${KLARNA_API_KEY}:`).toString('base64');
+        const endpointUrl = `${KLARNA_API_URL}/v2/accounts/${KLARNA_PARTNER_ACCOUNT_ID}/payment/requests/${paymentRequestId}`;
+        
+        console.log('📤 Fetching from Klarna API:', endpointUrl);
+
+        const response = await axios({
+            method: 'GET',
+            url: endpointUrl,
+            headers: {
+                'Authorization': `Basic ${auth}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        console.log('✅ Klarna payment request fetched successfully');
+        console.log('Response data:', JSON.stringify(response.data, null, 2));
+        
+        // Extract redirect URL from various possible locations
+        const redirectUrl = response.data.redirect_url 
+            || response.data.url 
+            || response.data.action_url
+            || response.data.next_action?.url
+            || response.data.next_action?.redirect_url
+            || response.data.actions?.find(a => a.type === 'redirect')?.url;
+        
+        res.json({
+            paymentRequestId: response.data.payment_request_id || paymentRequestId,
+            state: response.data.state,
+            redirectUrl: redirectUrl || null,
+            paymentRequest: response.data
+        });
+    } catch (error) {
+        console.error('❌ Error fetching Klarna payment request:', error.message);
+        console.error('Error details:', error.response?.data);
+        
+        res.status(error.response?.status || 500).json({
+            error: 'Failed to fetch Klarna payment request',
             message: error.response?.data?.message || error.message,
             details: error.response?.data || null,
             timestamp: new Date().toISOString()
