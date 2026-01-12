@@ -325,69 +325,27 @@
                         console.log('✅ Klarna button element found after', attempts * 200, 'ms');
                         clearInterval(checkInterval);
                         
-                        // The SDK should call the initiate callback automatically when button is clicked
-                        // But since it serializes the callback, we need to intercept and call it manually
-                        // Then we need to make sure the SDK gets the result
-                        console.log('✅ Klarna button ready. SDK should call initiate callback on click.');
+                        // Check button state and make sure it's clickable
+                        console.log('✅ Klarna button ready.');
+                        console.log('Button state:', {
+                            disabled: klarnaButton.disabled,
+                            hidden: klarnaButton.hidden,
+                            style: window.getComputedStyle(klarnaButton).pointerEvents,
+                            display: window.getComputedStyle(klarnaButton).display
+                        });
+                        
+                        // Don't intercept clicks - let the SDK handle it
+                        // The button should be clickable and the SDK should call the callback
+                        // If the callback is serialized and can't execute, we'll see an error in console
                         console.log('Button initialConfig:', {
                             hasInitiate: !!klarnaPaymentButton.initialConfig?.initiate,
                             initiateType: typeof klarnaPaymentButton.initialConfig?.initiate
                         });
                         
-                        // Intercept click to manually execute the callback since SDK can't execute serialized functions
-                        klarnaButton.addEventListener('click', async (e) => {
-                            console.log('🖱️ Klarna button clicked');
-                            
-                            // Prevent SDK's handler (which can't execute the serialized callback)
-                            e.preventDefault();
-                            e.stopPropagation();
-                            
-                            try {
-                                // Manually execute the initiate callback
-                                // This callback should:
-                                // 1. Call server-side endpoint to create payment request
-                                // 2. Return { paymentRequestId: '...' }
-                                console.log('🔄 Executing initiate callback...');
-                                const result = await window.klarnaInitiateCallback();
-                                console.log('✅ Initiate callback returned:', result);
-                                
-                                if (result && result.paymentRequestId) {
-                                    // Now we have the payment request ID
-                                    // The SDK needs this to continue the flow
-                                    // Try to use Payment.initiate() to let SDK handle the redirect
-                                    console.log('🔄 Calling Payment.initiate() with payment request ID...');
-                                    
-                                    try {
-                                        const paymentRequest = await window.klarnaInstance.Payment.initiate({
-                                            initiate: async () => {
-                                                // Return the payment request ID we already have
-                                                return { paymentRequestId: result.paymentRequestId };
-                                            }
-                                        });
-                                        
-                                        console.log('✅ Payment.initiate() completed:', paymentRequest);
-                                        
-                                        // SDK should handle redirect, but check if we need to do it manually
-                                        if (paymentRequest?.redirectUrl || paymentRequest?.url) {
-                                            window.location.href = paymentRequest.redirectUrl || paymentRequest.url;
-                                        }
-                                    } catch (initiateError) {
-                                        console.error('❌ Payment.initiate() failed:', initiateError);
-                                        // Fallback: try to get redirect URL from server
-                                        const fetchResponse = await fetch(`/api/klarna/payment-request/${result.paymentRequestId}`);
-                                        if (fetchResponse.ok) {
-                                            const paymentData = await fetchResponse.json();
-                                            const redirectUrl = paymentData.redirectUrl || paymentData.paymentRequest?.redirect_url || paymentData.paymentRequest?.url;
-                                            if (redirectUrl) {
-                                                window.location.href = redirectUrl;
-                                            }
-                                        }
-                                    }
-                                }
-                            } catch (error) {
-                                console.error('❌ Error in initiate callback:', error);
-                            }
-                        }, { capture: true, once: false });
+                        // Just add a click listener for debugging (don't prevent default)
+                        klarnaButton.addEventListener('click', (e) => {
+                            console.log('🖱️ Klarna button clicked - SDK should handle this');
+                        }, { capture: false });
                         
                         // Also add listeners for debugging
                         const events = ['mousedown', 'mouseup', 'touchstart', 'touchend'];
