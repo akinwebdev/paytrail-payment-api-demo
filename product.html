@@ -298,7 +298,7 @@
 
                 sdkState.klarna = await KlarnaSDK({
                     clientId: clientId,
-                    locale: "en-GB",
+                    locale: "en-FI",
                 });
 
                 sdkState.initializedClientId = clientId;
@@ -318,8 +318,37 @@
             if (!KlarnaInstance) return;
 
             KlarnaInstance.Payment.on("error", (err) => {
+                // #region agent log
+                console.error('[DEBUG] Klarna error event', err);
+                fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:320',message:'Klarna error event',data:{errorCode:err.errorCode,errorMessage:err.errorMessage,error:JSON.stringify(err)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'P'})}).catch(()=>{});
+                // #endregion
                 console.error("Klarna Payment error:", err);
                 alert(`An error occurred: ${err.errorCode} - ${err.errorMessage}`);
+            });
+
+            // Add event listeners for other events that might fire
+            KlarnaInstance.Payment.on("initiate", (paymentRequest) => {
+                // #region agent log
+                console.log('[DEBUG] Klarna initiate event', paymentRequest);
+                fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:initiate',message:'Klarna initiate event',data:{hasPaymentRequest:!!paymentRequest,paymentRequestId:paymentRequest?.paymentRequestId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'T'})}).catch(()=>{});
+                // #endregion
+                console.log("Klarna Payment initiate event:", paymentRequest);
+            });
+
+            KlarnaInstance.Payment.on("ready", () => {
+                // #region agent log
+                console.log('[DEBUG] Klarna ready event');
+                fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:ready',message:'Klarna ready event',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'U'})}).catch(()=>{});
+                // #endregion
+                console.log("Klarna Payment ready event");
+            });
+
+            KlarnaInstance.Payment.on("loading", (isLoading) => {
+                // #region agent log
+                console.log('[DEBUG] Klarna loading event', isLoading);
+                fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:loading',message:'Klarna loading event',data:{isLoading:isLoading},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'V'})}).catch(()=>{});
+                // #endregion
+                console.log("Klarna Payment loading event:", isLoading);
             });
 
             KlarnaInstance.Payment.on(
@@ -370,9 +399,15 @@
             );
 
             KlarnaInstance.Payment.on("complete", async (paymentRequest) => {
+                // #region agent log
+                fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:372',message:'Complete event fired',data:{hasPaymentRequest:!!paymentRequest,paymentRequestKeys:paymentRequest?Object.keys(paymentRequest):[],hasStateContext:!!paymentRequest?.stateContext,stateContextKeys:paymentRequest?.stateContext?Object.keys(paymentRequest.stateContext):[]},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+                // #endregion
                 const interoperabilityToken =
                     paymentRequest.stateContext?.interoperabilityToken;
                 console.log("KEC interoperability token", interoperabilityToken);
+                // #region agent log
+                fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:375',message:'Interoperability token check',data:{hasToken:!!interoperabilityToken,tokenLength:interoperabilityToken?.length||0,stateContextStructure:JSON.stringify(paymentRequest?.stateContext||{})},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+                // #endregion
 
                 if (interoperabilityToken) {
                     try {
@@ -385,8 +420,14 @@
                     }
                     
                     // Call Paytrail authorization
+                    // #region agent log
+                    fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:388',message:'Calling authorizePayment',data:{hasToken:!!interoperabilityToken,hasPaymentRequest:!!paymentRequest,paymentRequestId:paymentRequest?.paymentRequestId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+                    // #endregion
                     await authorizePayment(interoperabilityToken, paymentRequest);
                 } else {
+                    // #region agent log
+                    fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:390',message:'No interoperability token',data:{paymentRequestStructure:JSON.stringify(paymentRequest||{})},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+                    // #endregion
                     alert("Payment complete! Interoperability token not available.");
                 }
                 return false;
@@ -394,11 +435,20 @@
         }
 
         async function initKlarnaButton() {
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:396',message:'initKlarnaButton entry',data:{url:window.location.href},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'Q'})}).catch(()=>{});
+            // #endregion
             const KlarnaInstance = await loadKlarnaSdk();
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:398',message:'After loadKlarnaSdk',data:{hasKlarnaInstance:!!KlarnaInstance},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'R'})}).catch(()=>{});
+            // #endregion
             if (!KlarnaInstance) return;
 
             const buttonMountEl = document.getElementById("klarna-payment-button");
             if (!buttonMountEl) {
+                // #region agent log
+                fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:401',message:'Button mount element not found',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'S'})}).catch(()=>{});
+                // #endregion
                 return;
             }
 
@@ -415,6 +465,17 @@
             buttonMountEl.classList.remove('loading');
 
             const normalizedPrice = Math.round(productPrice * 100);
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:463',message:'Price calculation',data:{productPrice:productPrice,normalizedPrice:normalizedPrice,isValid:normalizedPrice>0&&Number.isFinite(normalizedPrice)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'W'})}).catch(()=>{});
+            // #endregion
+
+            if (!normalizedPrice || normalizedPrice <= 0 || !Number.isFinite(normalizedPrice)) {
+                // #region agent log
+                fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:467',message:'Invalid price detected',data:{normalizedPrice:normalizedPrice},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'X'})}).catch(()=>{});
+                // #endregion
+                alert('Invalid product price. Please check the amount parameter.');
+                return;
+            }
 
             checkoutState.baseAmount = normalizedPrice;
             checkoutState.productLineItem = {
@@ -425,112 +486,169 @@
             checkoutState.shippingOptions = [];
             checkoutState.selectedShippingOption = null;
 
-            // Construct return URL
-            const protocol = window.location.protocol;
-            const host = window.location.host;
-            const returnUrl = `${protocol}//${host}/payment-success?id={klarna.paymentRequest.id}&token={klarna.paymentRequest.payment_token}`;
+            // Construct return URL - must use the current domain (Vercel) which is whitelisted
+            // Klarna SDK requires the return URL to match the whitelisted domain
+            // Always use HTTPS for Klarna (required)
+            const returnUrlProtocol = 'https:';
+            const returnUrlHost = window.location.host; // Use current host (should be Vercel domain)
+            const returnUrl = `${returnUrlProtocol}//${returnUrlHost}/payment-success?id={klarna.paymentRequest.id}&token={klarna.paymentRequest.payment_token}`;
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:490',message:'Return URL constructed',data:{returnUrl:returnUrl,returnUrlHost:returnUrlHost,currentHost:window.location.host,currentProtocol:window.location.protocol,currentOrigin:window.location.origin},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+            // #endregion
 
+            // Start with minimal config exactly like working example
             const buttonConfig = {
-                initiate: () => ({
-                    currency: "EUR",
-                    amount: normalizedPrice,
-                    shippingConfig: {
-                        mode: "EDITABLE",
-                    },
-                    collectCustomerProfile: ["profile:email", "profile:name", "profile:phone", "profile:billing_address"],
-                    supplementaryPurchaseData: {
-                        lineItems: [
-                            {
-                                name: checkoutState.productLineItem.name,
-                                quantity: checkoutState.productLineItem.quantity,
-                                totalAmount: checkoutState.productLineItem.totalAmount,
-                            },
-                        ],
-                    },
-                    customerInteractionConfig: {
-                        returnUrl: returnUrl,
-                    },
-                }),
+                initiate: () => {
+                    const initiatePayload = {
+                        currency: "EUR",
+                        amount: normalizedPrice,
+                        shippingConfig: {
+                            mode: "EDITABLE",
+                        },
+                        collectCustomerProfile: ["profile:email", "profile:name", "profile:phone", "profile:billing_address"],
+                        supplementaryPurchaseData: {
+                            lineItems: [
+                                {
+                                    name: checkoutState.productLineItem.name,
+                                    quantity: checkoutState.productLineItem.quantity,
+                                    totalAmount: checkoutState.productLineItem.totalAmount,
+                                },
+                            ],
+                        },
+                        customerInteractionConfig: {
+                            returnUrl: returnUrl,
+                        },
+                    };
+                    // #region agent log
+                    console.log('[DEBUG] Button initiate called', { payload: initiatePayload, returnUrl, amount: normalizedPrice });
+                    fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:496',message:'Button initiate called',data:{payload:JSON.stringify(initiatePayload),amount:normalizedPrice,returnUrl:returnUrl,lineItems:JSON.stringify(initiatePayload.supplementaryPurchaseData.lineItems)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'})}).catch(()=>{});
+                    // #endregion
+                    return initiatePayload;
+                },
                 initiationMode: "ON_PAGE",
-                shape: "pill",
-                theme: "default",
-                locale: "en-FI",
-                intents: ["PAY"],
             };
+            
+            // Only add optional properties if needed (like working example does conditionally)
+            // Try without these first to match working example exactly
+            // buttonConfig.shape = "pill";
+            // buttonConfig.theme = "default";
+            // buttonConfig.locale = "en-FI";
+            // buttonConfig.intents = ["PAY"];
 
-            KlarnaInstance.Payment.button(buttonConfig).mount(`#klarna-payment-button`);
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:510',message:'Mounting button',data:{buttonId:'klarna-payment-button',hasKlarnaInstance:!!KlarnaInstance,buttonConfig:JSON.stringify({initiationMode:buttonConfig.initiationMode,shape:buttonConfig.shape,theme:buttonConfig.theme,locale:buttonConfig.locale,intents:buttonConfig.intents})},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
+            // #endregion
+            const button = KlarnaInstance.Payment.button(buttonConfig);
+            button.mount(`#klarna-payment-button`);
+            
+            // Add click listener to button container to track when button is clicked
+            setTimeout(() => {
+                const mountedButton = document.querySelector('#klarna-payment-button klarna-payment-button, #klarna-payment-button > *');
+                if (mountedButton) {
+                    mountedButton.addEventListener('click', () => {
+                        // #region agent log
+                        fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:click',message:'Button clicked',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'Y'})}).catch(()=>{});
+                        // #endregion
+                    }, { once: true });
+                }
+            }, 1000);
         }
 
         // Authorize payment with Paytrail using interoperability_token
         async function authorizePayment(interoperabilityToken, paymentRequest) {
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:465',message:'authorizePayment entry',data:{hasToken:!!interoperabilityToken,tokenLength:interoperabilityToken?.length||0,hasPaymentRequest:!!paymentRequest,paymentRequestId:paymentRequest?.paymentRequestId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H'})}).catch(()=>{});
+            // #endregion
             try {
                 // Get product price
                 const urlParams = new URLSearchParams(window.location.search);
                 const amount = urlParams.get('amount');
                 const productPrice = amount ? parseFloat(amount) : 15.90;
                 
+                const requestBody = {
+                    stamp: `kec-${Date.now()}`,
+                    reference: paymentRequest.paymentRequestId || `kec-ref-${Date.now()}`,
+                    amount: Math.round(productPrice * 100),
+                    currency: 'EUR',
+                    language: 'EN',
+                    items: [
+                        {
+                            unitPrice: Math.round(productPrice * 100),
+                            units: 1,
+                            vatPercentage: 24,
+                            productCode: 'demo-product',
+                            description: 'Demo Product'
+                        }
+                    ],
+                    customer: {
+                        email: paymentRequest.stateContext?.shipping?.recipient?.email || 
+                               paymentRequest.stateContext?.klarnaCustomer?.email || 
+                               'customer@example.com',
+                        firstName: paymentRequest.stateContext?.shipping?.recipient?.givenName || 
+                                  paymentRequest.stateContext?.klarnaCustomer?.givenName || 
+                                  'John',
+                        lastName: paymentRequest.stateContext?.shipping?.recipient?.familyName || 
+                                 paymentRequest.stateContext?.klarnaCustomer?.familyName || 
+                                 'Doe',
+                        phone: paymentRequest.stateContext?.shipping?.recipient?.phone || 
+                              paymentRequest.stateContext?.klarnaCustomer?.phone || 
+                              '+358501234567',
+                        vatId: ''
+                    },
+                    redirectUrls: {
+                        success: `${window.location.origin}/payment-success?paymentRequestId=${paymentRequest.paymentRequestId}`,
+                        cancel: `${window.location.origin}/`
+                    },
+                    providerDetails: {
+                        klarna: {
+                            networkSessionToken: interoperabilityToken
+                        }
+                    }
+                };
+                // #region agent log
+                fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:472',message:'Before fetch to /api/payments',data:{amount:requestBody.amount,hasToken:!!requestBody.providerDetails.klarna.networkSessionToken},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'I'})}).catch(()=>{});
+                // #endregion
                 const response = await fetch('/api/payments', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        stamp: `kec-${Date.now()}`,
-                        reference: paymentRequest.paymentRequestId || `kec-ref-${Date.now()}`,
-                        amount: Math.round(productPrice * 100),
-                        currency: 'EUR',
-                        language: 'EN',
-                        items: [
-                            {
-                                unitPrice: Math.round(productPrice * 100),
-                                units: 1,
-                                vatPercentage: 24,
-                                productCode: 'demo-product',
-                                description: 'Demo Product'
-                            }
-                        ],
-                        customer: {
-                            email: paymentRequest.stateContext?.shipping?.recipient?.email || 
-                                   paymentRequest.stateContext?.klarnaCustomer?.email || 
-                                   'customer@example.com',
-                            firstName: paymentRequest.stateContext?.shipping?.recipient?.givenName || 
-                                      paymentRequest.stateContext?.klarnaCustomer?.givenName || 
-                                      'John',
-                            lastName: paymentRequest.stateContext?.shipping?.recipient?.familyName || 
-                                     paymentRequest.stateContext?.klarnaCustomer?.familyName || 
-                                     'Doe',
-                            phone: paymentRequest.stateContext?.shipping?.recipient?.phone || 
-                                  paymentRequest.stateContext?.klarnaCustomer?.phone || 
-                                  '+358501234567',
-                            vatId: ''
-                        },
-                        redirectUrls: {
-                            success: `${window.location.origin}/payment-success?paymentRequestId=${paymentRequest.paymentRequestId}`,
-                            cancel: `${window.location.origin}/`
-                        },
-                        providerDetails: {
-                            klarna: {
-                                networkSessionToken: interoperabilityToken
-                            }
-                        }
-                    })
+                    body: JSON.stringify(requestBody)
                 });
+                // #region agent log
+                fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:517',message:'After fetch response',data:{ok:response.ok,status:response.status,statusText:response.statusText},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'J'})}).catch(()=>{});
+                // #endregion
 
                 if (!response.ok) {
                     const error = await response.json();
+                    // #region agent log
+                    fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:520',message:'API error response',data:{error:error.message||error.error,status:response.status},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'K'})}).catch(()=>{});
+                    // #endregion
                     throw new Error(error.message || 'Failed to authorize payment');
                 }
 
                 const paymentData = await response.json();
+                // #region agent log
+                fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:524',message:'Payment data received',data:{hasHref:!!paymentData.href,href:paymentData.href,paymentDataKeys:Object.keys(paymentData||{})},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'L'})}).catch(()=>{});
+                // #endregion
                 
                 // Redirect to Paytrail payment page
                 if (paymentData.href) {
+                    // #region agent log
+                    fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:527',message:'Redirecting to Paytrail',data:{href:paymentData.href},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'M'})}).catch(()=>{});
+                    // #endregion
                     window.location.href = paymentData.href;
                 } else {
+                    // #region agent log
+                    fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:530',message:'No href, redirecting to success page',data:{paymentRequestId:paymentRequest.paymentRequestId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'N'})}).catch(()=>{});
+                    // #endregion
                     alert('Payment authorized successfully!');
                     window.location.href = `/payment-success?paymentRequestId=${paymentRequest.paymentRequestId}`;
                 }
             } catch (error) {
+                // #region agent log
+                fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:533',message:'authorizePayment error',data:{error:error.message,stack:error.stack},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'O'})}).catch(()=>{});
+                // #endregion
                 console.error('Error authorizing payment:', error);
                 const errorEl = document.getElementById('error-message');
                 if (errorEl) {
