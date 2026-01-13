@@ -145,193 +145,313 @@
     </div>
 
     <script type="module">
-        // Get Klarna credentials from server
-        let klarnaClientId;
-        let productPrice = 15.90; // Default price in EUR
+        // Complete replacement with kec-index.js code, adapted for product.html
+        const sdkState = {
+            klarna: null,
+            initializedClientId: null,
+        };
 
-        // Fetch configuration from server
-        async function initKlarna() {
+        const checkoutState = {
+            baseAmount: 0,
+            productLineItem: null,
+            shippingOptions: [],
+            selectedShippingOption: null,
+        };
+
+        function getShippingAmount(option) {
+            if (!option) {
+                return 0;
+            }
+            const amount = Number(option.amount);
+            return Number.isFinite(amount) ? amount : 0;
+        }
+
+        function createBaseLineItems() {
+            if (!checkoutState.productLineItem) {
+                return [];
+            }
+            const { name, quantity, totalAmount } = checkoutState.productLineItem;
+            return [
+                {
+                    name,
+                    quantity,
+                    totalAmount,
+                },
+            ];
+        }
+
+        function buildLineItemsWithShipping(option) {
+            const lineItems = createBaseLineItems();
+            if (option) {
+                lineItems.push({
+                    name: option.displayName || option.name || "Shipping",
+                    quantity: 1,
+                    totalAmount: getShippingAmount(option),
+                });
+            }
+            return lineItems;
+        }
+
+        function calculateTotalAmount(option) {
+            return checkoutState.baseAmount + getShippingAmount(option);
+        }
+
+        function resolveShippingOptions(shippingAddress) {
+            const baseOptions = [
+                {
+                    amount: 499,
+                    description: "Delivery within 3-5 business days.",
+                    displayName: "Standard shipping",
+                    shippingOptionReference: "standard-shipping",
+                },
+                {
+                    amount: 1299,
+                    description: "Delivery within 1-2 business days.",
+                    displayName: "Express shipping",
+                    shippingOptionReference: "express-shipping",
+                },
+            ];
+
+            const normalizedOptions = baseOptions.map((option) => ({ ...option }));
+
+            const country =
+                shippingAddress && typeof shippingAddress.country === "string"
+                    ? shippingAddress.country.toUpperCase()
+                    : null;
+
+            if (country && country !== "DE") {
+                return normalizedOptions.map((option) => ({
+                    ...option,
+                    amount: option.amount + 300,
+                    description: `${option.description} (${country})`,
+                }));
+            }
+
+            return normalizedOptions;
+        }
+
+        function findShippingOption(reference) {
+            if (!reference) {
+                return null;
+            }
+            return (
+                checkoutState.shippingOptions.find(
+                    (option) => option.shippingOptionReference === reference
+                ) || null
+            );
+        }
+
+        async function loadKlarnaSdk() {
+            // Get client ID from server instead of sessionStorage
+            let clientId;
             try {
-                console.log('Initializing Klarna SDK...');
-                
                 const configResponse = await fetch('/api/klarna/config');
                 if (!configResponse.ok) {
                     throw new Error(`Failed to fetch config: ${configResponse.status}`);
                 }
-                
                 const config = await configResponse.json();
-                console.log('Config received:', config);
+                clientId = config.clientId;
                 
-                if (!config.clientId) {
-                    throw new Error('Klarna Client ID not configured');
+                // Store in sessionStorage for consistency with working example
+                if (clientId) {
+                    sessionStorage.setItem("klarnaClientId", clientId);
                 }
-                
-                klarnaClientId = config.clientId;
-                
-                // Get product price from URL params or use default
-                const urlParams = new URLSearchParams(window.location.search);
-                const amount = urlParams.get('amount');
-                if (amount) {
-                    productPrice = parseFloat(amount);
-                    document.getElementById('product-price').textContent = `€${productPrice.toFixed(2)}`;
-                }
-                
-                // Clear the loading text
-                const buttonContainer = document.getElementById('klarna-payment-button');
-                buttonContainer.innerHTML = '';
-                buttonContainer.classList.remove('loading');
-                
-                // Step 1: Import Library
-                // Note: The SDK URL is the same for all environments - the client ID determines which backend to use
-                const sdkUrl = 'https://js.klarna.com/web-sdk/v2/klarna.mjs';
-                console.log('Step 1: Importing Klarna SDK from:', sdkUrl);
-                const { KlarnaSDK } = await import(sdkUrl);
-                
-                // Initialize Klarna SDK with clientId (no products parameter - matches working example)
-                console.log('🔑 Initializing Klarna SDK with clientId:', klarnaClientId);
-                console.log('🔑 Client ID length:', klarnaClientId?.length);
-                console.log('🔑 Client ID preview:', klarnaClientId ? `${klarnaClientId.substring(0, 10)}...` : 'MISSING');
-                const klarna = await KlarnaSDK({
-                    clientId: klarnaClientId,
-                    locale: "en-FI" // optional
-                });
-                
-                console.log('✅ Klarna SDK initialized:', klarna);
-                console.log('Klarna object keys:', Object.keys(klarna));
-                console.log('Klarna.Payment:', klarna.Payment);
-                
-                // Store klarna instance globally for access
-                window.klarnaInstance = klarna;
-
-                // Step 2: Display the Klarna payment button
-                console.log('Step 2: Creating Klarna payment button...');
-                
-                // Step 3: Create button config with inline initiate callback (matching working example exactly)
-                // Construct return URL with placeholders for Klarna to populate
-                const protocol = window.location.protocol;
-                const host = window.location.host;
-                const returnUrl = `${protocol}//${host}/payment-success?id={klarna.paymentRequest.id}&token={klarna.paymentRequest.payment_token}`;
-                
-                const buttonConfig = {
-                    initiate: () => {
-                        console.log('🔄 INITIATE CALLBACK EXECUTED - Returning payment request payload (client-side)');
-                        const payload = {
-                            currency: "EUR",
-                            amount: Math.round(productPrice * 100), // Convert to cents
-                            shippingConfig: {
-                                mode: "EDITABLE"
-                            },
-                            collectCustomerProfile: ["profile:email", "profile:name", "profile:phone", "profile:billing_address"],
-                            supplementaryPurchaseData: {
-                                lineItems: [
-                                    {
-                                        name: "Product",
-                                        quantity: 1,
-                                        totalAmount: Math.round(productPrice * 100)
-                                    }
-                                ]
-                            },
-                            customerInteractionConfig: {
-                                returnUrl: returnUrl
-                            }
-                        };
-                        console.log('✅ Returning payment request payload:', payload);
-                        return payload;
-                    },
-                    initiationMode: "ON_PAGE",
-                    shape: "pill",
-                    theme: "default",
-                    locale: "en-FI",
-                    intents: ["PAY"]
-                };
-                
-                const klarnaPaymentButton = klarna.Payment.button(buttonConfig);
-                
-                // Mount the button to the container (Step 2) - following reference pattern
-                console.log('Mounting button to container...');
-                klarnaPaymentButton.mount("#klarna-payment-button");
-                console.log('✅ Payment button mounted');
-                
-                // Wait a bit for the button to render, then add debug listeners
-                setTimeout(() => {
-                    const buttonContainer = document.getElementById('klarna-payment-button');
-                    const klarnaButtonElement = buttonContainer?.querySelector('klarna-payment-button');
-                    
-                    if (klarnaButtonElement) {
-                        console.log('✅ Found klarna-payment-button element, adding debug listeners');
-                        
-                        // Add click listener to debug
-                        klarnaButtonElement.addEventListener('click', (e) => {
-                            console.log('🖱️ DEBUG: klarna-payment-button clicked!', e);
-                        }, true);
-                        
-                        // Also listen on the container
-                        buttonContainer.addEventListener('click', (e) => {
-                            console.log('🖱️ DEBUG: Container clicked!', e.target);
-                        }, true);
-                        
-                        // Check if button is visible and clickable
-                        const rect = klarnaButtonElement.getBoundingClientRect();
-                        console.log('✅ Button element position:', {
-                            visible: rect.width > 0 && rect.height > 0,
-                            width: rect.width,
-                            height: rect.height,
-                            top: rect.top,
-                            left: rect.left
-                        });
-                    } else {
-                        console.warn('⚠️ klarna-payment-button element not found after mount');
-                    }
-                }, 500);
-                
-                // Attach event listeners following reference pattern
-                klarna.Payment.on('error', (error, paymentRequest) => {
-                    console.error('❌ Payment Error:', error, paymentRequest);
-                });
-                
-                klarna.Payment.on('abort', (paymentRequest) => {
-                    console.log('⚠️ Payment Aborted:', paymentRequest);
-                });
-                
-                klarna.Payment.on('complete', async (paymentRequest) => {
-                    console.log('✅ Payment Complete:', paymentRequest);
-                    
-                    // Check if we have the interoperability_token in the callback
-                    if (paymentRequest.stateContext?.interoperabilityToken) {
-                        await authorizePayment(paymentRequest.stateContext.interoperabilityToken, paymentRequest);
-                    } else {
-                        console.log('Waiting for complete event to get interoperability_token...');
-                    }
-                });
-                
-                console.log('✅ Klarna payment button setup complete');
-                
-                // Listen for payment events
-                klarna.Payment.on('complete', async (paymentRequest) => {
-                    console.log('✅ Payment complete event received:', paymentRequest);
-                    
-                    if (paymentRequest.state === 'COMPLETED' && paymentRequest.stateContext?.interoperabilityToken) {
-                        // If we have the token directly, we can proceed
-                        await authorizePayment(paymentRequest.stateContext.interoperabilityToken, paymentRequest);
-                    }
-                });
-                
-                // Listen for error events for debugging
-                klarna.Payment.on('error', (error) => {
-                    console.error('❌ Klarna Payment error event:', error);
-                });
-
             } catch (error) {
-                console.error('Error initializing Klarna:', error);
-                const buttonContainer = document.getElementById('klarna-payment-button');
-                buttonContainer.innerHTML = `<div class="error">Error: ${error.message}</div>`;
-                buttonContainer.classList.remove('loading');
+                console.error('Failed to fetch client ID:', error);
+                clientId = sessionStorage.getItem("klarnaClientId");
             }
+
+            if (sdkState.klarna && clientId === sdkState.initializedClientId) {
+                return sdkState.klarna;
+            }
+
+            if (clientId !== sdkState.initializedClientId) {
+                sdkState.klarna = null;
+            }
+
+            if (!clientId) {
+                alert("Klarna Client ID not set. Please configure it.");
+                return null;
+            }
+
+            try {
+                const { KlarnaSDK } = await import(
+                    "https://js.klarna.com/web-sdk/v2/klarna.mjs"
+                );
+
+                sdkState.klarna = await KlarnaSDK({
+                    clientId: clientId,
+                    locale: "en-FI",
+                });
+
+                sdkState.initializedClientId = clientId;
+                window.Klarna = sdkState.klarna;
+                initializeKlarnaEvents(sdkState.klarna);
+                return sdkState.klarna;
+            } catch (error) {
+                console.error("Failed to load Klarna SDK:", error);
+                alert(
+                    `Failed to load Klarna SDK. Please check the Client ID and that the domain ${window.location.origin} is whitelisted.`
+                );
+                return null;
+            }
+        }
+
+        function initializeKlarnaEvents(KlarnaInstance) {
+            if (!KlarnaInstance) return;
+
+            KlarnaInstance.Payment.on("error", (err) => {
+                console.error("Klarna Payment error:", err);
+                alert(`An error occurred: ${err.errorCode} - ${err.errorMessage}`);
+            });
+
+            KlarnaInstance.Payment.on(
+                "shippingaddresschange",
+                async (paymentRequest, shippingAddress) => {
+                    const shippingOptions = resolveShippingOptions(shippingAddress);
+                    const previousSelectionReference =
+                        checkoutState.selectedShippingOption?.shippingOptionReference || null;
+
+                    checkoutState.shippingOptions = shippingOptions;
+                    checkoutState.selectedShippingOption = null;
+
+                    if (previousSelectionReference) {
+                        const reusedOption = findShippingOption(previousSelectionReference);
+                        if (reusedOption) {
+                            checkoutState.selectedShippingOption = reusedOption;
+                        }
+                    }
+
+                    return {
+                        shippingOptions,
+                    };
+                }
+            );
+
+            KlarnaInstance.Payment.on(
+                "shippingoptionselect",
+                async (paymentRequest, shippingOption) => {
+                    const selectedOption =
+                        findShippingOption(shippingOption?.shippingOptionReference) ||
+                        (shippingOption ? { ...shippingOption } : null);
+
+                    if (!selectedOption) {
+                        checkoutState.selectedShippingOption = null;
+                        return {
+                            amount: calculateTotalAmount(null),
+                            lineItems: buildLineItemsWithShipping(null),
+                        };
+                    }
+
+                    checkoutState.selectedShippingOption = selectedOption;
+
+                    return {
+                        amount: calculateTotalAmount(selectedOption),
+                        lineItems: buildLineItemsWithShipping(selectedOption),
+                    };
+                }
+            );
+
+            KlarnaInstance.Payment.on("complete", async (paymentRequest) => {
+                const interoperabilityToken =
+                    paymentRequest.stateContext?.interoperabilityToken;
+                console.log("KEC interoperability token", interoperabilityToken);
+
+                if (interoperabilityToken) {
+                    try {
+                        sessionStorage.setItem(
+                            "interoperabilityToken",
+                            interoperabilityToken
+                        );
+                    } catch (e) {
+                        console.warn("Unable to store interoperability token", e);
+                    }
+                    
+                    // Call Paytrail authorization
+                    await authorizePayment(interoperabilityToken, paymentRequest);
+                } else {
+                    alert("Payment complete! Interoperability token not available.");
+                }
+                return false;
+            });
+        }
+
+        async function initKlarnaButton() {
+            const KlarnaInstance = await loadKlarnaSdk();
+            if (!KlarnaInstance) return;
+
+            const buttonMountEl = document.getElementById("klarna-payment-button");
+            if (!buttonMountEl) {
+                return;
+            }
+
+            // Get product price from URL params or use default
+            const urlParams = new URLSearchParams(window.location.search);
+            const amount = urlParams.get('amount');
+            const productPrice = amount ? parseFloat(amount) : 15.90;
+            
+            // Update price display
+            document.getElementById('product-price').textContent = `€${productPrice.toFixed(2)}`;
+            
+            // Clear loading state
+            buttonMountEl.innerHTML = '';
+            buttonMountEl.classList.remove('loading');
+
+            const normalizedPrice = Math.round(productPrice * 100);
+
+            checkoutState.baseAmount = normalizedPrice;
+            checkoutState.productLineItem = {
+                name: "Demo Product",
+                quantity: 1,
+                totalAmount: normalizedPrice,
+            };
+            checkoutState.shippingOptions = [];
+            checkoutState.selectedShippingOption = null;
+
+            // Construct return URL
+            const protocol = window.location.protocol;
+            const host = window.location.host;
+            const returnUrl = `${protocol}//${host}/payment-success?id={klarna.paymentRequest.id}&token={klarna.paymentRequest.payment_token}`;
+
+            const buttonConfig = {
+                initiate: () => ({
+                    currency: "EUR",
+                    amount: normalizedPrice,
+                    shippingConfig: {
+                        mode: "EDITABLE",
+                    },
+                    collectCustomerProfile: ["profile:email", "profile:name", "profile:phone", "profile:billing_address"],
+                    supplementaryPurchaseData: {
+                        lineItems: [
+                            {
+                                name: checkoutState.productLineItem.name,
+                                quantity: checkoutState.productLineItem.quantity,
+                                totalAmount: checkoutState.productLineItem.totalAmount,
+                            },
+                        ],
+                    },
+                    customerInteractionConfig: {
+                        returnUrl: returnUrl,
+                    },
+                }),
+                initiationMode: "ON_PAGE",
+                shape: "pill",
+                theme: "default",
+                locale: "en-FI",
+                intents: ["PAY"],
+            };
+
+            KlarnaInstance.Payment.button(buttonConfig).mount(`#klarna-payment-button`);
         }
 
         // Authorize payment with Paytrail using interoperability_token
         async function authorizePayment(interoperabilityToken, paymentRequest) {
             try {
+                // Get product price
+                const urlParams = new URLSearchParams(window.location.search);
+                const amount = urlParams.get('amount');
+                const productPrice = amount ? parseFloat(amount) : 15.90;
+                
                 const response = await fetch('/api/payments', {
                     method: 'POST',
                     headers: {
@@ -390,19 +510,22 @@
                 if (paymentData.href) {
                     window.location.href = paymentData.href;
                 } else {
-                    // If no redirect URL, show success message
                     alert('Payment authorized successfully!');
                     window.location.href = `/payment-success?paymentRequestId=${paymentRequest.paymentRequestId}`;
                 }
             } catch (error) {
                 console.error('Error authorizing payment:', error);
-                document.getElementById('error-message').textContent = `Error authorizing payment: ${error.message}`;
-                document.getElementById('error-message').style.display = 'block';
+                const errorEl = document.getElementById('error-message');
+                if (errorEl) {
+                    errorEl.textContent = `Error authorizing payment: ${error.message}`;
+                    errorEl.style.display = 'block';
+                }
             }
         }
 
-        // Initialize on page load
-        initKlarna();
+        document.addEventListener("DOMContentLoaded", () => {
+            initKlarnaButton();
+        });
     </script>
 </body>
 </html>
