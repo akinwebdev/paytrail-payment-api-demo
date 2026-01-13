@@ -740,7 +740,7 @@ app.get('/api/klarna/payment-request/:paymentRequestId', async (req, res) => {
 
         const axios = require('axios');
         const auth = Buffer.from(`${KLARNA_API_KEY}:`).toString('base64');
-        const endpointUrl = `${KLARNA_API_URL}/v2/accounts/${KLARNA_PARTNER_ACCOUNT_ID}/payment/requests/${paymentRequestId}`;
+        const endpointUrl = `${KLARNA_API_URL}/v2/accounts/payment/requests/${paymentRequestId}`;
         
         console.log('📤 Fetching from Klarna API:', endpointUrl);
 
