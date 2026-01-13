@@ -164,19 +164,19 @@
         // Function to initialize Klarna SDK with locale
         async function initializeKlarnaSDK(locale) {
             // Get Klarna Client ID from server
-            const configResponse = await fetch('/api/klarna/config');
-            if (!configResponse.ok) {
+                const configResponse = await fetch('/api/klarna/config');
+                if (!configResponse.ok) {
                 console.error('Failed to fetch Klarna config:', configResponse.status);
                 throw new Error('Failed to fetch Klarna configuration');
-            }
-            const config = await configResponse.json();
+                }
+                const config = await configResponse.json();
             const clientId = config.clientId;
 
             // Initialize Klarna WebSDK
             const { KlarnaSDK } = await import("https://js.klarna.com/web-sdk/v2/klarna.mjs");
 
             Klarna = await KlarnaSDK({ 
-                clientId: clientId,
+                    clientId: clientId,
                 products: ["PAYMENT"], // Ensure products are properly specified for best performance
                 locale: locale,
             });
@@ -184,6 +184,16 @@
             console.log('✅ Klarna SDK initialized with locale:', locale);
             console.log('✅ Products specified:', ["PAYMENT"]);
             return Klarna;
+        }
+
+        // Check for stored locale preference
+        const storedLocale = sessionStorage.getItem('klarnaLocale');
+        if (storedLocale) {
+            currentLocale = storedLocale;
+            const localeSelect = document.getElementById('locale-select');
+            if (localeSelect) {
+                localeSelect.value = storedLocale;
+            }
         }
 
         // Initialize with default locale
@@ -267,18 +277,16 @@
                         const newLocale = e.target.value;
                         console.log('Locale changed to:', newLocale);
                         
-                        // Clear existing button
-                        const buttonContainer = document.getElementById('klarna-payment-button');
-                        if (buttonContainer) {
-                            buttonContainer.innerHTML = '';
+                        // Note: Klarna SDK locale is set during initialization and cannot be changed
+                        // To change locale, the page needs to be reloaded
+                        if (confirm(`To change the locale to ${newLocale}, the page needs to be reloaded. Reload now?`)) {
+                            // Store locale preference and reload
+                            sessionStorage.setItem('klarnaLocale', newLocale);
+                            window.location.reload();
+                        } else {
+                            // Revert dropdown to previous locale
+                            localeSelect.value = currentLocale;
                         }
-                        
-                        // Reinitialize SDK with new locale
-                        currentLocale = newLocale;
-                        await initializeKlarnaSDK(newLocale);
-                        
-                        // Remount button with new locale
-                        mountKlarnaButton();
                     });
                 }
             });
@@ -293,18 +301,16 @@
                     const newLocale = e.target.value;
                     console.log('Locale changed to:', newLocale);
                     
-                    // Clear existing button
-                    const buttonContainer = document.getElementById('klarna-payment-button');
-                    if (buttonContainer) {
-                        buttonContainer.innerHTML = '';
+                    // Note: Klarna SDK locale is set during initialization and cannot be changed
+                    // To change locale, the page needs to be reloaded
+                    if (confirm(`To change the locale to ${newLocale}, the page needs to be reloaded. Reload now?`)) {
+                        // Store locale preference and reload
+                        sessionStorage.setItem('klarnaLocale', newLocale);
+                        window.location.reload();
+                    } else {
+                        // Revert dropdown to previous locale
+                        localeSelect.value = currentLocale;
                     }
-                    
-                    // Reinitialize SDK with new locale
-                    currentLocale = newLocale;
-                    await initializeKlarnaSDK(newLocale);
-                    
-                    // Remount button with new locale
-                    mountKlarnaButton();
                 });
             }
         }
