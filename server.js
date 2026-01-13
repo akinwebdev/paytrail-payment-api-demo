@@ -535,6 +535,7 @@ async function createKlarnaPaymentRequest(data, req) {
     
     console.log('  - Final host used:', cleanHost);
     
+    // Using payment_token as per Klarna WebSDK documentation
     const returnUrl = `https://${cleanHost}/payment-success?payment_request_id={klarna.payment_request.id}&state={klarna.payment_request.state}&payment_token={klarna.payment_request.payment_token}`;
     
     console.log('  - Return URL:', returnUrl);
@@ -607,6 +608,8 @@ app.get('/api/klarna-proxy', async (req, res) => {
 });
 
 // POST /api/klarna/payment-request - Create Klarna payment request
+// NOTE: This endpoint exists but is currently unused. The frontend uses client-side payment request creation
+// via PaymentRequestData in the initiate callback. This endpoint is kept for potential server-side flow.
 app.post('/api/klarna/payment-request', async (req, res) => {
     try {
         console.log('🔄 Creating Klarna payment request...');

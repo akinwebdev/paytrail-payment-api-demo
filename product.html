@@ -387,6 +387,7 @@
             const buttonConfig = {
                 intents: ["PAY"],
                 initiationMode: "DEVICE_BEST", // SDK chooses the best method based on device
+                locale: currentLocale, // Set button locale to match SDK initialization locale
                 // According to Klarna WebSDK docs:
                 // initiate can return Promise<PaymentRequestData> for client-side payment request creation
                 // https://docs.klarna.com/websdk/v2/interfaces/payment.KlarnaPaymentButtonConfig.html#initiate
@@ -398,6 +399,7 @@
                     const paymentRef = `pay-ref-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
                     
                     // Get return URL (use current origin)
+                    // Using payment_token as per Klarna WebSDK documentation
                     const returnUrl = `${window.location.origin}/payment-success?payment_request_id={klarna.payment_request.id}&state={klarna.payment_request.state}&payment_token={klarna.payment_request.payment_token}`;
                     
                     // PaymentRequestData structure according to Klarna WebSDK documentation
@@ -412,7 +414,8 @@
                     };
                     
                     // Validate required PaymentRequestData fields
-                    const requiredFields = ['currency', 'amount', 'customerInteractionConfig'];
+                    // Note: customerInteractionConfig is optional per WebSDK spec, but we include it for returnUrl
+                    const requiredFields = ['currency', 'amount'];
                     const missingFields = requiredFields.filter(field => !paymentRequestData[field]);
                     
                     if (missingFields.length > 0) {
@@ -420,10 +423,10 @@
                         throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
                     }
                     
-                    // Validate customerInteractionConfig has returnUrl
-                    if (!paymentRequestData.customerInteractionConfig?.returnUrl) {
+                    // Validate returnUrl only if customerInteractionConfig is provided
+                    if (paymentRequestData.customerInteractionConfig && !paymentRequestData.customerInteractionConfig.returnUrl) {
                         console.error('❌ Missing returnUrl in customerInteractionConfig');
-                        throw new Error('customerInteractionConfig.returnUrl is required');
+                        throw new Error('customerInteractionConfig.returnUrl is required when customerInteractionConfig is provided');
                     }
                     
                     console.log('📤 Returning Promise<PaymentRequestData> to WebSDK:', JSON.stringify(paymentRequestData, null, 2));
