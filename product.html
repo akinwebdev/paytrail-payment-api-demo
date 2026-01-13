@@ -386,7 +386,7 @@
             // The WebSDK will handle creating the payment request internally
             const buttonConfig = {
                 intents: ["PAY"],
-                initiationMode: "ON_PAGE", // Keep payment flow on-page, not in new tab
+                initiationMode: "DEVICE_BEST", // SDK chooses the best method based on device
                 initiate: () => {
                     console.log('Button initiate called - returning payment request configuration');
                     console.log('Current origin:', window.location.origin);
