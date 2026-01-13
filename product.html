@@ -305,9 +305,11 @@
                         console.log('✅ Response keys:', Object.keys(data));
                         console.log('✅ paymentRequestId value:', data.paymentRequestId);
                         console.log('✅ payment_request_id value:', data.payment_request_id);
+                        console.log('✅ redirectUrl value:', data.redirectUrl);
                         
                         // Check both camelCase and snake_case
                         const paymentRequestId = data.paymentRequestId || data.payment_request_id;
+                        const redirectUrl = data.redirectUrl;
                         
                         if (!paymentRequestId) {
                             console.error('❌ Payment request ID missing from response');
@@ -317,7 +319,21 @@
                         
                         console.log('✅ Found payment request ID:', paymentRequestId);
                         
-                        // Return payment request ID to Klarna SDK (following reference pattern)
+                        // If we have a redirect URL, redirect directly instead of using SDK popup
+                        // This avoids the "Popup is closed" error with HANDOVER method
+                        if (redirectUrl) {
+                            console.log('✅ Found redirect URL, redirecting directly:', redirectUrl);
+                            console.log('🔄 Redirecting to Klarna payment page...');
+                            // Redirect in the next tick to allow the initiate callback to complete
+                            setTimeout(() => {
+                                window.location.href = redirectUrl;
+                            }, 100);
+                            // Still return the paymentRequestId for SDK compatibility
+                            return { paymentRequestId: paymentRequestId };
+                        }
+                        
+                        // If no redirect URL, return payment request ID to Klarna SDK
+                        console.log('⚠️ No redirect URL found, using SDK to handle payment');
                         return { paymentRequestId: paymentRequestId };
                     };
                 

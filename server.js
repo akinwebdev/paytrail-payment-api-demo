@@ -623,8 +623,10 @@ app.post('/api/klarna/payment-request', async (req, res) => {
         }
         
         // Check if the response contains a redirect URL or action URL
-        // Check multiple possible locations and nested structures
-        const redirectUrl = response.data.redirect_url 
+        // For HANDOVER method, payment_request_url is in state_context.customer_interaction.payment_request_url
+        const redirectUrl = response.data.state_context?.customer_interaction?.payment_request_url
+            || response.data.stateContext?.customerInteraction?.payment_request_url
+            || response.data.redirect_url 
             || response.data.url 
             || response.data.action_url
             || response.data.redirectUrl
