@@ -513,10 +513,15 @@
             fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:490',message:'Return URL constructed',data:{returnUrl:returnUrl,returnUrlHost:returnUrlHost,currentHost:window.location.host,currentProtocol:window.location.protocol,currentOrigin:window.location.origin},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
             // #endregion
 
-            // Start with minimal config exactly like working example
+            // Start with minimal config exactly like working example - use arrow function returning object directly
             const buttonConfig = {
                 initiate: () => {
-                    const initiatePayload = {
+                    // #region agent log
+                    console.log('[DEBUG] Button initiate called', { returnUrl, amount: normalizedPrice, lineItems: checkoutState.productLineItem });
+                    fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:518',message:'Button initiate called',data:{amount:normalizedPrice,returnUrl:returnUrl,lineItemName:checkoutState.productLineItem.name,lineItemTotal:checkoutState.productLineItem.totalAmount},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'})}).catch(()=>{});
+                    // #endregion
+                    // Return object directly like working example
+                    return {
                         currency: "EUR",
                         amount: normalizedPrice,
                         shippingConfig: {
@@ -536,11 +541,6 @@
                             returnUrl: returnUrl,
                         },
                     };
-                    // #region agent log
-                    console.log('[DEBUG] Button initiate called', { payload: initiatePayload, returnUrl, amount: normalizedPrice });
-                    fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:496',message:'Button initiate called',data:{payload:JSON.stringify(initiatePayload),amount:normalizedPrice,returnUrl:returnUrl,lineItems:JSON.stringify(initiatePayload.supplementaryPurchaseData.lineItems)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'})}).catch(()=>{});
-                    // #endregion
-                    return initiatePayload;
                 },
                 initiationMode: "ON_PAGE",
             };
@@ -553,7 +553,13 @@
             // buttonConfig.intents = ["PAY"];
 
             // #region agent log
-            fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:510',message:'Mounting button',data:{buttonId:'klarna-payment-button',hasKlarnaInstance:!!KlarnaInstance,buttonConfig:JSON.stringify({initiationMode:buttonConfig.initiationMode,shape:buttonConfig.shape,theme:buttonConfig.theme,locale:buttonConfig.locale,intents:buttonConfig.intents})},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
+            console.log('[DEBUG] Mounting button', { 
+                buttonId: 'klarna-payment-button', 
+                hasKlarnaInstance: !!KlarnaInstance,
+                initiationMode: buttonConfig.initiationMode,
+                hasIntents: 'intents' in buttonConfig
+            });
+            fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:556',message:'Mounting button',data:{buttonId:'klarna-payment-button',hasKlarnaInstance:!!KlarnaInstance,initiationMode:buttonConfig.initiationMode},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
             // #endregion
             const button = KlarnaInstance.Payment.button(buttonConfig);
             button.mount(`#klarna-payment-button`);
