@@ -185,13 +185,12 @@
                 console.log('Step 1: Importing Klarna SDK from: https://js.klarna.com/web-sdk/v2/klarna.mjs');
                 const { KlarnaSDK } = await import('https://js.klarna.com/web-sdk/v2/klarna.mjs');
                 
-                // Initialize Klarna SDK with clientId and products
+                // Initialize Klarna SDK with clientId (no products parameter - matches working example)
                 console.log('🔑 Initializing Klarna SDK with clientId:', klarnaClientId);
                 console.log('🔑 Client ID length:', klarnaClientId?.length);
                 console.log('🔑 Client ID preview:', klarnaClientId ? `${klarnaClientId.substring(0, 10)}...` : 'MISSING');
                 const klarna = await KlarnaSDK({
                     clientId: klarnaClientId,
-                    products: ["PAYMENT"],
                     locale: "en-FI" // optional
                 });
                 
@@ -207,38 +206,38 @@
                 
                 // Step 3: Implement initiate callback (client-side approach - alternative method)
                 // Return payment request payload directly from client
-                // Reference: https://docs.klarna.com/websdk/v2/modules.html
+                // Following working example pattern from kec-index.js
                 const initiateCallback = () => {
                     console.log('🔄 INITIATE CALLBACK EXECUTED - Returning payment request payload (client-side)');
                     
-                    // Generate payment request reference
-                    const paymentRequestReference = `pay-ref-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-                    
-                    // Construct return URL with placeholders for Klarna to populate
+                    // Construct return URL with placeholders for Klarna to populate (simpler format like working example)
                     const protocol = window.location.protocol;
                     const host = window.location.host;
-                    const returnUrl = `${protocol}//${host}/payment-success?payment_request_id={klarna.payment_request.id}&state={klarna.payment_request.state}&payment_token={klarna.payment_request.payment_token}&payment_request_reference={klarna.payment_request.payment_request_reference}&klarna-network-session-token={klarna.network_session_token}&interoperability_token={klarna.payment_request.interoperability_token}`;
+                    const returnUrl = `${protocol}//${host}/payment-success?id={klarna.paymentRequest.id}&token={klarna.paymentRequest.payment_token}`;
                     
-                    // Return payment request payload directly (client-side approach)
-                    // Following Klarna Web SDK v2 guidelines
+                    // Return payment request payload directly (matching working example structure)
                     const payload = {
                         currency: "EUR",
                         amount: Math.round(productPrice * 100), // Convert to cents
-                        paymentRequestReference: paymentRequestReference,
+                        shippingConfig: {
+                            mode: "EDITABLE"
+                        },
+                        collectCustomerProfile: ["profile:email", "profile:name", "profile:phone", "profile:billing_address"],
                         supplementaryPurchaseData: {
-                            purchaseReference: paymentRequestReference,
-                            lineItems: [],
-                            shipping: [],
-                            customer: {}
+                            lineItems: [
+                                {
+                                    name: "Product",
+                                    quantity: 1,
+                                    totalAmount: Math.round(productPrice * 100)
+                                }
+                            ]
                         },
                         customerInteractionConfig: {
-                            method: "HANDOVER", // Explicitly use HANDOVER method for redirect flow
                             returnUrl: returnUrl
                         }
                     };
                     
                     console.log('✅ Returning payment request payload:', payload);
-                    console.log('✅ Customer interaction method:', payload.customerInteractionConfig?.method);
                     console.log('✅ Return URL:', payload.customerInteractionConfig?.returnUrl);
                     return payload;
                 };
@@ -250,7 +249,7 @@
                     shape: "pill",
                     theme: "default",
                     intents: ["PAY"],
-                    initiationMode: "REDIRECT", // Use REDIRECT for HANDOVER method instead of DEVICE_BEST (which tries popup)
+                    initiationMode: "ON_PAGE", // Use ON_PAGE like working example (keeps flow on same page, no popup/redirect issues)
                     initiate: initiateCallback
                 });
                 
