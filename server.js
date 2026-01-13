@@ -556,7 +556,7 @@ app.post('/api/klarna/payment-request', async (req, res) => {
         // For Klarna API, the API key is used as the username with empty password
         const auth = Buffer.from(`${KLARNA_API_KEY}:`).toString('base64');
 
-        endpointUrl = `${KLARNA_API_URL}/v2/accounts/payment/requests`;
+        endpointUrl = `${KLARNA_API_URL}/v2/accounts/${KLARNA_PARTNER_ACCOUNT_ID}/payment/requests`;
         console.log('📤 Klarna API endpoint:', endpointUrl);
         console.log('📤 Partner Account ID:', KLARNA_PARTNER_ACCOUNT_ID);
         console.log('📤 API URL:', KLARNA_API_URL);
@@ -740,7 +740,7 @@ app.get('/api/klarna/payment-request/:paymentRequestId', async (req, res) => {
 
         const axios = require('axios');
         const auth = Buffer.from(`${KLARNA_API_KEY}:`).toString('base64');
-        const endpointUrl = `${KLARNA_API_URL}/v2/accounts/payment/requests/${paymentRequestId}`;
+        const endpointUrl = `${KLARNA_API_URL}/v2/accounts/${KLARNA_PARTNER_ACCOUNT_ID}/payment/requests/${paymentRequestId}`;
         
         console.log('📤 Fetching from Klarna API:', endpointUrl);
 
