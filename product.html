@@ -71,6 +71,11 @@
             line-height: 1.6;
             color: #5A5A5A;
         }
+        #klarna-payment-button {
+            width: 100%;
+            min-height: 60px;
+            display: block;
+        }
         .footer {
             margin-top: 3rem;
             padding-top: 2rem;
@@ -121,19 +126,19 @@
 
     <script type="module">
         // Get Klarna Client ID from server
-        const configResponse = await fetch('/api/klarna/config');
-        if (!configResponse.ok) {
+                const configResponse = await fetch('/api/klarna/config');
+                if (!configResponse.ok) {
             console.error('Failed to fetch Klarna config:', configResponse.status);
             throw new Error('Failed to fetch Klarna configuration');
-        }
-        const config = await configResponse.json();
+                }
+                const config = await configResponse.json();
         const clientId = config.clientId;
 
         // Initialize Klarna WebSDK
         const { KlarnaSDK } = await import("https://js.klarna.com/web-sdk/v2/klarna.mjs");
 
         const Klarna = await KlarnaSDK({ 
-            clientId: clientId,
+                    clientId: clientId,
             products: ["PAYMENT"],
             locale: "en-US",
         });
@@ -141,8 +146,26 @@
         // Klarna SDK ready to be utilized
         console.log('Klarna SDK initialized:', Klarna);
 
-        // Wait for DOM to be ready before mounting button
-        document.addEventListener("DOMContentLoaded", () => {
+        // Function to mount the button
+        function mountKlarnaButton() {
+            console.log('Attempting to mount Klarna button...');
+            console.log('Klarna object:', Klarna);
+            console.log('Klarna.Payment:', Klarna?.Payment);
+            
+            // Mount the button
+            const buttonElement = document.getElementById('klarna-payment-button');
+            console.log('Button element:', buttonElement);
+            
+            if (!buttonElement) {
+                console.error('Button container not found');
+                return;
+            }
+
+            if (!Klarna?.Payment?.button) {
+                console.error('Klarna.Payment.button is not available');
+                return;
+            }
+
             // Create button configuration with initiate callback
             const buttonConfig = {
                 initiate: async () => {
@@ -150,15 +173,17 @@
                     
                     try {
                         const resp = await fetch('/api/klarna/payment-request', {
-                            method: 'POST',
+                    method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
+                    body: JSON.stringify({
                                 currency: "EUR",
                                 amount: 1590
-                            })
-                        });
-                        
+                    })
+                });
+
                         if (!resp.ok) {
+                            const errorText = await resp.text();
+                            console.error('Server error response:', errorText);
                             throw new Error('Failed to create payment request');
                         }
                         
@@ -173,18 +198,25 @@
                 }
             };
 
-            console.log('Button configuration created');
+            console.log('Button configuration created:', buttonConfig);
 
-            // Mount the button
-            const buttonElement = document.getElementById('klarna-payment-button');
-            if (buttonElement) {
+            try {
                 const klarnaPaymentButton = Klarna.Payment.button(buttonConfig);
+                console.log('Button instance created:', klarnaPaymentButton);
                 klarnaPaymentButton.mount('#klarna-payment-button');
-                console.log('Klarna button mounted');
-            } else {
-                console.error('Button container not found');
+                console.log('Klarna button mounted successfully');
+            } catch (error) {
+                console.error('Error mounting button:', error);
             }
-        });
+        }
+
+        // Mount button when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener("DOMContentLoaded", mountKlarnaButton);
+        } else {
+            // DOM is already loaded
+            mountKlarnaButton();
+        }
 
         // Load commit hash for deployment tracking
         async function loadCommitHash() {
