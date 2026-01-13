@@ -387,8 +387,11 @@
             const buttonConfig = {
                 intents: ["PAY"],
                 initiationMode: "DEVICE_BEST", // SDK chooses the best method based on device
-                initiate: () => {
-                    console.log('Button initiate called - returning payment request configuration');
+                // According to Klarna WebSDK docs:
+                // initiate can return Promise<PaymentRequestData> for client-side payment request creation
+                // https://docs.klarna.com/websdk/v2/interfaces/payment.KlarnaPaymentButtonConfig.html#initiate
+                initiate: async () => {
+                    console.log('Button initiate called - returning PaymentRequestData');
                     console.log('Current origin:', window.location.origin);
                     
                     // Generate unique references
@@ -397,7 +400,9 @@
                     // Get return URL (use current origin)
                     const returnUrl = `${window.location.origin}/payment-success?payment_request_id={klarna.payment_request.id}&state={klarna.payment_request.state}&payment_token={klarna.payment_request.payment_token}`;
                     
-                    const paymentRequestConfig = {
+                    // PaymentRequestData structure according to Klarna WebSDK documentation
+                    // Returns Promise<PaymentRequestData> for client-side payment request creation
+                    const paymentRequestData = {
                         currency: "EUR",
                         amount: 1590,
                         paymentRequestReference: paymentRef,
@@ -412,9 +417,26 @@
                         }
                     };
                     
-                    console.log('📤 Returning payment request configuration to WebSDK:', JSON.stringify(paymentRequestConfig, null, 2));
+                    // Validate required PaymentRequestData fields
+                    const requiredFields = ['currency', 'amount', 'customerInteractionConfig'];
+                    const missingFields = requiredFields.filter(field => !paymentRequestData[field]);
                     
-                    return paymentRequestConfig;
+                    if (missingFields.length > 0) {
+                        console.error('❌ Missing required PaymentRequestData fields:', missingFields);
+                        throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
+                    }
+                    
+                    // Validate customerInteractionConfig has returnUrl
+                    if (!paymentRequestData.customerInteractionConfig?.returnUrl) {
+                        console.error('❌ Missing returnUrl in customerInteractionConfig');
+                        throw new Error('customerInteractionConfig.returnUrl is required');
+                    }
+                    
+                    console.log('📤 Returning Promise<PaymentRequestData> to WebSDK:', JSON.stringify(paymentRequestData, null, 2));
+                    console.log('✅ PaymentRequestData validation passed');
+                    
+                    // Return Promise<PaymentRequestData> as per WebSDK documentation
+                    return paymentRequestData;
                 }
             };
 
