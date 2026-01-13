@@ -209,9 +209,12 @@ const SECRET_KEY = process.env.PAYTRAIL_SECRET_KEY;
 
 // Klarna WebSDK configuration
 const KLARNA_WEBSDK_CLIENT_ID = process.env.KLARNA_WEBSDK_CLIENT_ID;
-const KLARNA_API_KEY = process.env.KLARNA_API_KEY; // API key for Basic Auth
+const KLARNA_API_KEY = process.env.KLARNA_API_KEY; // API key for Basic Auth (legacy)
 const KLARNA_PARTNER_ACCOUNT_ID = process.env.KLARNA_PARTNER_ACCOUNT_ID; // Partner account ID for API requests
 const KLARNA_API_URL = process.env.KLARNA_API_URL || 'https://api-global.test.klarna.com';
+// Klarna Basic Auth credentials for /v2/payment/requests endpoint
+const KLARNA_USERNAME = process.env.KLARNA_USERNAME;
+const KLARNA_PASSWORD = process.env.KLARNA_PASSWORD;
 
 // Validate required environment variables
 if (!MERCHANT_ID || !SECRET_KEY) {
@@ -583,13 +586,23 @@ app.post('/api/klarna/payment-request', async (req, res) => {
         console.log('📤 Sending to Klarna API:', JSON.stringify(payload, null, 2));
         console.log('📤 Return URL:', returnUrl);
 
-        // Create Basic Auth header using API key
-        // For Klarna API, the API key is used as the username with empty password
-        const auth = Buffer.from(`${KLARNA_API_KEY}:`).toString('base64');
+        // Validate username and password for Basic Auth
+        if (!KLARNA_USERNAME || !KLARNA_PASSWORD) {
+            console.error('❌ Klarna username and password not configured');
+            return res.status(500).json({
+                error: 'Klarna credentials not configured',
+                message: 'Please set KLARNA_USERNAME and KLARNA_PASSWORD environment variables',
+                timestamp: new Date().toISOString()
+            });
+        }
 
-        endpointUrl = `${KLARNA_API_URL}/v2/accounts/${KLARNA_PARTNER_ACCOUNT_ID}/payment/requests`;
+        // Create Basic Auth header using username and password
+        const auth = Buffer.from(`${KLARNA_USERNAME}:${KLARNA_PASSWORD}`).toString('base64');
+
+        // Use new endpoint without partner_account_id
+        endpointUrl = `${KLARNA_API_URL}/v2/payment/requests`;
         console.log('📤 Klarna API endpoint:', endpointUrl);
-        console.log('📤 Partner Account ID:', KLARNA_PARTNER_ACCOUNT_ID);
+        console.log('📤 Using username/password for Basic Auth');
         console.log('📤 API URL:', KLARNA_API_URL);
         console.log('📤 Payload:', JSON.stringify(payload, null, 2));
         console.log('📤 Auth header (first 20 chars):', auth.substring(0, 20) + '...');
