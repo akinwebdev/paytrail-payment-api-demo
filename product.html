@@ -262,20 +262,40 @@
             // Get client ID from server instead of sessionStorage
             let clientId;
             try {
+                // #region agent log
+                console.log('[DEBUG] Fetching Klarna config from /api/klarna/config');
+                // #endregion
                 const configResponse = await fetch('/api/klarna/config');
                 if (!configResponse.ok) {
-                    throw new Error(`Failed to fetch config: ${configResponse.status}`);
+                    const errorText = await configResponse.text();
+                    // #region agent log
+                    console.error('[DEBUG] Config fetch failed', { status: configResponse.status, statusText: configResponse.statusText, error: errorText });
+                    // #endregion
+                    throw new Error(`Failed to fetch config: ${configResponse.status} - ${errorText}`);
                 }
                 const config = await configResponse.json();
                 clientId = config.clientId;
+                // #region agent log
+                console.log('[DEBUG] Config fetched successfully', { hasClientId: !!clientId, clientIdLength: clientId?.length });
+                // #endregion
                 
                 // Store in sessionStorage for consistency with working example
                 if (clientId) {
                     sessionStorage.setItem("klarnaClientId", clientId);
+                } else {
+                    // #region agent log
+                    console.warn('[DEBUG] Client ID is empty in config response', { config });
+                    // #endregion
                 }
             } catch (error) {
+                // #region agent log
+                console.error('[DEBUG] Failed to fetch client ID from server', error);
+                // #endregion
                 console.error('Failed to fetch client ID:', error);
                 clientId = sessionStorage.getItem("klarnaClientId");
+                // #region agent log
+                console.log('[DEBUG] Fallback to sessionStorage', { hasClientId: !!clientId });
+                // #endregion
             }
 
             if (sdkState.klarna && clientId === sdkState.initializedClientId) {
@@ -292,23 +312,45 @@
             }
 
             try {
+                // #region agent log
+                console.log('[DEBUG] Loading Klarna SDK', { clientId: clientId ? `${clientId.substring(0, 10)}...` : 'MISSING', origin: window.location.origin });
+                // #endregion
                 const { KlarnaSDK } = await import(
                     "https://js.klarna.com/web-sdk/v2/klarna.mjs"
                 );
+                // #region agent log
+                console.log('[DEBUG] Klarna SDK module imported successfully');
+                // #endregion
 
+                // #region agent log
+                console.log('[DEBUG] Initializing KlarnaSDK with config', { clientId: clientId ? `${clientId.substring(0, 10)}...` : 'MISSING', locale: "en-FI" });
+                // #endregion
                 sdkState.klarna = await KlarnaSDK({
                     clientId: clientId,
                     locale: "en-FI",
                 });
+                // #region agent log
+                console.log('[DEBUG] KlarnaSDK initialized successfully', { hasKlarna: !!sdkState.klarna });
+                // #endregion
 
                 sdkState.initializedClientId = clientId;
                 window.Klarna = sdkState.klarna;
                 initializeKlarnaEvents(sdkState.klarna);
                 return sdkState.klarna;
             } catch (error) {
+                // #region agent log
+                console.error('[DEBUG] Failed to load Klarna SDK - Full error:', error);
+                console.error('[DEBUG] Error details:', {
+                    name: error.name,
+                    message: error.message,
+                    stack: error.stack,
+                    clientId: clientId ? `${clientId.substring(0, 10)}...` : 'MISSING',
+                    origin: window.location.origin
+                });
+                // #endregion
                 console.error("Failed to load Klarna SDK:", error);
                 alert(
-                    `Failed to load Klarna SDK. Please check the Client ID and that the domain ${window.location.origin} is whitelisted.`
+                    `Failed to load Klarna SDK. Error: ${error.message || error}. Please check the Client ID and that the domain ${window.location.origin} is whitelisted.`
                 );
                 return null;
             }
