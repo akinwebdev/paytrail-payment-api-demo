@@ -466,18 +466,14 @@
 
         async function initKlarnaButton() {
             // #region agent log
-            fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:396',message:'initKlarnaButton entry',data:{url:window.location.href},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'Q'})}).catch(()=>{});
+            console.log('[DEBUG] initKlarnaButton entry - server-side approach', { url: window.location.href });
+            fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:467',message:'initKlarnaButton entry',data:{url:window.location.href,approach:'server-side'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'Q'})}).catch(()=>{});
             // #endregion
-            const KlarnaInstance = await loadKlarnaSdk();
-            // #region agent log
-            fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:398',message:'After loadKlarnaSdk',data:{hasKlarnaInstance:!!KlarnaInstance},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'R'})}).catch(()=>{});
-            // #endregion
-            if (!KlarnaInstance) return;
 
             const buttonMountEl = document.getElementById("klarna-payment-button");
             if (!buttonMountEl) {
                 // #region agent log
-                fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:401',message:'Button mount element not found',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'S'})}).catch(()=>{});
+                fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:471',message:'Button mount element not found',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'S'})}).catch(()=>{});
                 // #endregion
                 return;
             }
@@ -490,92 +486,78 @@
             // Update price display
             document.getElementById('product-price').textContent = `€${productPrice.toFixed(2)}`;
             
-            // Clear loading state
-            buttonMountEl.innerHTML = '';
+            // Clear loading state and add a simple button
+            buttonMountEl.innerHTML = '<button id="klarna-pay-btn" style="width: 100%; padding: 1rem; background: #000; color: #fff; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer; font-family: inherit;">Pay with Klarna</button>';
             buttonMountEl.classList.remove('loading');
 
-            const normalizedPrice = Math.round(productPrice * 100);
-            // #region agent log
-            fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:463',message:'Price calculation',data:{productPrice:productPrice,normalizedPrice:normalizedPrice,isValid:normalizedPrice>0&&Number.isFinite(normalizedPrice)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'W'})}).catch(()=>{});
-            // #endregion
-
-            if (!normalizedPrice || normalizedPrice <= 0 || !Number.isFinite(normalizedPrice)) {
-                // #region agent log
-                fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:467',message:'Invalid price detected',data:{normalizedPrice:normalizedPrice},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'X'})}).catch(()=>{});
-                // #endregion
-                alert('Invalid product price. Please check the amount parameter.');
-                return;
-            }
-
-            checkoutState.baseAmount = normalizedPrice;
-            checkoutState.productLineItem = {
-                name: "Demo Product",
-                quantity: 1,
-                totalAmount: normalizedPrice,
-            };
-            checkoutState.shippingOptions = [];
-            checkoutState.selectedShippingOption = null;
-
-            // Construct return URL - must use the current domain (Vercel) which is whitelisted
-            // Klarna SDK requires the return URL to match the whitelisted domain
-            // Always use HTTPS for Klarna (required)
-            const returnUrlProtocol = 'https:';
-            const returnUrlHost = window.location.host; // Use current host (should be Vercel domain)
-            const returnUrl = `${returnUrlProtocol}//${returnUrlHost}/payment-success?id={klarna.paymentRequest.id}&token={klarna.paymentRequest.payment_token}`;
-            // #region agent log
-            fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:490',message:'Return URL constructed',data:{returnUrl:returnUrl,returnUrlHost:returnUrlHost,currentHost:window.location.host,currentProtocol:window.location.protocol,currentOrigin:window.location.origin},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
-            // #endregion
-
-            // Start with minimal config exactly like working example - use arrow function returning object directly
-            const buttonConfig = {
-                initiate: () => {
+            // Add click handler to create payment request server-side
+            const payButton = document.getElementById('klarna-pay-btn');
+            if (payButton) {
+                payButton.addEventListener('click', async () => {
                     // #region agent log
-                    console.log('[DEBUG] Button initiate called', { returnUrl, amount: 1590 });
-                    fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:531',message:'Button initiate called',data:{amount:1590,returnUrl:returnUrl},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'})}).catch(()=>{});
+                    console.log('[DEBUG] Klarna button clicked - creating payment request server-side');
+                    fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:click',message:'Button clicked - server-side',data:{amount:1590},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'Y'})}).catch(()=>{});
                     // #endregion
-                    // Return object directly like working example
-                    return {
-                        currency: "EUR",
-                        amount: 1590,
-                        collectCustomerProfile: ["profile:email", "profile:name", "profile:phone", "profile:billing_address"],
-                        customerInteractionConfig: {
-                            returnUrl: returnUrl,
-                        },
-                    };
-                },
-                initiationMode: "ON_PAGE",
-            };
-            
-            // Only add optional properties if needed (like working example does conditionally)
-            // Try without these first to match working example exactly
-            // buttonConfig.shape = "pill";
-            // buttonConfig.theme = "default";
-            // buttonConfig.locale = "en-FI";
-            // buttonConfig.intents = ["PAY"];
-
-            // #region agent log
-            console.log('[DEBUG] Mounting button', { 
-                buttonId: 'klarna-payment-button', 
-                hasKlarnaInstance: !!KlarnaInstance,
-                initiationMode: buttonConfig.initiationMode,
-                hasIntents: 'intents' in buttonConfig
-            });
-            fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:556',message:'Mounting button',data:{buttonId:'klarna-payment-button',hasKlarnaInstance:!!KlarnaInstance,initiationMode:buttonConfig.initiationMode},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
-            // #endregion
-            const button = KlarnaInstance.Payment.button(buttonConfig);
-            button.mount(`#klarna-payment-button`);
-            
-            // Add click listener to button container to track when button is clicked
-            setTimeout(() => {
-                const mountedButton = document.querySelector('#klarna-payment-button klarna-payment-button, #klarna-payment-button > *');
-                if (mountedButton) {
-                    mountedButton.addEventListener('click', () => {
+                    
+                    try {
+                        // Disable button during request
+                        payButton.disabled = true;
+                        payButton.textContent = 'Processing...';
+                        
+                        // Call server to create Klarna payment request
+                        const response = await fetch('/api/klarna/payment-request', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                amount: 1590,
+                                currency: 'EUR'
+                            })
+                        });
+                        
                         // #region agent log
-                        fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:click',message:'Button clicked',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'Y'})}).catch(()=>{});
+                        console.log('[DEBUG] Payment request response', { ok: response.ok, status: response.status });
+                        fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:payment-request',message:'Payment request response',data:{ok:response.ok,status:response.status},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'Z'})}).catch(()=>{});
                         // #endregion
-                    }, { once: true });
-                }
-            }, 1000);
+                        
+                        if (!response.ok) {
+                            const error = await response.json();
+                            throw new Error(error.message || 'Failed to create payment request');
+                        }
+                        
+                        const data = await response.json();
+                        // #region agent log
+                        console.log('[DEBUG] Payment request data', { paymentRequestId: data.paymentRequestId, hasRedirectUrl: !!data.redirectUrl, redirectUrl: data.redirectUrl });
+                        fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:payment-request-data',message:'Payment request data received',data:{paymentRequestId:data.paymentRequestId,hasRedirectUrl:!!data.redirectUrl,redirectUrl:data.redirectUrl},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'AA'})}).catch(()=>{});
+                        // #endregion
+                        
+                        // Store payment request ID for later use
+                        if (data.paymentRequestId) {
+                            sessionStorage.setItem('klarnaPaymentRequestId', data.paymentRequestId);
+                        }
+                        
+                        // Redirect to Klarna payment page
+                        if (data.redirectUrl) {
+                            // #region agent log
+                            console.log('[DEBUG] Redirecting to Klarna', { redirectUrl: data.redirectUrl });
+                            fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:redirect',message:'Redirecting to Klarna',data:{redirectUrl:data.redirectUrl},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'AB'})}).catch(()=>{});
+                            // #endregion
+                            window.location.href = data.redirectUrl;
+                        } else {
+                            throw new Error('No redirect URL received from server');
+                        }
+                    } catch (error) {
+                        // #region agent log
+                        console.error('[DEBUG] Error creating payment request', error);
+                        fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:error',message:'Error creating payment request',data:{error:error.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'AC'})}).catch(()=>{});
+                        // #endregion
+                        alert(`Error: ${error.message}`);
+                        payButton.disabled = false;
+                        payButton.textContent = 'Pay with Klarna';
+                    }
+                });
+            }
         }
 
         // Authorize payment with Paytrail using interoperability_token
