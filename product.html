@@ -116,20 +116,20 @@
                     <p>This is a demo product for testing Klarna Express Checkout integration. The product details and pricing can be customized as needed.</p>
                 </div>
                 <div style="margin-top: 1.5rem;">
-                    <label for="locale-select" style="display: block; margin-bottom: 0.5rem; color: #5A5A5A; font-size: 0.9rem;">Language:</label>
+                    <label for="locale-select" style="display: block; margin-bottom: 0.5rem; color: #5A5A5A; font-size: 0.9rem;">Locale:</label>
                     <select id="locale-select" style="padding: 0.5rem; border: 1px solid #E0E0E0; border-radius: 4px; font-size: 1rem; width: 100%; max-width: 200px; background: white; color: #0B051D;">
-                        <option value="en-GB" selected>English (UK)</option>
-                        <option value="en-US">English (US)</option>
-                        <option value="sv-SE">Swedish</option>
-                        <option value="no-NO">Norwegian</option>
-                        <option value="da-DK">Danish</option>
-                        <option value="fi-FI">Finnish</option>
-                        <option value="de-DE">German</option>
-                        <option value="nl-NL">Dutch</option>
-                        <option value="fr-FR">French</option>
-                        <option value="es-ES">Spanish</option>
-                        <option value="it-IT">Italian</option>
-                        <option value="pl-PL">Polish</option>
+                        <option value="en-GB" selected>en-GB</option>
+                        <option value="en-US">en-US</option>
+                        <option value="sv-SE">sv-SE</option>
+                        <option value="no-NO">no-NO</option>
+                        <option value="da-DK">da-DK</option>
+                        <option value="fi-FI">fi-FI</option>
+                        <option value="de-DE">de-DE</option>
+                        <option value="nl-NL">nl-NL</option>
+                        <option value="fr-FR">fr-FR</option>
+                        <option value="es-ES">es-ES</option>
+                        <option value="it-IT">it-IT</option>
+                        <option value="pl-PL">pl-PL</option>
                     </select>
                 </div>
                 <div id="klarna-payment-button" style="margin-top: 1.5rem;"></div>
@@ -170,19 +170,19 @@
             }
 
             // Get Klarna Client ID from server
-            const configResponse = await fetch('/api/klarna/config');
-            if (!configResponse.ok) {
+                const configResponse = await fetch('/api/klarna/config');
+                if (!configResponse.ok) {
                 console.error('Failed to fetch Klarna config:', configResponse.status);
                 throw new Error('Failed to fetch Klarna configuration');
-            }
-            const config = await configResponse.json();
+                }
+                const config = await configResponse.json();
             const clientId = config.clientId;
 
             // Initialize Klarna WebSDK
             const { KlarnaSDK } = await import("https://js.klarna.com/web-sdk/v2/klarna.mjs");
 
             Klarna = await KlarnaSDK({ 
-                clientId: clientId,
+                    clientId: clientId,
                 products: ["PAYMENT"], // Ensure products are properly specified for best performance
                 locale: locale,
             });
