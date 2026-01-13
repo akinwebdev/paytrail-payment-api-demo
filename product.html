@@ -181,9 +181,13 @@
                 buttonContainer.innerHTML = '';
                 buttonContainer.classList.remove('loading');
                 
-                // Step 1: Import Library - Use the correct import pattern from Klarna docs
-                console.log('Step 1: Importing Klarna SDK from: https://js.klarna.com/web-sdk/v2/klarna.mjs');
-                const { KlarnaSDK } = await import('https://js.klarna.com/web-sdk/v2/klarna.mjs');
+                // Step 1: Import Library - Using playground SDK for playground client ID
+                // Note: Must match the environment of your client ID:
+                // - Production: https://js.klarna.com/web-sdk/v2/klarna.mjs
+                // - Playground/Test: https://js.playground.klarna.com/web-sdk/v2/klarna.mjs
+                const sdkUrl = 'https://js.playground.klarna.com/web-sdk/v2/klarna.mjs';
+                console.log('Step 1: Importing Klarna SDK from (PLAYGROUND):', sdkUrl);
+                const { KlarnaSDK } = await import(sdkUrl);
                 
                 // Initialize Klarna SDK with clientId (no products parameter - matches working example)
                 console.log('🔑 Initializing Klarna SDK with clientId:', klarnaClientId);
