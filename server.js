@@ -207,6 +207,10 @@ const PAYTRAIL_API_URL = process.env.PAYTRAIL_API_URL || 'https://services.paytr
 const MERCHANT_ID = process.env.PAYTRAIL_MERCHANT_ID;
 const SECRET_KEY = process.env.PAYTRAIL_SECRET_KEY;
 
+// Klarna API configuration
+const KLARNA_API_KEY = process.env.KLARNA_API_KEY;
+const KLARNA_BASE_URL = process.env.KLARNA_BASE_URL || 'https://api-global.test.klarna.com';
+
 
 // Validate required environment variables
 if (!MERCHANT_ID || !SECRET_KEY) {
@@ -478,6 +482,78 @@ app.get('/api/klarna/config', (req, res) => {
             error: 'Failed to get Klarna configuration',
             message: error.message,
             timestamp: new Date().toISOString()
+        });
+    }
+});
+
+// Helper function to create Klarna payment request
+async function createKlarnaPaymentRequest(data, req) {
+    const axios = require('axios');
+    const crypto = require('crypto');
+        
+        if (!KLARNA_API_KEY) {
+        throw new Error('KLARNA_API_KEY environment variable is not set');
+    }
+    
+    const url = `${KLARNA_BASE_URL}/v2/payment/requests`;
+    
+    // Get the base URL for return_url from request headers or environment
+    const protocol = 'https'; // Klarna requires HTTPS
+    const host = req?.get('x-forwarded-host') || req?.get('host') || process.env.VERCEL_URL || 'paytrail-payment-api-demo.vercel.app';
+    const returnUrl = `https://${host}/payment-success?payment_request_id={klarna.payment_request.id}&state={klarna.payment_request.state}&payment_token={klarna.payment_request.payment_token}`;
+    
+    const payload = {
+        currency: data.currency || "EUR",
+        amount: data.amount || 1590,
+        payment_request_reference: `pay-ref-${crypto.randomUUID()}`,
+        supplementary_purchase_data: {
+            purchase_reference: `pay-ref-${crypto.randomUUID()}`,
+            line_items: [],
+            shipping: [],
+            customer: {},
+        },
+            customer_interaction_config: {
+            return_url: returnUrl,
+        },
+    };
+
+    // Merge any additional data from frontend (but don't override currency/amount if provided)
+    if (data) {
+        if (data.currency) payload.currency = data.currency;
+        if (data.amount) payload.amount = data.amount;
+    }
+
+    console.log('📤 Creating Klarna payment request:', JSON.stringify(payload, null, 2));
+
+    const response = await axios.post(url, payload, {
+                headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${KLARNA_API_KEY}`,
+        },
+    });
+
+    return response.data;
+}
+
+// POST /api/klarna/payment-request - Create Klarna payment request
+app.post('/api/klarna/payment-request', async (req, res) => {
+    try {
+        console.log('🔄 Creating Klarna payment request...');
+        console.log('Request body:', JSON.stringify(req.body, null, 2));
+        
+        const klarnaResp = await createKlarnaPaymentRequest(req.body, req);
+
+        console.log('✅ Klarna payment request created:', klarnaResp.payment_request_id);
+        
+        res.json({
+            paymentRequestId: klarnaResp.payment_request_id,
+        });
+    } catch (err) {
+        console.error('❌ Klarna payment request error:', err.response ? err.response.data : err.message);
+        res.status(500).json({
+            error: 'Failed to create payment request',
+            details: err.response ? err.response.data : err.message,
         });
     }
 });

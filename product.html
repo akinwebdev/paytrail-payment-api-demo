@@ -143,18 +143,43 @@
 
         // Wait for DOM to be ready before mounting button
         document.addEventListener("DOMContentLoaded", () => {
-            // Create button configuration object
+            // Create button configuration with initiate callback
             const buttonConfig = {
-                currency: "EUR",
-                amount: 1590
+                initiate: async () => {
+                    console.log('Button initiate called - creating payment request server-side');
+                    
+                    try {
+                        const resp = await fetch('/api/klarna/payment-request', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                currency: "EUR",
+                                amount: 1590
+                            })
+                        });
+                        
+                        if (!resp.ok) {
+                            throw new Error('Failed to create payment request');
+                        }
+                        
+                        const data = await resp.json();
+                        console.log('Payment request created:', data.paymentRequestId);
+                        
+                        return { paymentRequestId: data.paymentRequestId };
+                    } catch (error) {
+                        console.error('Error creating payment request:', error);
+                        throw error;
+                    }
+                }
             };
 
-            console.log('Button configuration:', buttonConfig);
+            console.log('Button configuration created');
 
             // Mount the button
             const buttonElement = document.getElementById('klarna-payment-button');
             if (buttonElement) {
-                Klarna.Payment.button(buttonConfig).mount('#klarna-payment-button');
+                const klarnaPaymentButton = Klarna.Payment.button(buttonConfig);
+                klarnaPaymentButton.mount('#klarna-payment-button');
                 console.log('Klarna button mounted');
             } else {
                 console.error('Button container not found');
