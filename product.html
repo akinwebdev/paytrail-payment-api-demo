@@ -136,35 +136,6 @@
                 <div class="product-description">
                     <p>This is a demo product for testing Klarna Express Checkout integration. The product details and pricing can be customized as needed.</p>
                 </div>
-                <div style="margin-top: 1.5rem; margin-bottom: 1rem;">
-                    <label for="payment-request-id-input" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #0B051D;">
-                        Payment Request ID (optional - for testing):
-                    </label>
-                    <input 
-                        type="text" 
-                        id="payment-request-id-input" 
-                        placeholder="Enter payment request ID to use existing request"
-                        style="width: 100%; padding: 0.75rem; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 0.875rem; font-family: 'Klarna Text', -apple-system, BlinkMacSystemFont, sans-serif;"
-                    />
-                    <p style="margin-top: 0.5rem; font-size: 0.75rem; color: #6B7280;">
-                        Leave empty to create a new payment request
-                    </p>
-                    <div style="margin-top: 0.5rem; display: flex; gap: 0.5rem;">
-                        <button 
-                            id="test-initiate-btn" 
-                            style="padding: 0.5rem 1rem; background: #FF6B9D; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.875rem;"
-                        >
-                            🧪 Test Initiate Callback
-                        </button>
-                        <button 
-                            id="create-payment-request-btn" 
-                            style="padding: 0.5rem 1rem; background: #4A90E2; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.875rem;"
-                        >
-                            🔧 Create Payment Request
-                        </button>
-                    </div>
-                    <div id="payment-request-result" style="margin-top: 0.5rem; padding: 0.75rem; background: #F3F4F6; border-radius: 6px; font-size: 0.75rem; font-family: monospace; display: none; max-height: 200px; overflow-y: auto;"></div>
-                </div>
                 <div id="klarna-payment-button" class="loading" style="margin-top: 1.5rem;">
                     Loading Klarna payment button...
                 </div>
@@ -232,113 +203,41 @@
                 // Step 2: Display the Klarna payment button
                 console.log('Step 2: Creating Klarna payment button...');
                 
-                // Step 3: Implement initiate callback (server-side approach - recommended)
-                // Following the reference implementation pattern
-                // Store initiate callback globally so we can test it
-                const initiateCallback = async () => {
-                        console.log('🔄🔄🔄 INITIATE CALLBACK EXECUTED! 🔄🔄🔄');
-                        
-                        // Check if user provided a payment request ID
-                        const paymentRequestIdInput = document.getElementById('payment-request-id-input');
-                        const manualPaymentRequestId = paymentRequestIdInput?.value?.trim();
-                        
-                        if (manualPaymentRequestId) {
-                            console.log('✅ Using manually provided payment request ID:', manualPaymentRequestId);
-                            return { paymentRequestId: manualPaymentRequestId };
+                // Step 3: Implement initiate callback (client-side approach - alternative method)
+                // Return payment request payload directly from client
+                // Reference: https://docs.klarna.com/websdk/v2/modules.html
+                const initiateCallback = () => {
+                    console.log('🔄 INITIATE CALLBACK EXECUTED - Returning payment request payload (client-side)');
+                    
+                    // Generate payment request reference
+                    const paymentRequestReference = `pay-ref-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+                    
+                    // Construct return URL with placeholders for Klarna to populate
+                    const protocol = window.location.protocol;
+                    const host = window.location.host;
+                    const returnUrl = `${protocol}//${host}/payment-success?payment_request_id={klarna.payment_request.id}&state={klarna.payment_request.state}&payment_token={klarna.payment_request.payment_token}&payment_request_reference={klarna.payment_request.payment_request_reference}&klarna-network-session-token={klarna.network_session_token}&interoperability_token={klarna.payment_request.interoperability_token}`;
+                    
+                    // Return payment request payload directly (client-side approach)
+                    // Following Klarna Web SDK v2 guidelines
+                    const payload = {
+                        currency: "EUR",
+                        amount: Math.round(productPrice * 100), // Convert to cents
+                        paymentRequestReference: paymentRequestReference,
+                        supplementaryPurchaseData: {
+                            purchaseReference: paymentRequestReference,
+                            lineItems: [],
+                            shipping: [],
+                            customer: {}
+                        },
+                        customerInteractionConfig: {
+                            returnUrl: returnUrl
                         }
-                        
-                        console.log('🔄 Step 3: Creating payment request (server-side)...');
-                        
-                        // Collect data to send to server
-                        const postData = {
-                            amount: Math.round(productPrice * 100), // Convert to cents
-                            currency: 'EUR'
-                        };
-                        
-                        console.log('Sending to server:', postData);
-                        console.log('Request URL:', window.location.origin + '/api/klarna/payment-request');
-                        
-                        // Create payment request on server side (recommended approach)
-                        // Add timeout to prevent hanging
-                        const controller = new AbortController();
-                        const timeoutId = setTimeout(() => {
-                            controller.abort();
-                            console.error('❌ Fetch request timed out after 35 seconds');
-                        }, 35000);
-                        
-                        let resp;
-                        try {
-                            resp = await fetch('/api/klarna/payment-request', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify(postData),
-                                signal: controller.signal
-                            });
-                            clearTimeout(timeoutId);
-                            console.log('✅ Fetch request completed, status:', resp.status);
-                        } catch (fetchError) {
-                            clearTimeout(timeoutId);
-                            console.error('❌ Fetch request failed:', fetchError);
-                            if (fetchError.name === 'AbortError') {
-                                throw new Error('Request timed out - server is not responding');
-                            }
-                            throw fetchError;
-                        }
-                        
-                        console.log('Response received, status:', resp.status);
-                        
-                        if (!resp.ok) {
-                            const errorText = await resp.text();
-                            console.error('❌ Payment request failed - Status:', resp.status);
-                            console.error('❌ Error response text:', errorText);
-                            try {
-                                const errorData = JSON.parse(errorText);
-                                throw new Error(errorData.message || errorData.error || 'Failed to create payment request');
-                            } catch (parseError) {
-                                throw new Error(`Failed to create payment request: ${errorText}`);
-                            }
-                        }
-                        
-                        const data = await resp.json();
-                        console.log('✅ Payment request created:', data);
-                        console.log('✅ Full response data:', JSON.stringify(data, null, 2));
-                        console.log('✅ Response keys:', Object.keys(data));
-                        console.log('✅ paymentRequestId value:', data.paymentRequestId);
-                        console.log('✅ payment_request_id value:', data.payment_request_id);
-                        console.log('✅ redirectUrl value:', data.redirectUrl);
-                        
-                        // Check both camelCase and snake_case
-                        const paymentRequestId = data.paymentRequestId || data.payment_request_id;
-                        const redirectUrl = data.redirectUrl;
-                        
-                        if (!paymentRequestId) {
-                            console.error('❌ Payment request ID missing from response');
-                            console.error('Response data structure:', data);
-                            throw new Error('Payment request ID not returned from server');
-                        }
-                        
-                        console.log('✅ Found payment request ID:', paymentRequestId);
-                        
-                        // If we have a redirect URL, redirect directly instead of using SDK popup
-                        // This avoids the "Popup is closed" error with HANDOVER method
-                        if (redirectUrl) {
-                            console.log('✅ Found redirect URL, redirecting directly:', redirectUrl);
-                            console.log('🔄 Redirecting to Klarna payment page...');
-                            // Redirect in the next tick to allow the initiate callback to complete
-                            setTimeout(() => {
-                                window.location.href = redirectUrl;
-                            }, 100);
-                            // Still return the paymentRequestId for SDK compatibility
-                            return { paymentRequestId: paymentRequestId };
-                        }
-                        
-                        // If no redirect URL, return payment request ID to Klarna SDK
-                        console.log('⚠️ No redirect URL found, using SDK to handle payment');
-                        return { paymentRequestId: paymentRequestId };
                     };
+                    
+                    console.log('✅ Returning payment request payload:', payload);
+                    return payload;
+                };
                 
-                // Store globally for testing
-                window.klarnaInitiateCallback = initiateCallback;
                 
                 const klarnaPaymentButton = klarna.Payment.button({
                     id: "klarna-payment-button",
@@ -409,88 +308,6 @@
                 
                 console.log('✅ Klarna payment button setup complete');
                 
-                // Add test button listener
-                const testInitiateBtn = document.getElementById('test-initiate-btn');
-                if (testInitiateBtn) {
-                    testInitiateBtn.addEventListener('click', async () => {
-                        console.log('🧪 TEST: Manually triggering initiate callback...');
-                        try {
-                            const result = await window.klarnaInitiateCallback();
-                            console.log('🧪 TEST: Initiate callback result:', result);
-                            alert(`Initiate callback executed successfully!\nResult: ${JSON.stringify(result, null, 2)}`);
-                        } catch (error) {
-                            console.error('🧪 TEST: Initiate callback error:', error);
-                            alert(`Initiate callback failed: ${error.message}`);
-                        }
-                    });
-                }
-                
-                // Add "Create Payment Request" button listener
-                const createPaymentRequestBtn = document.getElementById('create-payment-request-btn');
-                const paymentRequestResult = document.getElementById('payment-request-result');
-                if (createPaymentRequestBtn) {
-                    createPaymentRequestBtn.addEventListener('click', async () => {
-                        console.log('🔧 TEST: Creating payment request directly...');
-                        createPaymentRequestBtn.disabled = true;
-                        createPaymentRequestBtn.textContent = '⏳ Creating...';
-                        paymentRequestResult.style.display = 'none';
-                        
-                        try {
-                            const postData = {
-                                amount: Math.round(productPrice * 100), // Convert to cents
-                                currency: 'EUR'
-                            };
-                            
-                            console.log('Sending to server:', postData);
-                            
-                            const controller = new AbortController();
-                            const timeoutId = setTimeout(() => {
-                                controller.abort();
-                            }, 35000);
-                            
-                            const resp = await fetch('/api/klarna/payment-request', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify(postData),
-                                signal: controller.signal
-                            });
-                            
-                            clearTimeout(timeoutId);
-                            
-                            const data = await resp.json();
-                            
-                            if (resp.ok) {
-                                console.log('✅ Payment request created:', data);
-                                paymentRequestResult.style.display = 'block';
-                                paymentRequestResult.style.background = '#D1FAE5';
-                                paymentRequestResult.style.border = '1px solid #10B981';
-                                paymentRequestResult.textContent = `✅ Success!\n\nPayment Request ID:\n${data.paymentRequestId || data.payment_request_id || 'N/A'}\n\nFull Response:\n${JSON.stringify(data, null, 2)}`;
-                                
-                                // Auto-fill the input field with the payment request ID
-                                const paymentRequestIdInput = document.getElementById('payment-request-id-input');
-                                if (paymentRequestIdInput && (data.paymentRequestId || data.payment_request_id)) {
-                                    paymentRequestIdInput.value = data.paymentRequestId || data.payment_request_id;
-                                }
-                            } else {
-                                console.error('❌ Payment request failed:', data);
-                                paymentRequestResult.style.display = 'block';
-                                paymentRequestResult.style.background = '#FEE2E2';
-                                paymentRequestResult.style.border = '1px solid #EF4444';
-                                paymentRequestResult.textContent = `❌ Error (${resp.status}):\n\n${JSON.stringify(data, null, 2)}`;
-                            }
-                        } catch (error) {
-                            console.error('❌ Error creating payment request:', error);
-                            paymentRequestResult.style.display = 'block';
-                            paymentRequestResult.style.background = '#FEE2E2';
-                            paymentRequestResult.style.border = '1px solid #EF4444';
-                            paymentRequestResult.textContent = `❌ Error:\n\n${error.message}`;
-                        } finally {
-                            createPaymentRequestBtn.disabled = false;
-                            createPaymentRequestBtn.textContent = '🔧 Create Payment Request';
-                        }
-                    });
-                }
-
                 // Listen for payment events
                 klarna.Payment.on('complete', async (paymentRequest) => {
                     console.log('✅ Payment complete event received:', paymentRequest);
