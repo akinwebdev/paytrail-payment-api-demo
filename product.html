@@ -115,6 +115,23 @@
                 <div class="product-description">
                     <p>This is a demo product for testing Klarna Express Checkout integration. The product details and pricing can be customized as needed.</p>
                 </div>
+                <div style="margin-top: 1.5rem;">
+                    <label for="locale-select" style="display: block; margin-bottom: 0.5rem; color: #5A5A5A; font-size: 0.9rem;">Language:</label>
+                    <select id="locale-select" style="padding: 0.5rem; border: 1px solid #E0E0E0; border-radius: 4px; font-size: 1rem; width: 100%; max-width: 200px; background: white; color: #0B051D;">
+                        <option value="en-GB" selected>English (UK)</option>
+                        <option value="en-US">English (US)</option>
+                        <option value="sv-SE">Swedish</option>
+                        <option value="no-NO">Norwegian</option>
+                        <option value="da-DK">Danish</option>
+                        <option value="fi-FI">Finnish</option>
+                        <option value="de-DE">German</option>
+                        <option value="nl-NL">Dutch</option>
+                        <option value="fr-FR">French</option>
+                        <option value="es-ES">Spanish</option>
+                        <option value="it-IT">Italian</option>
+                        <option value="pl-PL">Polish</option>
+                    </select>
+                </div>
                 <div id="klarna-payment-button" style="margin-top: 1.5rem;"></div>
             </div>
         </div>
@@ -125,26 +142,41 @@
     </div>
 
     <script type="module">
-        // Get Klarna Client ID from server
-                const configResponse = await fetch('/api/klarna/config');
-                if (!configResponse.ok) {
-            console.error('Failed to fetch Klarna config:', configResponse.status);
-            throw new Error('Failed to fetch Klarna configuration');
-                }
-                const config = await configResponse.json();
-        const clientId = config.clientId;
+        let Klarna = null;
+        let currentLocale = 'en-GB';
 
-        // Initialize Klarna WebSDK
-        const { KlarnaSDK } = await import("https://js.klarna.com/web-sdk/v2/klarna.mjs");
+        // Function to get selected locale
+        function getSelectedLocale() {
+            const select = document.getElementById('locale-select');
+            return select ? select.value : 'en-GB';
+        }
 
-        const Klarna = await KlarnaSDK({ 
-            clientId: clientId,
-            products: ["PAYMENT"],
-            locale: "en-GB",
-        });
+        // Function to initialize Klarna SDK with locale
+        async function initializeKlarnaSDK(locale) {
+            // Get Klarna Client ID from server
+            const configResponse = await fetch('/api/klarna/config');
+            if (!configResponse.ok) {
+                console.error('Failed to fetch Klarna config:', configResponse.status);
+                throw new Error('Failed to fetch Klarna configuration');
+            }
+            const config = await configResponse.json();
+            const clientId = config.clientId;
 
-        // Klarna SDK ready to be utilized
-        console.log('Klarna SDK initialized:', Klarna);
+            // Initialize Klarna WebSDK
+            const { KlarnaSDK } = await import("https://js.klarna.com/web-sdk/v2/klarna.mjs");
+
+            Klarna = await KlarnaSDK({ 
+                clientId: clientId,
+                products: ["PAYMENT"],
+                locale: locale,
+            });
+
+            console.log('Klarna SDK initialized with locale:', locale);
+            return Klarna;
+        }
+
+        // Initialize with default locale
+        await initializeKlarnaSDK(currentLocale);
 
         // Function to mount the button
         function mountKlarnaButton() {
@@ -214,10 +246,56 @@
 
         // Mount button when DOM is ready
         if (document.readyState === 'loading') {
-            document.addEventListener("DOMContentLoaded", mountKlarnaButton);
+            document.addEventListener("DOMContentLoaded", () => {
+                mountKlarnaButton();
+                
+                // Add locale change handler
+                const localeSelect = document.getElementById('locale-select');
+                if (localeSelect) {
+                    localeSelect.addEventListener('change', async (e) => {
+                        const newLocale = e.target.value;
+                        console.log('Locale changed to:', newLocale);
+                        
+                        // Clear existing button
+                        const buttonContainer = document.getElementById('klarna-payment-button');
+                        if (buttonContainer) {
+                            buttonContainer.innerHTML = '';
+                        }
+                        
+                        // Reinitialize SDK with new locale
+                        currentLocale = newLocale;
+                        await initializeKlarnaSDK(newLocale);
+                        
+                        // Remount button with new locale
+                        mountKlarnaButton();
+                    });
+                }
+            });
         } else {
             // DOM is already loaded
             mountKlarnaButton();
+            
+            // Add locale change handler
+            const localeSelect = document.getElementById('locale-select');
+            if (localeSelect) {
+                localeSelect.addEventListener('change', async (e) => {
+                    const newLocale = e.target.value;
+                    console.log('Locale changed to:', newLocale);
+                    
+                    // Clear existing button
+                    const buttonContainer = document.getElementById('klarna-payment-button');
+                    if (buttonContainer) {
+                        buttonContainer.innerHTML = '';
+                    }
+                    
+                    // Reinitialize SDK with new locale
+                    currentLocale = newLocale;
+                    await initializeKlarnaSDK(newLocale);
+                    
+                    // Remount button with new locale
+                    mountKlarnaButton();
+                });
+            }
         }
 
         // Load commit hash for deployment tracking
