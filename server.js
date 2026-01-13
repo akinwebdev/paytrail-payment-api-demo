@@ -467,26 +467,37 @@ app.get('/api/merchants/grouped-payment-providers', async (req, res) => {
 // GET /api/klarna/config - Return Klarna WebSDK configuration
 app.get('/api/klarna/config', (req, res) => {
     try {
-        console.log('🔍 Klarna config request - CLIENT_ID present:', !!KLARNA_WEBSDK_CLIENT_ID);
+        const hasClientId = !!KLARNA_WEBSDK_CLIENT_ID;
+        const clientIdLength = KLARNA_WEBSDK_CLIENT_ID ? KLARNA_WEBSDK_CLIENT_ID.length : 0;
+        const clientIdPreview = KLARNA_WEBSDK_CLIENT_ID ? `${KLARNA_WEBSDK_CLIENT_ID.substring(0, 10)}...` : 'MISSING';
+        
+        console.log('🔍 Klarna config request received');
+        console.log('🔍 CLIENT_ID present:', hasClientId);
+        console.log('🔍 CLIENT_ID length:', clientIdLength);
+        console.log('🔍 CLIENT_ID preview:', clientIdPreview);
         console.log('🔍 Environment check:', {
             hasClientId: !!process.env.KLARNA_WEBSDK_CLIENT_ID,
-            hasApiKey: !!process.env.KLARNA_API_KEY
+            hasApiKey: !!process.env.KLARNA_API_KEY,
+            envVarNames: Object.keys(process.env).filter(key => key.includes('KLARNA'))
         });
         
         if (!KLARNA_WEBSDK_CLIENT_ID) {
             console.error('❌ Klarna WebSDK Client ID not configured in environment variables');
+            console.error('❌ Available env vars with KLARNA:', Object.keys(process.env).filter(key => key.includes('KLARNA')));
             return res.status(500).json({
                 error: 'Klarna WebSDK Client ID not configured',
-                message: 'Please set KLARNA_WEBSDK_CLIENT_ID environment variable',
+                message: 'Please set KLARNA_WEBSDK_CLIENT_ID environment variable in Vercel',
                 timestamp: new Date().toISOString()
             });
         }
         
+        console.log('✅ Returning Klarna Client ID to frontend');
         res.json({
             clientId: KLARNA_WEBSDK_CLIENT_ID
         });
     } catch (error) {
         console.error('❌ Error getting Klarna config:', error.message);
+        console.error('❌ Error stack:', error.stack);
         res.status(500).json({
             error: 'Failed to get Klarna configuration',
             message: error.message,
@@ -766,27 +777,23 @@ app.get('/api/klarna/payment-request/:paymentRequestId', async (req, res) => {
         const { paymentRequestId } = req.params;
         console.log('🔍 Fetching Klarna payment request:', paymentRequestId);
         
-        if (!KLARNA_API_KEY) {
+        // Validate username and password for Basic Auth
+        if (!KLARNA_USERNAME || !KLARNA_PASSWORD) {
             return res.status(500).json({
-                error: 'Klarna API key not configured',
-                message: 'Please set KLARNA_API_KEY environment variable',
-                timestamp: new Date().toISOString()
-            });
-        }
-
-        if (!KLARNA_PARTNER_ACCOUNT_ID) {
-            return res.status(500).json({
-                error: 'Klarna Partner Account ID not configured',
-                message: 'Please set KLARNA_PARTNER_ACCOUNT_ID environment variable',
+                error: 'Klarna credentials not configured',
+                message: 'Please set KLARNA_USERNAME and KLARNA_PASSWORD environment variables',
                 timestamp: new Date().toISOString()
             });
         }
 
         const axios = require('axios');
-        const auth = Buffer.from(`${KLARNA_API_KEY}:`).toString('base64');
-        const endpointUrl = `${KLARNA_API_URL}/v2/accounts/${KLARNA_PARTNER_ACCOUNT_ID}/payment/requests/${paymentRequestId}`;
+        // Create Basic Auth header using username and password
+        const auth = Buffer.from(`${KLARNA_USERNAME}:${KLARNA_PASSWORD}`).toString('base64');
+        // Use new endpoint without partner_account_id
+        const endpointUrl = `${KLARNA_API_URL}/v2/payment/requests/${paymentRequestId}`;
         
         console.log('📤 Fetching from Klarna API:', endpointUrl);
+        console.log('📤 Using username/password for Basic Auth');
 
         const response = await axios({
             method: 'GET',
