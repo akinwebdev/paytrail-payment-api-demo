@@ -123,6 +123,13 @@
                         placeholder="Enter your Klarna Client ID"
                         style="padding: 0.5rem; border: 1px solid #E0E0E0; border-radius: 4px; font-size: 0.9rem; width: 100%; max-width: 600px; background: white; color: #0B051D; font-family: 'Klarna Mono', monospace;"
                     />
+                    <label for="api-key-input" style="display: block; margin-top: 1rem; margin-bottom: 0.5rem; color: #5A5A5A; font-size: 0.9rem; font-weight: 600;">Klarna API Key:</label>
+                    <input 
+                        type="password" 
+                        id="api-key-input" 
+                        placeholder="Enter your Klarna API Key"
+                        style="padding: 0.5rem; border: 1px solid #E0E0E0; border-radius: 4px; font-size: 0.9rem; width: 100%; max-width: 600px; background: white; color: #0B051D; font-family: 'Klarna Mono', monospace;"
+                    />
                     <button 
                         id="init-sdk-button" 
                         style="margin-top: 0.5rem; padding: 0.5rem 1rem; background-color: #0B051D; color: white; border: none; border-radius: 4px; font-size: 0.9rem; cursor: pointer; font-weight: 500;"
@@ -175,6 +182,9 @@
         let currentLocale = 'en-GB';
         let currentClientId = null;
 
+        // Klarna API endpoint
+        const KLARNA_API_ENDPOINT = 'https://api-global.test.klarna.com/v2/payment/requests';
+
         // Function to get selected locale
         function getSelectedLocale() {
             const select = document.getElementById('locale-select');
@@ -189,6 +199,16 @@
             }
             // Fallback to stored client ID
             return sessionStorage.getItem('klarnaClientId') || null;
+        }
+
+        // Function to get API key from input or storage
+        function getApiKey() {
+            const input = document.getElementById('api-key-input');
+            if (input && input.value.trim()) {
+                return input.value.trim();
+            }
+            // Fallback to stored API key
+            return sessionStorage.getItem('klarnaApiKey') || null;
         }
 
         // Function to update SDK status message
@@ -247,6 +267,12 @@
                 
                 // Store client ID in sessionStorage
                 sessionStorage.setItem('klarnaClientId', clientId);
+                
+                // Also store API key if provided
+                const apiKey = getApiKey();
+                if (apiKey) {
+                    sessionStorage.setItem('klarnaApiKey', apiKey);
+                }
 
                 console.log('✅ Klarna SDK initialized with locale:', locale);
                 console.log('✅ Products specified:', ["PAYMENT", "MESSAGING"]);
@@ -275,12 +301,20 @@
             }
         }
 
-        // Load stored client ID
+        // Load stored client ID and API key
         const storedClientId = sessionStorage.getItem('klarnaClientId');
         if (storedClientId) {
             const clientIdInput = document.getElementById('client-id-input');
             if (clientIdInput) {
                 clientIdInput.value = storedClientId;
+            }
+        }
+        
+        const storedApiKey = sessionStorage.getItem('klarnaApiKey');
+        if (storedApiKey) {
+            const apiKeyInput = document.getElementById('api-key-input');
+            if (apiKeyInput) {
+                apiKeyInput.value = storedApiKey;
             }
         }
 
@@ -386,21 +420,58 @@
                 intents: ["PAY"], // Fix the intents warning
                 initiationMode: "ON_PAGE", // Keep payment flow on-page, not in new tab
                 initiate: async () => {
-                    console.log('Button initiate called - creating payment request server-side');
+                    console.log('Button initiate called - creating payment request');
                     console.log('Current origin:', window.location.origin);
                     
+                    // Get API key from input or storage
+                    const apiKey = getApiKey();
+                    
+                    if (!apiKey) {
+                        const errorMsg = 'Klarna API key is not configured. Please enter your API key in the input field.';
+                        console.error('❌', errorMsg);
+                        updateSDKStatus('⚠️ Please enter Klarna API Key', true);
+                        throw new Error(errorMsg);
+                    }
+                    
+                    // Use direct Klarna API call if API key is provided
                     try {
-                        const resp = await fetch('/api/klarna/payment-request', {
-                            method: 'POST',
-                            headers: { 
-                                'Content-Type': 'application/json',
-                                'Accept': 'application/json'
+                        // Create Basic Auth header
+                        const auth = btoa(`${apiKey}:`);
+                        
+                        // Generate unique references
+                        const paymentRef = `pay-ref-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+                        const purchaseRef = `purchase-ref-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+                        
+                        // Get return URL (use current origin)
+                        const returnUrl = `${window.location.origin}/payment-success?payment_request_id={klarna.payment_request.id}&state={klarna.payment_request.state}&payment_token={klarna.payment_request.payment_token}`;
+                        
+                        // Prepare payload matching Klarna API requirements
+                        const payload = {
+                            currency: "EUR",
+                            amount: 1590,
+                            payment_request_reference: paymentRef,
+                            supplementary_purchase_data: {
+                                purchase_reference: purchaseRef,
+                                line_items: [],
+                                shipping: [],
+                                customer: {},
                             },
-                            credentials: 'same-origin', // Include credentials for same-origin requests
-                            body: JSON.stringify({
-                                currency: "EUR",
-                                amount: 1590
-                            })
+                            customer_interaction_config: {
+                                return_url: returnUrl,
+                            },
+                        };
+                        
+                        console.log('📤 Calling Klarna API directly:', KLARNA_API_ENDPOINT);
+                        console.log('📤 Request payload:', JSON.stringify(payload, null, 2));
+                        
+                        const resp = await fetch(KLARNA_API_ENDPOINT, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'Authorization': `Basic ${auth}`
+                            },
+                            body: JSON.stringify(payload)
                         });
 
                         console.log('Response status:', resp.status);
@@ -408,21 +479,27 @@
 
                         if (!resp.ok) {
                             const errorText = await resp.text();
-                            console.error('Server error response:', errorText);
+                            console.error('Klarna API error response:', errorText);
                             console.error('Response status:', resp.status);
-                            throw new Error(`Failed to create payment request: ${resp.status} ${errorText}`);
+                            
+                            updateSDKStatus(`❌ Klarna API Error: ${resp.status} ${errorText}`, true);
+                            throw new Error(`Klarna API returned ${resp.status}: ${errorText}`);
                         }
                         
                         const data = await resp.json();
-                        console.log('✅ Payment request created - Full response:', JSON.stringify(data, null, 2));
-                        console.log('✅ Payment request ID:', data.paymentRequestId);
+                        console.log('✅ Klarna API response:', JSON.stringify(data, null, 2));
                         
-                        if (!data.paymentRequestId) {
-                            console.error('❌ No paymentRequestId in response:', data);
-                            throw new Error('Server did not return paymentRequestId');
+                        // Klarna returns 'payment_request_id', not 'paymentRequestId'
+                        const paymentRequestId = data.payment_request_id;
+                        
+                        if (!paymentRequestId) {
+                            console.error('❌ No payment_request_id in Klarna response:', data);
+                            throw new Error('Klarna API did not return payment_request_id');
                         }
                         
-                        const result = { paymentRequestId: data.paymentRequestId };
+                        console.log('✅ Payment request ID:', paymentRequestId);
+                        
+                        const result = { paymentRequestId: paymentRequestId };
                         console.log('📤 Returning to Klarna SDK:', JSON.stringify(result, null, 2));
                         
                         return result;
@@ -433,7 +510,8 @@
                         
                         // Check if it's a CORS error
                         if (error.message.includes('CORS') || error.message.includes('Failed to fetch') || error.name === 'TypeError') {
-                            console.error('⚠️ This appears to be a CORS error. Check server CORS configuration and ensure the domain is whitelisted.');
+                            console.error('⚠️ This appears to be a CORS error. Klarna API may not allow direct browser requests.');
+                            updateSDKStatus('⚠️ CORS error - Klarna API may not allow direct browser requests', true);
                         }
                         
                         throw error;
