@@ -362,9 +362,22 @@
             KlarnaInstance.Payment.on("error", (err) => {
                 // #region agent log
                 console.error('[DEBUG] Klarna error event', err);
-                fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:357',message:'Klarna error event',data:{errorCode:err.errorCode,errorMessage:err.errorMessage,error:JSON.stringify(err)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'P'})}).catch(()=>{});
+                fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:362',message:'Klarna error event',data:{errorCode:err.errorCode,errorMessage:err.errorMessage,errorType:err.errorType,error:JSON.stringify(err)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'P'})}).catch(()=>{});
                 // #endregion
                 console.error("Klarna Payment error:", err);
+                
+                // Handle cancellation gracefully - don't show alert for user cancellation
+                const isCancellation = err.errorCode === 'INTERNAL_ERROR' && 
+                                      err.errorMessage && 
+                                      err.errorMessage.includes('cancelled');
+                
+                if (isCancellation) {
+                    console.log('[DEBUG] Payment was cancelled by user - handling gracefully');
+                    // Don't show alert for cancellation, just log it
+                    return;
+                }
+                
+                // Show alert for other errors
                 alert(`An error occurred: ${err.errorCode} - ${err.errorMessage}`);
             });
 
