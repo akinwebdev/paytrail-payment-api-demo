@@ -541,6 +541,34 @@ async function createKlarnaPaymentRequest(data, req) {
     return response.data;
 }
 
+// GET /api/klarna-proxy - Proxy endpoint for Klarna messaging API (to bypass CORS)
+// Note: This may not work directly with Klarna SDK as it makes its own API calls
+app.get('/api/klarna-proxy', async (req, res) => {
+    try {
+        const axios = require('axios');
+        // Construct the full URL for Klarna API using query parameters
+        const klarnaApiUrl = `https://js.playground.klarna.com/eu/cma/v4/messaging?${new URLSearchParams(req.query).toString()}`;
+        
+        console.log('🔄 Proxying Klarna messaging request:', klarnaApiUrl);
+        
+        const response = await axios.get(klarnaApiUrl, {
+            headers: {
+                'Accept': 'application/json',
+            }
+        });
+        
+        console.log('✅ Klarna proxy response received');
+        res.json(response.data);
+    } catch (error) {
+        console.error('❌ Proxy error:', error.message);
+        console.error('Error details:', error.response?.data || error.message);
+        res.status(error.response?.status || 500).json({ 
+            message: 'Error fetching from Klarna API',
+            error: error.response?.data || error.message
+        });
+    }
+});
+
 // POST /api/klarna/payment-request - Create Klarna payment request
 app.post('/api/klarna/payment-request', async (req, res) => {
     try {
