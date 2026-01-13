@@ -110,6 +110,7 @@
                 <div class="product-description">
                     <p>This is a demo product for testing Klarna Express Checkout integration. The product details and pricing can be customized as needed.</p>
                 </div>
+                <div id="klarna-payment-button" style="margin-top: 1.5rem;"></div>
             </div>
         </div>
         
@@ -139,6 +140,26 @@
 
         // Klarna SDK ready to be utilized
         console.log('Klarna SDK initialized:', Klarna);
+
+        // Wait for DOM to be ready before mounting button
+        document.addEventListener("DOMContentLoaded", () => {
+            // Create button configuration object
+            const buttonConfig = {
+                currency: "EUR",
+                amount: 1590
+            };
+
+            console.log('Button configuration:', buttonConfig);
+
+            // Mount the button
+            const buttonElement = document.getElementById('klarna-payment-button');
+            if (buttonElement) {
+                Klarna.Payment.button(buttonConfig).mount('#klarna-payment-button');
+                console.log('Klarna button mounted');
+            } else {
+                console.error('Button container not found');
+            }
+        });
 
         // Load commit hash for deployment tracking
         async function loadCommitHash() {
