@@ -456,6 +456,32 @@ app.get('/api/merchants/grouped-payment-providers', async (req, res) => {
     }
 });
 
+// GET /api/klarna/config - Return Klarna WebSDK Client ID
+app.get('/api/klarna/config', (req, res) => {
+    try {
+        const KLARNA_WEBSDK_CLIENT_ID = process.env.KLARNA_WEBSDK_CLIENT_ID;
+        
+        if (!KLARNA_WEBSDK_CLIENT_ID) {
+            return res.status(500).json({
+                error: 'Klarna WebSDK Client ID not configured',
+                message: 'Please set KLARNA_WEBSDK_CLIENT_ID environment variable',
+                timestamp: new Date().toISOString()
+            });
+        }
+        
+        res.json({
+            clientId: KLARNA_WEBSDK_CLIENT_ID
+        });
+    } catch (error) {
+        console.error('❌ Error getting Klarna config:', error.message);
+        res.status(500).json({
+            error: 'Failed to get Klarna configuration',
+            message: error.message,
+            timestamp: new Date().toISOString()
+        });
+    }
+});
+
 // GET /api/commit - Return git commit hash for deployment tracking
 app.get('/api/commit', (req, res) => {
     try {

@@ -119,11 +119,20 @@
     </div>
 
     <script type="module">
+        // Get Klarna Client ID from server
+        const configResponse = await fetch('/api/klarna/config');
+        if (!configResponse.ok) {
+            console.error('Failed to fetch Klarna config:', configResponse.status);
+            throw new Error('Failed to fetch Klarna configuration');
+        }
+        const config = await configResponse.json();
+        const clientId = config.clientId;
+
         // Initialize Klarna WebSDK
         const { KlarnaSDK } = await import("https://js.klarna.com/web-sdk/v2/klarna.mjs");
 
         const Klarna = await KlarnaSDK({ 
-            clientId: "klarna_test_client_MWVIem1QNDcjJE8zKjUyZEwtako2MEdLUGp2Ti8zTjgsOTNjYTA0OGMtNjg3My00YTRmLWFmZTgtZjc2ODE3MDg1OTRkLDEsczBrUGJ3RjdnYjVRdjg1YXpESnhRL083R0ZUeEREd1pjNXBvMFdCdTlwST0",
+            clientId: clientId,
             products: ["PAYMENT"],
             locale: "en-US",
         });
