@@ -525,11 +525,14 @@ async function createKlarnaPaymentRequest(data, req) {
 
     console.log('📤 Creating Klarna payment request:', JSON.stringify(payload, null, 2));
 
+    // Create Basic Auth header (Klarna uses Basic Auth, not Bearer)
+    const auth = Buffer.from(`${KLARNA_API_KEY}:`).toString('base64');
+
     const response = await axios.post(url, payload, {
-                headers: {
+        headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
-            'Authorization': `Bearer ${KLARNA_API_KEY}`,
+            'Authorization': `Basic ${auth}`,
         },
     });
 
