@@ -132,6 +132,7 @@
                         <option value="pl-PL">pl-PL</option>
                     </select>
                 </div>
+                <div id="osm-placement" style="margin-top: 1.5rem;"></div>
                 <div id="klarna-payment-button" style="margin-top: 1.5rem;"></div>
             </div>
         </div>
@@ -169,26 +170,20 @@
                 return Klarna;
             }
 
-            // Get Klarna Client ID from server
-                const configResponse = await fetch('/api/klarna/config');
-                if (!configResponse.ok) {
-                console.error('Failed to fetch Klarna config:', configResponse.status);
-                throw new Error('Failed to fetch Klarna configuration');
-                }
-                const config = await configResponse.json();
-            const clientId = config.clientId;
+            // Static client ID for testing
+            const clientId = "klarna_test_client_WU5zKkEhV0hwdVopTUlUKTNjZUE4MHlHWG02RGRuS0osMWFmOTI2ZGUtYzZmMS00ZWQ1LTkxYWEtMjU4ODZhZWViZGJiLDEsM00xOFVLYjBSNUVRQlpQZEJyUW5RaExaMnNjNWFRbDhiZVNxbEVIU1AzTT0";
 
             // Initialize Klarna WebSDK
             const { KlarnaSDK } = await import("https://js.klarna.com/web-sdk/v2/klarna.mjs");
 
             Klarna = await KlarnaSDK({ 
-                    clientId: clientId,
-                products: ["PAYMENT"], // Ensure products are properly specified for best performance
+                clientId: clientId,
+                products: ["PAYMENT", "MESSAGING"], // Ensure products are properly specified for best performance
                 locale: locale,
             });
 
             console.log('✅ Klarna SDK initialized with locale:', locale);
-            console.log('✅ Products specified:', ["PAYMENT"]);
+            console.log('✅ Products specified:', ["PAYMENT", "MESSAGING"]);
             return Klarna;
         }
 
@@ -204,6 +199,24 @@
 
         // Initialize with default locale
         await initializeKlarnaSDK(currentLocale);
+
+        // Function to mount Klarna on-site messaging placement
+        function mountMessagingPlacement() {
+            if (Klarna?.Messaging?.placement) {
+                try {
+                    Klarna.Messaging.placement({
+                        key: 'credit-promotion-badge',
+                        locale: currentLocale,
+                        amount: 1590
+                    }).mount('#osm-placement');
+                    console.log('✅ Klarna messaging placement mounted');
+                } catch (error) {
+                    console.error('Error mounting messaging placement:', error);
+                }
+            } else {
+                console.warn('Klarna.Messaging.placement not available');
+            }
+        }
 
         // Function to mount the button
         function mountKlarnaButton() {
@@ -274,6 +287,7 @@
         // Mount button when DOM is ready
         if (document.readyState === 'loading') {
             document.addEventListener("DOMContentLoaded", () => {
+                mountMessagingPlacement();
                 mountKlarnaButton();
                 
                 // Add locale change handler
@@ -295,6 +309,7 @@
             });
         } else {
             // DOM is already loaded
+            mountMessagingPlacement();
             mountKlarnaButton();
             
             // Add locale change handler
