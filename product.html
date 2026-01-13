@@ -549,7 +549,6 @@
                             paymentRequestId: data.paymentRequestId, // Pass the server-created payment request ID
                             collectCustomerProfile: ["profile:email", "profile:name", "profile:phone", "profile:billing_address"],
                             customerInteractionConfig: {
-                                method: 'DEVICE_BEST',
                                 returnUrl: returnUrl,
                             },
                         };
@@ -561,7 +560,7 @@
                         throw error; // Let SDK handle the error
                     }
                 },
-                initiationMode: "ON_PAGE",
+                initiationMode: "DEVICE_BEST",
             };
 
             // #region agent log
