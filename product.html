@@ -181,12 +181,10 @@
                 buttonContainer.innerHTML = '';
                 buttonContainer.classList.remove('loading');
                 
-                // Step 1: Import Library - Using playground SDK for playground client ID
-                // Note: Must match the environment of your client ID:
-                // - Production: https://js.klarna.com/web-sdk/v2/klarna.mjs
-                // - Playground/Test: https://js.playground.klarna.com/web-sdk/v2/klarna.mjs
-                const sdkUrl = 'https://js.playground.klarna.com/web-sdk/v2/klarna.mjs';
-                console.log('Step 1: Importing Klarna SDK from (PLAYGROUND):', sdkUrl);
+                // Step 1: Import Library
+                // Note: The SDK URL is the same for all environments - the client ID determines which backend to use
+                const sdkUrl = 'https://js.klarna.com/web-sdk/v2/klarna.mjs';
+                console.log('Step 1: Importing Klarna SDK from:', sdkUrl);
                 const { KlarnaSDK } = await import(sdkUrl);
                 
                 // Initialize Klarna SDK with clientId (no products parameter - matches working example)
@@ -208,54 +206,46 @@
                 // Step 2: Display the Klarna payment button
                 console.log('Step 2: Creating Klarna payment button...');
                 
-                // Step 3: Implement initiate callback (client-side approach - alternative method)
-                // Return payment request payload directly from client
-                // Following working example pattern from kec-index.js
-                const initiateCallback = () => {
-                    console.log('🔄 INITIATE CALLBACK EXECUTED - Returning payment request payload (client-side)');
-                    
-                    // Construct return URL with placeholders for Klarna to populate (simpler format like working example)
-                    const protocol = window.location.protocol;
-                    const host = window.location.host;
-                    const returnUrl = `${protocol}//${host}/payment-success?id={klarna.paymentRequest.id}&token={klarna.paymentRequest.payment_token}`;
-                    
-                    // Return payment request payload directly (matching working example structure)
-                    const payload = {
-                        currency: "EUR",
-                        amount: Math.round(productPrice * 100), // Convert to cents
-                        shippingConfig: {
-                            mode: "EDITABLE"
-                        },
-                        collectCustomerProfile: ["profile:email", "profile:name", "profile:phone", "profile:billing_address"],
-                        supplementaryPurchaseData: {
-                            lineItems: [
-                                {
-                                    name: "Product",
-                                    quantity: 1,
-                                    totalAmount: Math.round(productPrice * 100)
-                                }
-                            ]
-                        },
-                        customerInteractionConfig: {
-                            returnUrl: returnUrl
-                        }
-                    };
-                    
-                    console.log('✅ Returning payment request payload:', payload);
-                    console.log('✅ Return URL:', payload.customerInteractionConfig?.returnUrl);
-                    return payload;
-                };
+                // Step 3: Create button config with inline initiate callback (matching working example exactly)
+                // Construct return URL with placeholders for Klarna to populate
+                const protocol = window.location.protocol;
+                const host = window.location.host;
+                const returnUrl = `${protocol}//${host}/payment-success?id={klarna.paymentRequest.id}&token={klarna.paymentRequest.payment_token}`;
                 
-                
-                const klarnaPaymentButton = klarna.Payment.button({
-                    id: "klarna-payment-button",
-                    locale: "en-FI",
+                const buttonConfig = {
+                    initiate: () => {
+                        console.log('🔄 INITIATE CALLBACK EXECUTED - Returning payment request payload (client-side)');
+                        const payload = {
+                            currency: "EUR",
+                            amount: Math.round(productPrice * 100), // Convert to cents
+                            shippingConfig: {
+                                mode: "EDITABLE"
+                            },
+                            collectCustomerProfile: ["profile:email", "profile:name", "profile:phone", "profile:billing_address"],
+                            supplementaryPurchaseData: {
+                                lineItems: [
+                                    {
+                                        name: "Product",
+                                        quantity: 1,
+                                        totalAmount: Math.round(productPrice * 100)
+                                    }
+                                ]
+                            },
+                            customerInteractionConfig: {
+                                returnUrl: returnUrl
+                            }
+                        };
+                        console.log('✅ Returning payment request payload:', payload);
+                        return payload;
+                    },
+                    initiationMode: "ON_PAGE",
                     shape: "pill",
                     theme: "default",
-                    intents: ["PAY"],
-                    initiationMode: "ON_PAGE", // Use ON_PAGE like working example (keeps flow on same page, no popup/redirect issues)
-                    initiate: initiateCallback
-                });
+                    locale: "en-FI",
+                    intents: ["PAY"]
+                };
+                
+                const klarnaPaymentButton = klarna.Payment.button(buttonConfig);
                 
                 // Mount the button to the container (Step 2) - following reference pattern
                 console.log('Mounting button to container...');
