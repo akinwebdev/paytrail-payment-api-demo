@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Klarna Express Checkout Demo</title>
+</head>
+<body>
+    <div class="product-container">
+        <div class="product-header">
+            <h1>Klarna Express Checkout Demo</h1>
+        </div>
+        
+        <div class="product-content">
+            <div class="product-image">
+                🛍️
+            </div>
+            
+            <div class="product-info">
+                <h1 class="product-title">Demo Product</h1>
+                <p class="product-price" id="product-price">€15.90</p>
+                <div class="product-description">
+                    <p>This is a demo product for testing Klarna Express Checkout integration. The product details and pricing can be customized as needed.</p>
+                </div>
+                <div style="margin-top: 1.5rem;">
+                    <label for="locale-select" style="display: block; margin-bottom: 0.5rem; color: #5A5A5A; font-size: 0.9rem;">Locale:</label>
+                    <select id="locale-select" style="padding: 0.5rem; border: 1px solid #E0E0E0; border-radius: 4px; font-size: 1rem; width: 100%; max-width: 200px; background: white; color: #0B051D;">
+                        <option value="en-GB" selected>en-GB</option>
+                        <option value="en-US">en-US</option>
+                        <option value="sv-SE">sv-SE</option>
+                        <option value="no-NO">no-NO</option>
+                        <option value="da-DK">da-DK</option>
+                        <option value="fi-FI">fi-FI</option>
+                        <option value="de-DE">de-DE</option>
+                        <option value="nl-NL">nl-NL</option>
+                        <option value="fr-FR">fr-FR</option>
+                        <option value="es-ES">es-ES</option>
+                        <option value="it-IT">it-IT</option>
+                        <option value="pl-PL">pl-PL</option>
+                    </select>
+                </div>
+                <div id="info-message" style="margin-top: 1rem; padding: 1rem; background-color: #E8F4F8; border: 1px solid #B8D4E3; border-radius: 4px; color: #0B051D; font-size: 0.875rem;">
+                    <strong>Note:</strong> This demo calls Klarna's API directly from the browser. <strong>⚠️ Security Warning:</strong> API keys exposed in frontend code are a security risk. For production, always use a server-side proxy. Update the <code>KLARNA_API_KEY</code> variable in the JavaScript with your actual API key.
+                </div>
+                <div id="osm-placement" style="margin-top: 1.5rem;"></div>
+                <div id="klarna-payment-button" style="margin-top: 1.5rem;"></div>
+                <div id="error-message" style="display: none; margin-top: 1rem; padding: 1rem; background-color: #FFE9F3; border: 1px solid #FFA8CD; border-radius: 4px; color: #0B051D;"></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

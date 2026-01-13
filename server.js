@@ -22,7 +22,19 @@ if (!DEMO_PASSWORD) {
 app.use(helmet({
     contentSecurityPolicy: false, // Disable for demo purposes
 }));
-app.use(cors());
+
+// CORS configuration - explicitly allow all origins and required headers for Klarna SDK
+app.use(cors({
+    origin: true, // Allow all origins (or specify your domain)
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+    exposedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// Handle preflight OPTIONS requests explicitly
+app.options('*', cors());
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -498,9 +510,32 @@ async function createKlarnaPaymentRequest(data, req) {
     const url = `${KLARNA_BASE_URL}/v2/payment/requests`;
     
     // Get the base URL for return_url from request headers or environment
+    // IMPORTANT: This must match the whitelisted domain in Klarna's portal exactly
     const protocol = 'https'; // Klarna requires HTTPS
-    const host = req?.get('x-forwarded-host') || req?.get('host') || process.env.VERCEL_URL || 'paytrail-payment-api-demo.vercel.app';
-    const returnUrl = `https://${host}/payment-success?payment_request_id={klarna.payment_request.id}&state={klarna.payment_request.state}&payment_token={klarna.payment_request.payment_token}`;
+    
+    // Log all possible host values for debugging
+    const xForwardedHost = req?.get('x-forwarded-host');
+    const hostHeader = req?.get('host');
+    const vercelUrl = process.env.VERCEL_URL;
+    const origin = req?.get('origin');
+    
+    console.log('🔍 Host detection for return URL:');
+    console.log('  - x-forwarded-host:', xForwardedHost);
+    console.log('  - host header:', hostHeader);
+    console.log('  - VERCEL_URL env:', vercelUrl);
+    console.log('  - origin header:', origin);
+    
+    // Use the whitelisted domain explicitly to ensure it matches
+    const host = xForwardedHost || hostHeader || vercelUrl || 'paytrail-payment-api-demo.vercel.app';
+    
+    // Ensure we're using the exact whitelisted domain (no www, no paths)
+    const cleanHost = host.split(':')[0].split('/')[0]; // Remove port and path if present
+    
+    console.log('  - Final host used:', cleanHost);
+    
+    const returnUrl = `https://${cleanHost}/payment-success?payment_request_id={klarna.payment_request.id}&state={klarna.payment_request.state}&payment_token={klarna.payment_request.payment_token}`;
+    
+    console.log('  - Return URL:', returnUrl);
     
     const payload = {
         currency: data.currency || "EUR",
@@ -574,16 +609,31 @@ app.post('/api/klarna/payment-request', async (req, res) => {
     try {
         console.log('🔄 Creating Klarna payment request...');
         console.log('Request body:', JSON.stringify(req.body, null, 2));
+        console.log('Request origin:', req.get('origin'));
+        console.log('Request headers:', JSON.stringify(req.headers, null, 2));
         
         const klarnaResp = await createKlarnaPaymentRequest(req.body, req);
 
         console.log('✅ Klarna payment request created:', klarnaResp.payment_request_id);
+        console.log('Full Klarna response:', JSON.stringify(klarnaResp, null, 2));
+        
+        // Set explicit CORS headers
+        res.header('Access-Control-Allow-Origin', req.get('origin') || '*');
+        res.header('Access-Control-Allow-Credentials', 'true');
+        res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+        res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
         
         res.json({
             paymentRequestId: klarnaResp.payment_request_id,
         });
     } catch (err) {
         console.error('❌ Klarna payment request error:', err.response ? err.response.data : err.message);
+        console.error('Error stack:', err.stack);
+        
+        // Set CORS headers even on error
+        res.header('Access-Control-Allow-Origin', req.get('origin') || '*');
+        res.header('Access-Control-Allow-Credentials', 'true');
+        
         res.status(500).json({
             error: 'Failed to create payment request',
             details: err.response ? err.response.data : err.message,

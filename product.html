@@ -115,6 +115,24 @@
                 <div class="product-description">
                     <p>This is a demo product for testing Klarna Express Checkout integration. The product details and pricing can be customized as needed.</p>
                 </div>
+                <div style="margin-top: 1.5rem; padding: 1rem; background-color: #F9F8F5; border: 1px solid #E0E0E0; border-radius: 4px;">
+                    <label for="client-id-input" style="display: block; margin-bottom: 0.5rem; color: #5A5A5A; font-size: 0.9rem; font-weight: 600;">Klarna Client ID:</label>
+                    <input 
+                        type="text" 
+                        id="client-id-input" 
+                        placeholder="Enter your Klarna Client ID"
+                        style="padding: 0.5rem; border: 1px solid #E0E0E0; border-radius: 4px; font-size: 0.9rem; width: 100%; max-width: 600px; background: white; color: #0B051D; font-family: 'Klarna Mono', monospace;"
+                    />
+                    <button 
+                        id="init-sdk-button" 
+                        style="margin-top: 0.5rem; padding: 0.5rem 1rem; background-color: #0B051D; color: white; border: none; border-radius: 4px; font-size: 0.9rem; cursor: pointer; font-weight: 500;"
+                        onmouseover="this.style.backgroundColor='#1a1a2e'"
+                        onmouseout="this.style.backgroundColor='#0B051D'"
+                    >
+                        Initialize Klarna SDK
+                    </button>
+                    <div id="sdk-status" style="margin-top: 0.5rem; font-size: 0.85rem; color: #5A5A5A;"></div>
+                </div>
                 <div style="margin-top: 1.5rem;">
                     <label for="locale-select" style="display: block; margin-bottom: 0.5rem; color: #5A5A5A; font-size: 0.9rem;">Locale:</label>
                     <select id="locale-select" style="padding: 0.5rem; border: 1px solid #E0E0E0; border-radius: 4px; font-size: 1rem; width: 100%; max-width: 200px; background: white; color: #0B051D;">
@@ -155,6 +173,7 @@
 
         let Klarna = null;
         let currentLocale = 'en-GB';
+        let currentClientId = null;
 
         // Function to get selected locale
         function getSelectedLocale() {
@@ -162,32 +181,91 @@
             return select ? select.value : 'en-GB';
         }
 
-        // Function to initialize Klarna SDK with locale
-        async function initializeKlarnaSDK(locale) {
-            // If SDK is already initialized, don't reinitialize (causes custom element registration errors)
-            if (Klarna) {
-                console.log('⚠️ SDK already initialized. Locale cannot be changed without page reload.');
+        // Function to get client ID from input or storage
+        function getClientId() {
+            const input = document.getElementById('client-id-input');
+            if (input && input.value.trim()) {
+                return input.value.trim();
+            }
+            // Fallback to stored client ID
+            return sessionStorage.getItem('klarnaClientId') || null;
+        }
+
+        // Function to update SDK status message
+        function updateSDKStatus(message, isError = false) {
+            const statusEl = document.getElementById('sdk-status');
+            if (statusEl) {
+                statusEl.textContent = message;
+                statusEl.style.color = isError ? '#D32F2F' : '#2E7D32';
+            }
+        }
+
+        // Function to initialize Klarna SDK with locale and client ID
+        async function initializeKlarnaSDK(locale, clientId) {
+            if (!clientId) {
+                updateSDKStatus('⚠️ Please enter a Klarna Client ID', true);
+                throw new Error('Client ID is required');
+            }
+
+            // If SDK is already initialized with the same client ID, don't reinitialize
+            if (Klarna && currentClientId === clientId) {
+                console.log('⚠️ SDK already initialized with this Client ID. Locale cannot be changed without page reload.');
+                updateSDKStatus('✅ SDK already initialized');
                 return Klarna;
             }
 
-            // Static client ID for testing
-            const clientId = "klarna_test_client_WU5zKkEhV0hwdVopTUlUKTNjZUE4MHlHWG02RGRuS0osMWFmOTI2ZGUtYzZmMS00ZWQ1LTkxYWEtMjU4ODZhZWViZGJiLDEsM00xOFVLYjBSNUVRQlpQZEJyUW5RaExaMnNjNWFRbDhiZVNxbEVIU1AzTT0";
+            // If client ID changed, we need to reload the page to reinitialize
+            if (Klarna && currentClientId !== clientId) {
+                console.log('⚠️ Client ID changed. Page reload required to reinitialize SDK.');
+                updateSDKStatus('⚠️ Client ID changed. Reloading page...', true);
+                sessionStorage.setItem('klarnaClientId', clientId);
+                window.location.reload();
+                return;
+            }
 
-            // Initialize Klarna WebSDK
-            const { KlarnaSDK } = await import("https://js.klarna.com/web-sdk/v2/klarna.mjs");
+            // Log the current origin - this is what Klarna sees for domain whitelisting
+            console.log('🌐 Current origin (what Klarna sees for whitelisting):', window.location.origin);
+            console.log('🌐 Current hostname:', window.location.hostname);
+            console.log('🌐 Full URL:', window.location.href);
 
-            Klarna = await KlarnaSDK({ 
-                clientId: clientId,
-                products: ["PAYMENT", "MESSAGING"], // Ensure products are properly specified for best performance
-                locale: locale,
-            });
+            console.log('🔑 Using Client ID:', clientId);
+            console.log('⚠️ Make sure this Client ID is whitelisted for:', window.location.origin);
 
-            console.log('✅ Klarna SDK initialized with locale:', locale);
-            console.log('✅ Products specified:', ["PAYMENT", "MESSAGING"]);
-            return Klarna;
+            updateSDKStatus('🔄 Initializing Klarna SDK...');
+
+            try {
+                // Initialize Klarna WebSDK
+                const { KlarnaSDK } = await import("https://js.klarna.com/web-sdk/v2/klarna.mjs");
+
+                Klarna = await KlarnaSDK({ 
+                    clientId: clientId,
+                    products: ["PAYMENT", "MESSAGING"], // Ensure products are properly specified for best performance
+                    locale: locale,
+                });
+
+                currentClientId = clientId;
+                
+                // Store client ID in sessionStorage
+                sessionStorage.setItem('klarnaClientId', clientId);
+
+                console.log('✅ Klarna SDK initialized with locale:', locale);
+                console.log('✅ Products specified:', ["PAYMENT", "MESSAGING"]);
+                
+                updateSDKStatus('✅ SDK initialized successfully');
+                
+                // Mount components after successful initialization
+                mountMessagingPlacement();
+                mountKlarnaButton();
+                
+                return Klarna;
+            } catch (error) {
+                console.error('❌ Failed to initialize Klarna SDK:', error);
+                updateSDKStatus(`❌ Error: ${error.message}`, true);
+                throw error;
+            }
         }
 
-        // Check for stored locale preference
+        // Check for stored preferences
         const storedLocale = sessionStorage.getItem('klarnaLocale');
         if (storedLocale) {
             currentLocale = storedLocale;
@@ -197,8 +275,62 @@
             }
         }
 
-        // Initialize with default locale
-        await initializeKlarnaSDK(currentLocale);
+        // Load stored client ID
+        const storedClientId = sessionStorage.getItem('klarnaClientId');
+        if (storedClientId) {
+            const clientIdInput = document.getElementById('client-id-input');
+            if (clientIdInput) {
+                clientIdInput.value = storedClientId;
+            }
+        }
+
+        // Initialize SDK button handler
+        document.addEventListener('DOMContentLoaded', () => {
+            const initButton = document.getElementById('init-sdk-button');
+            const clientIdInput = document.getElementById('client-id-input');
+            
+            if (initButton) {
+                initButton.addEventListener('click', async () => {
+                    const clientId = getClientId();
+                    if (!clientId) {
+                        updateSDKStatus('⚠️ Please enter a Klarna Client ID', true);
+                        return;
+                    }
+                    
+                    try {
+                        await initializeKlarnaSDK(currentLocale, clientId);
+                    } catch (error) {
+                        console.error('Failed to initialize SDK:', error);
+                    }
+                });
+            }
+
+            // Allow Enter key to initialize
+            if (clientIdInput) {
+                clientIdInput.addEventListener('keypress', async (e) => {
+                    if (e.key === 'Enter') {
+                        const clientId = getClientId();
+                        if (clientId) {
+                            try {
+                                await initializeKlarnaSDK(currentLocale, clientId);
+                            } catch (error) {
+                                console.error('Failed to initialize SDK:', error);
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Auto-initialize if client ID is already stored
+            if (storedClientId) {
+                console.log('🔄 Auto-initializing with stored Client ID...');
+                initializeKlarnaSDK(currentLocale, storedClientId).catch(error => {
+                    console.error('Auto-initialization failed:', error);
+                });
+            } else {
+                updateSDKStatus('⚠️ Enter a Klarna Client ID and click "Initialize Klarna SDK"');
+            }
+        });
 
         // Function to mount Klarna on-site messaging placement
         // Note: Messaging may fail if domain is not whitelisted or client ID doesn't have messaging permissions
@@ -255,29 +387,46 @@
                 initiationMode: "ON_PAGE", // Keep payment flow on-page, not in new tab
                 initiate: async () => {
                     console.log('Button initiate called - creating payment request server-side');
+                    console.log('Current origin:', window.location.origin);
                     
                     try {
                         const resp = await fetch('/api/klarna/payment-request', {
-                    method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
+                            method: 'POST',
+                            headers: { 
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            },
+                            credentials: 'same-origin', // Include credentials for same-origin requests
+                            body: JSON.stringify({
                                 currency: "EUR",
                                 amount: 1590
-                    })
-                });
+                            })
+                        });
+
+                        console.log('Response status:', resp.status);
+                        console.log('Response headers:', [...resp.headers.entries()]);
 
                         if (!resp.ok) {
                             const errorText = await resp.text();
                             console.error('Server error response:', errorText);
-                            throw new Error('Failed to create payment request');
+                            console.error('Response status:', resp.status);
+                            throw new Error(`Failed to create payment request: ${resp.status} ${errorText}`);
                         }
                         
                         const data = await resp.json();
-                        console.log('Payment request created:', data.paymentRequestId);
+                        console.log('✅ Payment request created:', data.paymentRequestId);
                         
                         return { paymentRequestId: data.paymentRequestId };
                     } catch (error) {
-                        console.error('Error creating payment request:', error);
+                        console.error('❌ Error creating payment request:', error);
+                        console.error('Error name:', error.name);
+                        console.error('Error message:', error.message);
+                        
+                        // Check if it's a CORS error
+                        if (error.message.includes('CORS') || error.message.includes('Failed to fetch') || error.name === 'TypeError') {
+                            console.error('⚠️ This appears to be a CORS error. Check server CORS configuration and ensure the domain is whitelisted.');
+                        }
+                        
                         throw error;
                     }
                 }
@@ -295,35 +444,8 @@
             }
         }
 
-        // Mount button when DOM is ready
-        if (document.readyState === 'loading') {
-            document.addEventListener("DOMContentLoaded", () => {
-                mountMessagingPlacement();
-                mountKlarnaButton();
-                
-                // Add locale change handler
-                const localeSelect = document.getElementById('locale-select');
-                if (localeSelect) {
-                    localeSelect.addEventListener('change', async (e) => {
-                        const newLocale = e.target.value;
-                        console.log('Locale changed to:', newLocale);
-                        
-                        // Note: Klarna SDK locale is set during initialization and cannot be changed dynamically
-                        // The locale affects the SDK initialization, so changing it requires a page reload
-                        if (newLocale !== currentLocale) {
-                            // Store locale preference and reload
-                            sessionStorage.setItem('klarnaLocale', newLocale);
-                            window.location.reload();
-                        }
-                    });
-                }
-            });
-        } else {
-            // DOM is already loaded
-            mountMessagingPlacement();
-            mountKlarnaButton();
-            
-            // Add locale change handler
+        // Add locale change handler (mounting happens after SDK initialization)
+        function setupLocaleChangeHandler() {
             const localeSelect = document.getElementById('locale-select');
             if (localeSelect) {
                 localeSelect.addEventListener('change', async (e) => {
@@ -339,6 +461,16 @@
                     }
                 });
             }
+        }
+
+        // Setup locale handler when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener("DOMContentLoaded", () => {
+                setupLocaleChangeHandler();
+            });
+        } else {
+            // DOM is already loaded
+            setupLocaleChangeHandler();
         }
 
         // Load commit hash for deployment tracking
