@@ -530,26 +530,14 @@
             const buttonConfig = {
                 initiate: () => {
                     // #region agent log
-                    console.log('[DEBUG] Button initiate called', { returnUrl, amount: normalizedPrice, lineItems: checkoutState.productLineItem });
-                    fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:518',message:'Button initiate called',data:{amount:normalizedPrice,returnUrl:returnUrl,lineItemName:checkoutState.productLineItem.name,lineItemTotal:checkoutState.productLineItem.totalAmount},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'})}).catch(()=>{});
+                    console.log('[DEBUG] Button initiate called', { returnUrl, amount: 1590 });
+                    fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:531',message:'Button initiate called',data:{amount:1590,returnUrl:returnUrl},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'})}).catch(()=>{});
                     // #endregion
                     // Return object directly like working example
                     return {
                         currency: "EUR",
-                        amount: normalizedPrice,
-                        shippingConfig: {
-                            mode: "EDITABLE",
-                        },
+                        amount: 1590,
                         collectCustomerProfile: ["profile:email", "profile:name", "profile:phone", "profile:billing_address"],
-                        supplementaryPurchaseData: {
-                            lineItems: [
-                                {
-                                    name: checkoutState.productLineItem.name,
-                                    quantity: checkoutState.productLineItem.quantity,
-                                    totalAmount: checkoutState.productLineItem.totalAmount,
-                                },
-                            ],
-                        },
                         customerInteractionConfig: {
                             returnUrl: returnUrl,
                         },
