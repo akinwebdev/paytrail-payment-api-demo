@@ -259,14 +259,8 @@
         }
 
         async function loadKlarnaSdk() {
-            // Simple fetch of client ID
-            const config = await fetch('/api/klarna/config').then(r => r.json());
-            const clientId = config.clientId;
-            
-            if (!clientId) {
-                alert("Klarna Client ID not configured");
-                return null;
-            }
+            // Hardcoded client ID
+            const clientId = "klarna_test_client_MWVIem1QNDcjJE8zKjUyZEwtako2MEdLUGp2Ti8zTjgsOTNjYTA0OGMtNjg3My00YTRmLWFmZTgtZjc2ODE3MDg1OTRkLDEsczBrUGJ3RjdnYjVRdjg1YXpESnhRL083R0ZUeEREd1pjNXBvMFdCdTlwST0";
 
             if (sdkState.klarna && clientId === sdkState.initializedClientId) {
                 return sdkState.klarna;
