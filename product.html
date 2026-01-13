@@ -201,20 +201,31 @@
         await initializeKlarnaSDK(currentLocale);
 
         // Function to mount Klarna on-site messaging placement
+        // Note: Messaging may fail if domain is not whitelisted or client ID doesn't have messaging permissions
+        // This is expected and won't affect the payment button functionality
         function mountMessagingPlacement() {
             if (Klarna?.Messaging?.placement) {
                 try {
-                    Klarna.Messaging.placement({
+                    const placement = Klarna.Messaging.placement({
                         key: 'credit-promotion-badge',
                         locale: currentLocale,
                         amount: 1590
-                    }).mount('#osm-placement');
+                    });
+                    
+                    // Add error handler for messaging placement
+                    if (placement.on) {
+                        placement.on('error', (error) => {
+                            console.warn('⚠️ Klarna messaging placement error (expected if domain not whitelisted for messaging or client ID lacks messaging permissions):', error);
+                        });
+                    }
+                    
+                    placement.mount('#osm-placement');
                     console.log('✅ Klarna messaging placement mounted');
                 } catch (error) {
-                    console.error('Error mounting messaging placement:', error);
+                    console.warn('⚠️ Error mounting messaging placement (expected if domain not whitelisted for messaging or client ID lacks messaging permissions):', error);
                 }
             } else {
-                console.warn('Klarna.Messaging.placement not available');
+                console.warn('⚠️ Klarna.Messaging.placement not available');
             }
         }
 
