@@ -4,6 +4,7 @@ const helmet = require('helmet');
 const path = require('path');
 const crypto = require('crypto');
 const cookieParser = require('cookie-parser');
+const { execSync } = require('child_process');
 require('dotenv').config();
 
 const app = express();
@@ -486,6 +487,36 @@ app.get('/api/klarna/config', (req, res) => {
         res.status(500).json({
             error: 'Failed to get Klarna configuration',
             message: error.message,
+            timestamp: new Date().toISOString()
+        });
+    }
+});
+
+// GET /api/commit - Return git commit hash for deployment tracking
+app.get('/api/commit', (req, res) => {
+    try {
+        let commitHash = 'unknown';
+        
+        // Vercel provides VERCEL_GIT_COMMIT_SHA automatically
+        if (process.env.VERCEL_GIT_COMMIT_SHA) {
+            commitHash = process.env.VERCEL_GIT_COMMIT_SHA;
+        } else {
+            // For local development, try to get it from git
+            try {
+                commitHash = execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
+            } catch (gitError) {
+                console.warn('⚠️ Could not get commit hash from git:', gitError.message);
+            }
+        }
+        
+        res.json({
+            commit: commitHash,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error('❌ Error getting commit hash:', error.message);
+        res.json({
+            commit: 'unknown',
             timestamp: new Date().toISOString()
         });
     }

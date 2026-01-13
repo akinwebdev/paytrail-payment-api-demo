@@ -110,6 +110,19 @@
             color: #0B051D;
             margin-top: 1rem;
         }
+        .footer {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #E0E0E0;
+            text-align: center;
+            color: #5A5A5A;
+            font-size: 0.875rem;
+        }
+        .commit-hash {
+            font-family: 'Klarna Mono', monospace;
+            color: #0B051D;
+            font-size: 0.75rem;
+        }
         @media (max-width: 768px) {
             .product-content {
                 grid-template-columns: 1fr;
@@ -141,6 +154,10 @@
                 </div>
                 <div id="error-message" style="display: none; margin-top: 1rem;" class="error"></div>
             </div>
+        </div>
+        
+        <div class="footer">
+            <div>Commit: <span id="commit-hash" class="commit-hash">Loading...</span></div>
         </div>
     </div>
 
@@ -523,8 +540,29 @@
             }
         }
 
+        // Load commit hash for deployment tracking
+        async function loadCommitHash() {
+            try {
+                const response = await fetch('/api/commit');
+                if (response.ok) {
+                    const data = await response.json();
+                    const commitEl = document.getElementById('commit-hash');
+                    if (commitEl) {
+                        commitEl.textContent = data.commit || 'unknown';
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load commit hash:', error);
+                const commitEl = document.getElementById('commit-hash');
+                if (commitEl) {
+                    commitEl.textContent = 'unknown';
+                }
+            }
+        }
+
         document.addEventListener("DOMContentLoaded", () => {
             initKlarnaButton();
+            loadCommitHash();
         });
     </script>
 </body>
