@@ -414,9 +414,18 @@
                         }
                         
                         const data = await resp.json();
-                        console.log('✅ Payment request created:', data.paymentRequestId);
+                        console.log('✅ Payment request created - Full response:', JSON.stringify(data, null, 2));
+                        console.log('✅ Payment request ID:', data.paymentRequestId);
                         
-                        return { paymentRequestId: data.paymentRequestId };
+                        if (!data.paymentRequestId) {
+                            console.error('❌ No paymentRequestId in response:', data);
+                            throw new Error('Server did not return paymentRequestId');
+                        }
+                        
+                        const result = { paymentRequestId: data.paymentRequestId };
+                        console.log('📤 Returning to Klarna SDK:', JSON.stringify(result, null, 2));
+                        
+                        return result;
                     } catch (error) {
                         console.error('❌ Error creating payment request:', error);
                         console.error('Error name:', error.name);
@@ -437,10 +446,32 @@
             try {
                 const klarnaPaymentButton = Klarna.Payment.button(buttonConfig);
                 console.log('Button instance created:', klarnaPaymentButton);
+                
+                // Add event listeners to track button behavior
+                if (klarnaPaymentButton.on) {
+                    klarnaPaymentButton.on('error', (error) => {
+                        console.error('❌ Klarna button error event:', error);
+                        console.error('Error details:', JSON.stringify(error, null, 2));
+                    });
+                    
+                    klarnaPaymentButton.on('complete', (data) => {
+                        console.log('✅ Klarna button complete event:', data);
+                    });
+                    
+                    klarnaPaymentButton.on('shippingaddresschange', (data) => {
+                        console.log('📍 Shipping address change:', data);
+                    });
+                    
+                    klarnaPaymentButton.on('shippingoptionselect', (data) => {
+                        console.log('🚚 Shipping option select:', data);
+                    });
+                }
+                
                 klarnaPaymentButton.mount('#klarna-payment-button');
-                console.log('Klarna button mounted successfully');
+                console.log('✅ Klarna button mounted successfully');
             } catch (error) {
-                console.error('Error mounting button:', error);
+                console.error('❌ Error mounting button:', error);
+                updateSDKStatus(`❌ Error mounting button: ${error.message}`, true);
             }
         }
 

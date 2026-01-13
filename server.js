@@ -614,8 +614,15 @@ app.post('/api/klarna/payment-request', async (req, res) => {
         
         const klarnaResp = await createKlarnaPaymentRequest(req.body, req);
 
-        console.log('✅ Klarna payment request created:', klarnaResp.payment_request_id);
-        console.log('Full Klarna response:', JSON.stringify(klarnaResp, null, 2));
+        console.log('✅ Klarna payment request created successfully');
+        console.log('📋 Full Klarna API response:', JSON.stringify(klarnaResp, null, 2));
+        console.log('🔑 Payment Request ID:', klarnaResp.payment_request_id);
+        
+        if (!klarnaResp.payment_request_id) {
+            console.error('❌ ERROR: Klarna response missing payment_request_id!');
+            console.error('Response keys:', Object.keys(klarnaResp));
+            throw new Error('Klarna API did not return payment_request_id');
+        }
         
         // Set explicit CORS headers
         res.header('Access-Control-Allow-Origin', req.get('origin') || '*');
@@ -623,12 +630,22 @@ app.post('/api/klarna/payment-request', async (req, res) => {
         res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
         res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
         
-        res.json({
+        const responseData = {
             paymentRequestId: klarnaResp.payment_request_id,
-        });
+        };
+        
+        console.log('📤 Sending response to client:', JSON.stringify(responseData, null, 2));
+        
+        res.json(responseData);
     } catch (err) {
         console.error('❌ Klarna payment request error:', err.response ? err.response.data : err.message);
         console.error('Error stack:', err.stack);
+        
+        if (err.response) {
+            console.error('❌ Klarna API error response status:', err.response.status);
+            console.error('❌ Klarna API error response headers:', err.response.headers);
+            console.error('❌ Klarna API error response data:', JSON.stringify(err.response.data, null, 2));
+        }
         
         // Set CORS headers even on error
         res.header('Access-Control-Allow-Origin', req.get('origin') || '*');
