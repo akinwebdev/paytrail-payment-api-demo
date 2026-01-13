@@ -119,6 +119,18 @@
     </div>
 
     <script type="module">
+        // Initialize Klarna WebSDK
+        const { KlarnaSDK } = await import("https://js.klarna.com/web-sdk/v2/klarna.mjs");
+
+        const Klarna = await KlarnaSDK({ 
+            clientId: "klarna_test_client_MWVIem1QNDcjJE8zKjUyZEwtako2MEdLUGp2Ti8zTjgsOTNjYTA0OGMtNjg3My00YTRmLWFmZTgtZjc2ODE3MDg1OTRkLDEsczBrUGJ3RjdnYjVRdjg1YXpESnhRL083R0ZUeEREd1pjNXBvMFdCdTlwST0",
+            products: ["PAYMENT"],
+            locale: "en-US",
+        });
+
+        // Klarna SDK ready to be utilized
+        console.log('Klarna SDK initialized:', Klarna);
+
         // Load commit hash for deployment tracking
         async function loadCommitHash() {
             try {
