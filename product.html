@@ -142,6 +142,16 @@
     </div>
 
     <script type="module">
+        // Check if script is running in 1st-party context (not in iframe)
+        // Klarna SDK requires 1st-party context for purchase flows to work correctly
+        if (window.self !== window.top) {
+            console.error('❌ Klarna SDK Error: Script is running inside an iframe. Klarna SDK must be loaded in 1st-party context.');
+            alert('Error: This page cannot be loaded in an iframe. Please open it directly in your browser.');
+            throw new Error('Klarna SDK cannot be initialized in iframe context');
+        }
+
+        console.log('✅ Script is running in 1st-party context (not in iframe)');
+
         let Klarna = null;
         let currentLocale = 'en-GB';
 
@@ -167,11 +177,12 @@
 
             Klarna = await KlarnaSDK({ 
                 clientId: clientId,
-                products: ["PAYMENT"],
+                products: ["PAYMENT"], // Ensure products are properly specified for best performance
                 locale: locale,
             });
 
-            console.log('Klarna SDK initialized with locale:', locale);
+            console.log('✅ Klarna SDK initialized with locale:', locale);
+            console.log('✅ Products specified:', ["PAYMENT"]);
             return Klarna;
         }
 
