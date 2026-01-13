@@ -169,6 +169,7 @@
             // Create button configuration with initiate callback
             const buttonConfig = {
                 intents: ["PAY"], // Fix the intents warning
+                initiationMode: "ON_PAGE", // Keep payment flow on-page, not in new tab
                 initiate: async () => {
                     console.log('Button initiate called - creating payment request server-side');
                     

@@ -514,6 +514,8 @@ async function createKlarnaPaymentRequest(data, req) {
         },
             customer_interaction_config: {
             return_url: returnUrl,
+            // Don't specify method - let WebSDK handle the interaction method
+            // When using WebSDK with initiate callback, the SDK manages the flow
         },
     };
 
@@ -529,10 +531,10 @@ async function createKlarnaPaymentRequest(data, req) {
     const auth = Buffer.from(`${KLARNA_API_KEY}:`).toString('base64');
 
     const response = await axios.post(url, payload, {
-        headers: {
+                headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
-            'Authorization': `Basic ${auth}`,
+                    'Authorization': `Basic ${auth}`,
         },
     });
 
