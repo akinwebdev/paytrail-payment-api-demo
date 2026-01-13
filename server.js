@@ -528,8 +528,10 @@ async function createKlarnaPaymentRequest(data, req) {
     // Use the whitelisted domain explicitly to ensure it matches
     const host = xForwardedHost || hostHeader || vercelUrl || 'paytrail-payment-api-demo.vercel.app';
     
-    // Ensure we're using the exact whitelisted domain (no www, no paths)
-    const cleanHost = host.split(':')[0].split('/')[0]; // Remove port and path if present
+    // Ensure we're using the exact whitelisted domain (no protocol, no port, no paths)
+    // Remove protocol (https:// or http://) if present
+    let cleanHost = host.replace(/^https?:\/\//, ''); // Remove http:// or https://
+    cleanHost = cleanHost.split(':')[0].split('/')[0]; // Remove port and path if present
     
     console.log('  - Final host used:', cleanHost);
     
