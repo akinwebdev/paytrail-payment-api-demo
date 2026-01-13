@@ -163,20 +163,26 @@
 
         // Function to initialize Klarna SDK with locale
         async function initializeKlarnaSDK(locale) {
+            // If SDK is already initialized, don't reinitialize (causes custom element registration errors)
+            if (Klarna) {
+                console.log('⚠️ SDK already initialized. Locale cannot be changed without page reload.');
+                return Klarna;
+            }
+
             // Get Klarna Client ID from server
-                const configResponse = await fetch('/api/klarna/config');
-                if (!configResponse.ok) {
+            const configResponse = await fetch('/api/klarna/config');
+            if (!configResponse.ok) {
                 console.error('Failed to fetch Klarna config:', configResponse.status);
                 throw new Error('Failed to fetch Klarna configuration');
-                }
-                const config = await configResponse.json();
+            }
+            const config = await configResponse.json();
             const clientId = config.clientId;
 
             // Initialize Klarna WebSDK
             const { KlarnaSDK } = await import("https://js.klarna.com/web-sdk/v2/klarna.mjs");
 
             Klarna = await KlarnaSDK({ 
-                    clientId: clientId,
+                clientId: clientId,
                 products: ["PAYMENT"], // Ensure products are properly specified for best performance
                 locale: locale,
             });
@@ -277,15 +283,12 @@
                         const newLocale = e.target.value;
                         console.log('Locale changed to:', newLocale);
                         
-                        // Note: Klarna SDK locale is set during initialization and cannot be changed
-                        // To change locale, the page needs to be reloaded
-                        if (confirm(`To change the locale to ${newLocale}, the page needs to be reloaded. Reload now?`)) {
+                        // Note: Klarna SDK locale is set during initialization and cannot be changed dynamically
+                        // The locale affects the SDK initialization, so changing it requires a page reload
+                        if (newLocale !== currentLocale) {
                             // Store locale preference and reload
                             sessionStorage.setItem('klarnaLocale', newLocale);
                             window.location.reload();
-                        } else {
-                            // Revert dropdown to previous locale
-                            localeSelect.value = currentLocale;
                         }
                     });
                 }
@@ -301,15 +304,12 @@
                     const newLocale = e.target.value;
                     console.log('Locale changed to:', newLocale);
                     
-                    // Note: Klarna SDK locale is set during initialization and cannot be changed
-                    // To change locale, the page needs to be reloaded
-                    if (confirm(`To change the locale to ${newLocale}, the page needs to be reloaded. Reload now?`)) {
+                    // Note: Klarna SDK locale is set during initialization and cannot be changed dynamically
+                    // The locale affects the SDK initialization, so changing it requires a page reload
+                    if (newLocale !== currentLocale) {
                         // Store locale preference and reload
                         sessionStorage.setItem('klarnaLocale', newLocale);
                         window.location.reload();
-                    } else {
-                        // Revert dropdown to previous locale
-                        localeSelect.value = currentLocale;
                     }
                 });
             }
