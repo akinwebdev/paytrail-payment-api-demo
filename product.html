@@ -549,6 +549,7 @@
                             paymentRequestId: data.paymentRequestId, // Pass the server-created payment request ID
                             collectCustomerProfile: ["profile:email", "profile:name", "profile:phone", "profile:billing_address"],
                             customerInteractionConfig: {
+                                method: 'DEVICE_BEST',
                                 returnUrl: returnUrl,
                             },
                         };
