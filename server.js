@@ -589,7 +589,7 @@ app.post('/api/klarna/payment-request', async (req, res) => {
             amount: amount || 1590, // Default to 15.90 EUR in cents
             payment_request_reference: paymentRequestReference,
             customer_interaction_config: {
-                method: 'HANDOVER',
+                method: 'DEVICE_BEST',
                 return_url: returnUrl
             }
         };
