@@ -362,35 +362,10 @@
             KlarnaInstance.Payment.on("error", (err) => {
                 // #region agent log
                 console.error('[DEBUG] Klarna error event', err);
-                fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:320',message:'Klarna error event',data:{errorCode:err.errorCode,errorMessage:err.errorMessage,error:JSON.stringify(err)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'P'})}).catch(()=>{});
+                fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:357',message:'Klarna error event',data:{errorCode:err.errorCode,errorMessage:err.errorMessage,error:JSON.stringify(err)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'P'})}).catch(()=>{});
                 // #endregion
                 console.error("Klarna Payment error:", err);
                 alert(`An error occurred: ${err.errorCode} - ${err.errorMessage}`);
-            });
-
-            // Add event listeners for other events that might fire
-            KlarnaInstance.Payment.on("initiate", (paymentRequest) => {
-                // #region agent log
-                console.log('[DEBUG] Klarna initiate event', paymentRequest);
-                fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:initiate',message:'Klarna initiate event',data:{hasPaymentRequest:!!paymentRequest,paymentRequestId:paymentRequest?.paymentRequestId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'T'})}).catch(()=>{});
-                // #endregion
-                console.log("Klarna Payment initiate event:", paymentRequest);
-            });
-
-            KlarnaInstance.Payment.on("ready", () => {
-                // #region agent log
-                console.log('[DEBUG] Klarna ready event');
-                fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:ready',message:'Klarna ready event',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'U'})}).catch(()=>{});
-                // #endregion
-                console.log("Klarna Payment ready event");
-            });
-
-            KlarnaInstance.Payment.on("loading", (isLoading) => {
-                // #region agent log
-                console.log('[DEBUG] Klarna loading event', isLoading);
-                fetch('http://127.0.0.1:7242/ingest/013cfa0f-d6bd-4506-879d-0bb4433fa130',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'product.html:loading',message:'Klarna loading event',data:{isLoading:isLoading},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'V'})}).catch(()=>{});
-                // #endregion
-                console.log("Klarna Payment loading event:", isLoading);
             });
 
             KlarnaInstance.Payment.on(
