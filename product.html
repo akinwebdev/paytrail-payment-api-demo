@@ -186,7 +186,9 @@
                 const { KlarnaSDK } = await import('https://js.klarna.com/web-sdk/v2/klarna.mjs');
                 
                 // Initialize Klarna SDK with clientId and products
-                console.log('Initializing Klarna SDK with clientId:', klarnaClientId);
+                console.log('🔑 Initializing Klarna SDK with clientId:', klarnaClientId);
+                console.log('🔑 Client ID length:', klarnaClientId?.length);
+                console.log('🔑 Client ID preview:', klarnaClientId ? `${klarnaClientId.substring(0, 10)}...` : 'MISSING');
                 const klarna = await KlarnaSDK({
                     clientId: klarnaClientId,
                     products: ["PAYMENT"],
@@ -230,11 +232,14 @@
                             customer: {}
                         },
                         customerInteractionConfig: {
+                            method: "HANDOVER", // Explicitly use HANDOVER method for redirect flow
                             returnUrl: returnUrl
                         }
                     };
                     
                     console.log('✅ Returning payment request payload:', payload);
+                    console.log('✅ Customer interaction method:', payload.customerInteractionConfig?.method);
+                    console.log('✅ Return URL:', payload.customerInteractionConfig?.returnUrl);
                     return payload;
                 };
                 
