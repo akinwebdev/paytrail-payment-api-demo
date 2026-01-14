@@ -433,7 +433,7 @@
                     // Get return URL - use current origin to match validation requirements
                     // Using camelCase paymentRequest format to match working examples
                     // Note: The domain must be whitelisted in Klarna's portal for redirects to work
-                    const returnUrl = `${window.location.origin}/payment-success?id={klarna.paymentRequest.id}&token={klarna.paymentRequest.payment_token}`;
+                    const returnUrl = `${window.location.origin}/payment-success`;
                     
                     console.log('🔗 Return URL:', returnUrl);
                     console.log('✅ Return URL validation: URL is', returnUrl.startsWith('http') ? 'valid' : 'INVALID');
