@@ -227,10 +227,32 @@
             // Log the current origin - this is what Klarna sees for domain whitelisting
             console.log('🌐 Current origin (what Klarna sees for whitelisting):', window.location.origin);
             console.log('🌐 Current hostname:', window.location.hostname);
+            console.log('🌐 Current protocol:', window.location.protocol);
             console.log('🌐 Full URL:', window.location.href);
+            
+            // Log document.referrer to see if there's a different origin context
+            console.log('🌐 Document referrer:', document.referrer);
+            
+            // Check if running in iframe (like CodePen's cdpn.io vs codepen.io)
+            if (window.self !== window.top) {
+                console.warn('⚠️ Running in iframe context!');
+                console.warn('⚠️ The actual origin Klarna sees might be:', window.top.location.origin);
+                console.warn('⚠️ Make sure to whitelist BOTH:', window.location.origin, 'AND', window.top.location.origin);
+            }
+            
+            // Vercel-specific origin detection
+            const isVercel = window.location.hostname.includes('vercel.app');
+            if (isVercel) {
+                console.log('📦 Vercel deployment detected');
+                console.log('📦 Possible origins to whitelist:');
+                console.log('  1. Production:', window.location.origin);
+                console.log('  2. Preview deployments may use different subdomains');
+                console.log('  3. Check Vercel dashboard for actual deployment URL');
+            }
 
             console.log('🔑 Using Client ID:', clientId);
-            console.log('⚠️ Make sure this Client ID is whitelisted for:', window.location.origin);
+            console.log('⚠️ IMPORTANT: Make sure this Client ID is whitelisted for:', window.location.origin);
+            console.log('⚠️ If using Vercel preview deployments, whitelist the preview URL too!');
 
             updateSDKStatus('🔄 Initializing Klarna SDK...');
 
@@ -393,8 +415,17 @@
                 // initiate can return PaymentRequestData directly (not async Promise)
                 // https://docs.klarna.com/websdk/v2/interfaces/payment.KlarnaPaymentButtonConfig.html#initiate
                 initiate: () => {
-                    console.log('Button initiate called - returning PaymentRequestData');
-                    console.log('Current origin:', window.location.origin);
+                    console.log('🔵 Button initiate called - returning PaymentRequestData');
+                    console.log('📍 Current origin:', window.location.origin);
+                    console.log('📍 Current hostname:', window.location.hostname);
+                    console.log('📍 Current protocol:', window.location.protocol);
+                    console.log('📍 Document referrer:', document.referrer);
+                    
+                    // Check for iframe context (like CodePen's cdpn.io)
+                    if (window.self !== window.top) {
+                        console.warn('⚠️ Running in iframe! Top origin:', window.top.location.origin);
+                        console.warn('⚠️ Klarna may see top-level origin instead of iframe origin');
+                    }
                     
                     // Generate unique references
                     const paymentRef = `pay-ref-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -403,6 +434,9 @@
                     // Using camelCase paymentRequest format to match working examples
                     // Note: The domain must be whitelisted in Klarna's portal for redirects to work
                     const returnUrl = `${window.location.origin}/payment-success?id={klarna.paymentRequest.id}&token={klarna.paymentRequest.payment_token}`;
+                    
+                    console.log('🔗 Return URL:', returnUrl);
+                    console.log('✅ Return URL validation: URL is', returnUrl.startsWith('http') ? 'valid' : 'INVALID');
                     
                     // PaymentRequestData structure matching Val Town demo pattern
                     const paymentRequestData = {
@@ -431,7 +465,12 @@
                         }
                     };
                     
-                    console.log('📤 Returning PaymentRequestData to WebSDK:', JSON.stringify(paymentRequestData, null, 2));
+                    // Validate payment request data before returning
+                    console.log('📤 Returning PaymentRequestData to WebSDK:');
+                    console.log('  - Currency:', paymentRequestData.currency);
+                    console.log('  - Amount:', paymentRequestData.amount);
+                    console.log('  - Return URL:', paymentRequestData.customerInteractionConfig.returnUrl);
+                    console.log('  - Full data:', JSON.stringify(paymentRequestData, null, 2));
                     
                     // Return PaymentRequestData directly (not async Promise)
                     return paymentRequestData;
@@ -449,6 +488,14 @@
                     klarnaPaymentButton.on('error', (error) => {
                         console.error('❌ Klarna button error event:', error);
                         console.error('Error details:', JSON.stringify(error, null, 2));
+                        console.error('Error code:', error?.errorCode);
+                        console.error('Error message:', error?.errorMessage);
+                        console.error('Validation errors:', error?.validationErrors);
+                        
+                        // Show user-friendly error message
+                        if (error?.errorMessage) {
+                            alert(`Klarna Payment Error: ${error.errorMessage}\n\nError Code: ${error.errorCode || 'Unknown'}\n\nCheck console for details.`);
+                        }
                     });
                     
                     klarnaPaymentButton.on('complete', (paymentRequest) => {
