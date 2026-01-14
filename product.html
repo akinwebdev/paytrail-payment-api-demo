@@ -138,6 +138,7 @@
                     <select id="locale-select" style="padding: 0.5rem; border: 1px solid #E0E0E0; border-radius: 4px; font-size: 1rem; width: 100%; max-width: 200px; background: white; color: #0B051D;">
                         <option value="en-GB" selected>en-GB</option>
                         <option value="en-US">en-US</option>
+                        <option value="en-FI">en-FI</option>
                         <option value="sv-SE">sv-SE</option>
                         <option value="no-NO">no-NO</option>
                         <option value="da-DK">da-DK</option>
@@ -398,15 +399,16 @@
                     // Generate unique references
                     const paymentRef = `pay-ref-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
                     
-                    // Get return URL (use current origin)
+                    // Get return URL - use current origin to match validation requirements
                     // Using camelCase paymentRequest format to match working examples
+                    // Note: The domain must be whitelisted in Klarna's portal for redirects to work
                     const returnUrl = `${window.location.origin}/payment-success?id={klarna.paymentRequest.id}&token={klarna.paymentRequest.payment_token}`;
                     
                     // PaymentRequestData structure matching Val Town demo pattern
                     const paymentRequestData = {
-                        currency: "EUR",
+                    currency: "EUR",
                         amount: 15900,
-                        shippingConfig: {
+                    shippingConfig: {
                             mode: "EDITABLE"
                         },
                         collectCustomerProfile: [
@@ -415,16 +417,16 @@
                             "profile:phone",
                             "profile:billing_address"
                         ],
-                        supplementaryPurchaseData: {
-                            lineItems: [
-                                {
+                    supplementaryPurchaseData: {
+                        lineItems: [
+                            {
                                     name: "Demo Product",
                                     quantity: 1,
                                     totalAmount: 15900
                                 }
                             ]
-                        },
-                        customerInteractionConfig: {
+                    },
+                    customerInteractionConfig: {
                             returnUrl: returnUrl
                         }
                     };
