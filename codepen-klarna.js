@@ -83,7 +83,7 @@ if (storedLocale) {
                     const placement = Klarna.Messaging.placement({
                         key: 'credit-promotion-badge',
                         locale: currentLocale,
-                        amount: 1590
+                        amount: 15900
                     });
                     
                     // Add error handler for messaging placement
@@ -156,7 +156,7 @@ if (storedLocale) {
                         // Prepare payload matching Klarna API requirements
                         const payload = {
                             currency: "EUR",
-                            amount: 1590,
+                            amount: 15900,
                             payment_request_reference: paymentRef,
                             supplementary_purchase_data: {
                                 purchase_reference: purchaseRef,

@@ -542,7 +542,7 @@ async function createKlarnaPaymentRequest(data, req) {
     
     const payload = {
         currency: data.currency || "EUR",
-        amount: data.amount || 1590,
+        amount: data.amount || 15900,
         payment_request_reference: `pay-ref-${crypto.randomUUID()}`,
         supplementary_purchase_data: {
             purchase_reference: `pay-ref-${crypto.randomUUID()}`,
