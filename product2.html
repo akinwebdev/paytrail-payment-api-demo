@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Klarna Network Payment Selector</title>
+    <link rel="stylesheet" href="/fonts/klarna-fonts.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Klarna Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: #F9F8F5;
+            color: #0B051D;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .header {
+            margin-bottom: 2rem;
+        }
+        
+        .back-link {
+            color: #0B051D;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        
+        h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            color: #5A5A5A;
+            font-size: 0.95rem;
+        }
+        
+        .info-banner {
+            background-color: #E8F4F8;
+            border: 1px solid #B8D4E3;
+            border-radius: 4px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+        
+        .info-banner.warning {
+            background-color: #FFF4E6;
+            border-color: #FFD699;
+        }
+        
+        .config-section {
+            background: white;
+            border: 1px solid #E0E0E0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .config-section h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #5A5A5A;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #E0E0E0;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-family: 'Klarna Mono', monospace;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #0B051D;
+        }
+        
+        .btn {
+            background-color: #0B051D;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .btn:hover {
+            background-color: #1a1a2e;
+        }
+        
+        .btn:disabled {
+            background-color: #CCCCCC;
+            cursor: not-allowed;
+        }
+        
+        .btn-secondary {
+            background-color: #E0E0E0;
+            color: #0B051D;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #D0D0D0;
+        }
+        
+        .payment-section {
+            background: white;
+            border: 1px solid #E0E0E0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .payment-section h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        
+        #klarna-payment-button {
+            margin-top: 1rem;
+        }
+        
+        .status {
+            padding: 0.75rem;
+            border-radius: 4px;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .status.success {
+            background-color: #E8F5E9;
+            color: #2E7D32;
+            border: 1px solid #A5D6A7;
+        }
+        
+        .status.error {
+            background-color: #FFEBEE;
+            color: #C62828;
+            border: 1px solid #EF9A9A;
+        }
+        
+        .status.info {
+            background-color: #E3F2FD;
+            color: #1565C0;
+            border: 1px solid #90CAF9;
+        }
+        
+        .logs {
+            background: #1E1E1E;
+            color: #D4D4D4;
+            padding: 1rem;
+            border-radius: 4px;
+            font-family: 'Klarna Mono', monospace;
+            font-size: 0.85rem;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 1rem;
+        }
+        
+        .log-entry {
+            margin-bottom: 0.5rem;
+            padding: 0.25rem 0;
+        }
+        
+        .log-entry.error {
+            color: #F48771;
+        }
+        
+        .log-entry.success {
+            color: #89E5A0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="/" class="back-link">← Back to Home</a>
+            <h1>Klarna Network Payment Selector</h1>
+            <p class="subtitle">Based on Val Town demo - Klarna Payment Authorization API integration</p>
+        </div>
+        
+        <div class="info-banner" id="info-banner">
+            <strong>ℹ️ Info:</strong> Configure your Klarna credentials below to get started.
+        </div>
+        
+        <div class="config-section">
+            <h2>Configuration</h2>
+            <div class="form-group">
+                <label for="client-id-input">Klarna Client ID:</label>
+                <input 
+                    type="text" 
+                    id="client-id-input" 
+                    placeholder="Enter your Klarna Client ID"
+                />
+            </div>
+            <div class="form-group">
+                <label for="locale-select">Locale:</label>
+                <select id="locale-select">
+                    <option value="en-GB" selected>en-GB</option>
+                    <option value="en-US">en-US</option>
+                    <option value="en-FI">en-FI</option>
+                    <option value="sv-SE">sv-SE</option>
+                    <option value="no-NO">no-NO</option>
+                    <option value="da-DK">da-DK</option>
+                    <option value="fi-FI">fi-FI</option>
+                    <option value="de-DE">de-DE</option>
+                    <option value="nl-NL">nl-NL</option>
+                    <option value="fr-FR">fr-FR</option>
+                    <option value="es-ES">es-ES</option>
+                    <option value="it-IT">it-IT</option>
+                    <option value="pl-PL">pl-PL</option>
+                </select>
+            </div>
+            <button class="btn" id="init-sdk-button">Initialize Klarna SDK</button>
+            <div id="sdk-status" class="status info" style="display: none;"></div>
+        </div>
+        
+        <div class="payment-section" id="payment-section" style="display: none;">
+            <h2>Payment</h2>
+            <p>Amount: <strong>€159.00</strong> (15900 cents)</p>
+            <div id="klarna-payment-button"></div>
+            <div id="payment-status" class="status" style="display: none;"></div>
+        </div>
+        
+        <div class="config-section">
+            <h2>Backend Logs</h2>
+            <div class="logs" id="logs">
+                <div class="log-entry">Ready. Enter Client ID and click "Initialize Klarna SDK" to begin.</div>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module">
+        let Klarna = null;
+        let currentLocale = 'en-GB';
+        let currentClientId = null;
+        
+        // Logging utility
+        function log(message, type = 'info') {
+            const logs = document.getElementById('logs');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logs.appendChild(entry);
+            logs.scrollTop = logs.scrollHeight;
+            console.log(message);
+        }
+        
+        // Update status display
+        function updateStatus(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = message;
+                element.className = `status ${type}`;
+                element.style.display = 'block';
+            }
+        }
+        
+        // Get selected locale
+        function getSelectedLocale() {
+            const select = document.getElementById('locale-select');
+            return select ? select.value : 'en-GB';
+        }
+        
+        // Get client ID from input
+        function getClientId() {
+            const input = document.getElementById('client-id-input');
+            return input ? input.value.trim() : '';
+        }
+        
+        // Initialize Klarna SDK
+        async function initializeKlarnaSDK(locale, clientId) {
+            if (!clientId) {
+                updateStatus('sdk-status', '⚠️ Please enter a Klarna Client ID', 'error');
+                throw new Error('Client ID is required');
+            }
+            
+            if (Klarna && currentClientId === clientId) {
+                log('⚠️ SDK already initialized with this Client ID', 'info');
+                updateStatus('sdk-status', '✅ SDK already initialized', 'success');
+                return Klarna;
+            }
+            
+            log(`🔄 Initializing Klarna SDK with locale: ${locale}, Client ID: ${clientId.substring(0, 20)}...`);
+            updateStatus('sdk-status', '🔄 Initializing Klarna SDK...', 'info');
+            
+            try {
+                const { KlarnaSDK } = await import("https://js.klarna.com/web-sdk/v2/klarna.mjs");
+                
+                Klarna = await KlarnaSDK({ 
+                    clientId: clientId,
+                    products: ["PAYMENT"],
+                    locale: locale,
+                });
+                
+                currentClientId = clientId;
+                sessionStorage.setItem('klarnaClientId', clientId);
+                
+                log('✅ Klarna SDK initialized successfully');
+                updateStatus('sdk-status', '✅ SDK initialized successfully', 'success');
+                
+                // Show payment section and mount button
+                document.getElementById('payment-section').style.display = 'block';
+                mountKlarnaButton();
+                
+                return Klarna;
+            } catch (error) {
+                log(`❌ Failed to initialize Klarna SDK: ${error.message}`, 'error');
+                updateStatus('sdk-status', `❌ Error: ${error.message}`, 'error');
+                throw error;
+            }
+        }
+        
+        // Mount Klarna payment button
+        function mountKlarnaButton() {
+            if (!Klarna?.Payment?.button) {
+                log('❌ Klarna.Payment.button is not available', 'error');
+                return;
+            }
+            
+            const buttonElement = document.getElementById('klarna-payment-button');
+            if (!buttonElement) {
+                log('❌ Button container not found', 'error');
+                return;
+            }
+            
+            // Clear previous button
+            buttonElement.innerHTML = '';
+            
+            log('🔵 Creating Klarna payment button...');
+            
+            const buttonConfig = {
+                intents: ["PAY"],
+                initiationMode: "ON_PAGE",
+                locale: currentLocale,
+                initiate: () => {
+                    log('🔵 Button initiate called - returning PaymentRequestData');
+                    
+                    const returnUrl = `${window.location.origin}/payment-success`;
+                    
+                    const paymentRequestData = {
+                        currency: "EUR",
+                        amount: 15900,
+                        shippingConfig: {
+                            mode: "EDITABLE"
+                        },
+                        collectCustomerProfile: [
+                            "profile:email",
+                            "profile:name",
+                            "profile:phone",
+                            "profile:billing_address"
+                        ],
+                        supplementaryPurchaseData: {
+                            lineItems: [
+                                {
+                                    name: "Demo Product",
+                                    quantity: 1,
+                                    totalAmount: 15900
+                                }
+                            ]
+                        },
+                        customerInteractionConfig: {
+                            returnUrl: returnUrl
+                        }
+                    };
+                    
+                    log(`📤 Returning PaymentRequestData: ${JSON.stringify(paymentRequestData, null, 2)}`);
+                    
+                    return paymentRequestData;
+                }
+            };
+            
+            try {
+                const klarnaPaymentButton = Klarna.Payment.button(buttonConfig);
+                
+                // Add event listeners
+                if (klarnaPaymentButton.on) {
+                    klarnaPaymentButton.on('error', (error) => {
+                        log(`❌ Klarna button error: ${JSON.stringify(error, null, 2)}`, 'error');
+                        updateStatus('payment-status', `Error: ${error.errorMessage || error.message}`, 'error');
+                    });
+                    
+                    klarnaPaymentButton.on('complete', (paymentRequest) => {
+                        log(`✅ Payment complete: ${JSON.stringify(paymentRequest, null, 2)}`, 'success');
+                        updateStatus('payment-status', '✅ Payment completed successfully!', 'success');
+                        
+                        const interoperabilityToken = paymentRequest?.stateContext?.interoperabilityToken;
+                        if (interoperabilityToken) {
+                            log(`🔑 Interoperability Token: ${interoperabilityToken}`, 'success');
+                            sessionStorage.setItem('klarnaInteroperabilityToken', interoperabilityToken);
+                        }
+                    });
+                }
+                
+                klarnaPaymentButton.mount('#klarna-payment-button');
+                log('✅ Klarna button mounted successfully', 'success');
+            } catch (error) {
+                log(`❌ Error mounting button: ${error.message}`, 'error');
+                updateStatus('payment-status', `Error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Load stored preferences
+        const storedLocale = sessionStorage.getItem('klarnaLocale');
+        if (storedLocale) {
+            currentLocale = storedLocale;
+            const localeSelect = document.getElementById('locale-select');
+            if (localeSelect) {
+                localeSelect.value = storedLocale;
+            }
+        }
+        
+        const storedClientId = sessionStorage.getItem('klarnaClientId');
+        if (storedClientId) {
+            const clientIdInput = document.getElementById('client-id-input');
+            if (clientIdInput) {
+                clientIdInput.value = storedClientId;
+            }
+        }
+        
+        // Event listeners
+        document.addEventListener("DOMContentLoaded", () => {
+            const initSdkButton = document.getElementById('init-sdk-button');
+            const clientIdInput = document.getElementById('client-id-input');
+            const localeSelect = document.getElementById('locale-select');
+            
+            if (initSdkButton) {
+                initSdkButton.addEventListener('click', async () => {
+                    const clientId = getClientId();
+                    const locale = getSelectedLocale();
+                    
+                    if (!clientId) {
+                        updateStatus('sdk-status', '⚠️ Please enter a Klarna Client ID', 'error');
+                        return;
+                    }
+                    
+                    try {
+                        await initializeKlarnaSDK(locale, clientId);
+                    } catch (error) {
+                        log(`Failed to initialize SDK: ${error.message}`, 'error');
+                    }
+                });
+            }
+            
+            if (clientIdInput) {
+                clientIdInput.addEventListener('keypress', async (e) => {
+                    if (e.key === 'Enter') {
+                        const clientId = getClientId();
+                        const locale = getSelectedLocale();
+                        if (clientId) {
+                            try {
+                                await initializeKlarnaSDK(locale, clientId);
+                            } catch (error) {
+                                log(`Failed to initialize SDK: ${error.message}`, 'error');
+                            }
+                        }
+                    }
+                });
+            }
+            
+            if (localeSelect) {
+                localeSelect.addEventListener('change', (e) => {
+                    const newLocale = e.target.value;
+                    if (newLocale !== currentLocale) {
+                        sessionStorage.setItem('klarnaLocale', newLocale);
+                        window.location.reload();
+                    }
+                });
+            }
+            
+            // Auto-initialize if client ID is stored
+            if (storedClientId) {
+                log('🔄 Auto-initializing with stored Client ID...');
+                initializeKlarnaSDK(currentLocale, storedClientId).catch(error => {
+                    log(`Auto-initialization failed: ${error.message}`, 'error');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

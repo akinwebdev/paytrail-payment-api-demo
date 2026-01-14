@@ -498,6 +498,52 @@ app.get('/api/klarna/config', (req, res) => {
     }
 });
 
+// GET /api/config - Klarna Network Payment Selector config endpoint
+app.get('/api/config', (req, res) => {
+    try {
+        const KLARNA_WEBSDK_CLIENT_ID = process.env.KLARNA_WEBSDK_CLIENT_ID;
+        const PARTNER_ACCOUNT_ID = process.env.KLARNA_PARTNER_ACCOUNT_ID;
+        
+        // Determine auth mode based on available credentials
+        const authMode = PARTNER_ACCOUNT_ID ? 'ACQUIRING_PARTNER' : 'SUB_PARTNER';
+        
+        const config = {
+            clientId: KLARNA_WEBSDK_CLIENT_ID || null,
+            authMode: authMode,
+            partnerAccountId: PARTNER_ACCOUNT_ID || null
+        };
+        
+        res.json(config);
+    } catch (error) {
+        console.error('❌ Error getting config:', error.message);
+        res.status(500).json({
+            error: 'Failed to get configuration',
+            message: error.message
+        });
+    }
+});
+
+// GET /api/health - Health check endpoint for Klarna Network Payment Selector
+app.get('/api/health', (req, res) => {
+    try {
+        const KLARNA_WEBSDK_CLIENT_ID = process.env.KLARNA_WEBSDK_CLIENT_ID;
+        const PARTNER_ACCOUNT_ID = process.env.KLARNA_PARTNER_ACCOUNT_ID;
+        const authMode = PARTNER_ACCOUNT_ID ? 'ACQUIRING_PARTNER' : 'SUB_PARTNER';
+        
+        res.json({
+            status: 'ok',
+            authMode: authMode,
+            mtls: 'not_configured', // mTLS not implemented yet
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: 'error',
+            message: error.message
+        });
+    }
+});
+
 // Helper function to create Klarna payment request
 async function createKlarnaPaymentRequest(data, req) {
     const axios = require('axios');
@@ -766,6 +812,11 @@ app.use((req, res, next) => {
 // Serve product detail page
 app.get('/product', (req, res) => {
     res.sendFile(path.join(__dirname, 'product.html'));
+});
+
+// Serve product2 page (Klarna Network Payment Selector)
+app.get('/product2', (req, res) => {
+    res.sendFile(path.join(__dirname, 'product2.html'));
 });
 
 // Serve payment success page
