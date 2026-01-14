@@ -152,7 +152,16 @@
                     </select>
                 </div>
                 <div id="osm-placement" style="margin-top: 1.5rem;"></div>
-                <div id="klarna-payment-button" style="margin-top: 1.5rem;"></div>
+                
+                <div style="margin-top: 2rem; padding: 1rem; background-color: #F0F0F0; border-radius: 4px;">
+                    <h3 style="margin-top: 0; font-size: 1.1rem; font-weight: 600;">Button 1: Direct PaymentRequestData (Current)</h3>
+                    <div id="klarna-payment-button" style="margin-top: 1rem;"></div>
+                </div>
+                
+                <div style="margin-top: 2rem; padding: 1rem; background-color: #F0F0F0; border-radius: 4px;">
+                    <h3 style="margin-top: 0; font-size: 1.1rem; font-weight: 600;">Button 2: Presentation API (Working from klarna-network-payment-selector)</h3>
+                    <div id="klarna-payment-button-2" style="margin-top: 1rem;"></div>
+                </div>
             </div>
         </div>
         
@@ -279,6 +288,7 @@
                 // Mount components after successful initialization
                 mountMessagingPlacement();
                 mountKlarnaButton();
+                mountKlarnaButton2(); // New button using presentation API
                 
                 return Klarna;
             } catch (error) {
@@ -539,6 +549,119 @@
             } catch (error) {
                 console.error('❌ Error mounting button:', error);
                 updateSDKStatus(`❌ Error mounting button: ${error.message}`, true);
+            }
+        }
+
+        // Function to mount the second button using Presentation API (working approach from klarna-network-payment-selector)
+        async function mountKlarnaButton2() {
+            console.log('🔵 Attempting to mount Klarna button 2 (Presentation API approach)...');
+            
+            const buttonElement = document.getElementById('klarna-payment-button-2');
+            if (!buttonElement) {
+                console.error('Button 2 container not found');
+                return;
+            }
+
+            if (!Klarna?.Payment?.presentation) {
+                console.error('Klarna.Payment.presentation is not available');
+                return;
+            }
+
+            try {
+                // Step 1: Get presentation from SDK
+                console.log('📋 Getting payment presentation...');
+                const presentationConfig = {
+                    currency: "EUR",
+                    amount: 15900,
+                    locale: currentLocale,
+                    intents: ["PAY"]
+                };
+
+                const presentation = await Klarna.Payment.presentation(presentationConfig);
+                console.log('✅ Presentation received:', presentation);
+                console.log('📋 Payment Option ID:', presentation.paymentOption?.paymentOptionId);
+
+                // Step 2: Use the button component from presentation
+                const buttonComponent = presentation.paymentOption.paymentButton.component;
+                const paymentOptionId = presentation.paymentOption.paymentOptionId;
+
+                // Step 3: Create button with initiate callback
+                // The initiate handler receives an object from the SDK containing:
+                // - klarnaNetworkSessionToken: the session token string (optional)
+                // - paymentOptionId: the payment option ID
+                buttonComponent({
+                    shape: "default",
+                    theme: "default",
+                    initiationMode: "DEVICE_BEST",
+                    initiate: async (initiateData) => {
+                        console.log('🔵 Button 2 initiate callback received:', initiateData);
+                        const token = initiateData?.klarnaNetworkSessionToken || null;
+                        console.log('🔑 Klarna Network Session Token:', token ? token : '(not provided)');
+                        console.log('📋 Payment Option ID from initiateData:', initiateData?.paymentOptionId);
+                        
+                        // Call server endpoint to create payment request
+                        try {
+                            const paymentRequestData = {
+                                currency: "EUR",
+                                amount: 15900,
+                                paymentOptionId: paymentOptionId,
+                                paymentRequestReference: `pay-ref-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                                supplementaryPurchaseData: {
+                                    purchaseReference: `purchase-ref-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                                    lineItems: [{
+                                        name: "Demo Product",
+                                        quantity: 1,
+                                        totalAmount: 15900,
+                                        unitPrice: 15900
+                                    }]
+                                }
+                            };
+
+                            const requestBody = {
+                                klarnaNetworkSessionToken: token,
+                                paymentOptionId: paymentOptionId,
+                                paymentRequestData: paymentRequestData,
+                                returnUrl: `${window.location.origin}/payment-success`,
+                                authMode: "SUB_PARTNER"
+                            };
+
+                            console.log('📤 Calling /api/payment-request with:', JSON.stringify(requestBody, null, 2));
+
+                            const response = await fetch('/api/payment-request', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(requestBody)
+                            });
+
+                            const res = await response.json();
+                            console.log('📥 Server response:', res);
+
+                            if (!response.ok) {
+                                throw new Error(res.message || 'Payment request failed');
+                            }
+
+                            // For SUB_PARTNER mode with status "CREATED", return paymentRequestId
+                            if (res.status === "CREATED") {
+                                console.log('✅ Returning paymentRequestId to SDK:', res.paymentRequestId);
+                                return { paymentRequestId: res.paymentRequestId };
+                            } else if (res.status === "COMPLETED") {
+                                // Tokenized payments - payment completed directly
+                                return { returnUrl: res.successUrl || `${window.location.origin}/payment-success` };
+                            } else {
+                                throw new Error(`Unexpected payment request status: ${res.status}`);
+                            }
+                        } catch (error) {
+                            console.error('❌ Payment request error:', error);
+                            alert('There was an error processing the payment. Please try again.');
+                            return null;
+                        }
+                    }
+                }).mount('#klarna-payment-button-2');
+
+                console.log('✅ Klarna button 2 mounted successfully (Presentation API approach)');
+            } catch (error) {
+                console.error('❌ Error mounting button 2:', error);
+                buttonElement.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
             }
         }
 

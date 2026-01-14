@@ -653,7 +653,105 @@ app.get('/api/klarna-proxy', async (req, res) => {
     }
 });
 
-// POST /api/klarna/payment-request - Create Klarna payment request
+// POST /api/payment-request - Create Klarna payment request (for Presentation API button)
+// This endpoint handles requests from the Presentation API button approach
+app.post('/api/payment-request', async (req, res) => {
+    try {
+        const {
+            klarnaNetworkSessionToken,
+            paymentOptionId,
+            paymentRequestData,
+            returnUrl,
+            authMode
+        } = req.body;
+
+        console.log('🔄 Creating Klarna payment request (Presentation API approach)...');
+        console.log('Request body:', JSON.stringify(req.body, null, 2));
+
+        if (!paymentRequestData) {
+            return res.status(400).json({
+                status: "ERROR",
+                message: "Missing required field: paymentRequestData is required"
+            });
+        }
+
+        const resolvedPaymentOptionId = paymentOptionId || paymentRequestData.paymentOptionId;
+        if (!resolvedPaymentOptionId) {
+            return res.status(400).json({
+                status: "ERROR",
+                message: "Missing paymentOptionId: provide it directly or include it in paymentRequestData"
+            });
+        }
+
+        // Build Klarna API payload
+        const paymentRequest = {
+            currency: paymentRequestData.currency,
+            payment_request_reference: paymentRequestData.paymentRequestReference || `req_${Date.now()}`,
+            payment_option_id: resolvedPaymentOptionId,
+            customer_interaction_config: {
+                method: "HANDOVER",
+                return_url: returnUrl || `${req.protocol}://${req.get('host')}/payment-success`
+            }
+        };
+
+        if (paymentRequestData.amount) {
+            paymentRequest.amount = paymentRequestData.amount;
+        }
+
+        if (paymentRequestData.supplementaryPurchaseData) {
+            paymentRequest.supplementary_purchase_data = {
+                purchase_reference: paymentRequestData.supplementaryPurchaseData.purchaseReference || `purchase_${Date.now()}`,
+                line_items: paymentRequestData.supplementaryPurchaseData.lineItems || []
+            };
+        }
+
+        const requestUrl = `${KLARNA_BASE_URL}/v2/payment/requests`;
+        const headers = {
+            'Authorization': `Basic ${Buffer.from(`${KLARNA_API_KEY}:`).toString('base64')}`,
+            'Content-Type': 'application/json'
+        };
+
+        if (klarnaNetworkSessionToken) {
+            headers['Klarna-Network-Session-Token'] = klarnaNetworkSessionToken;
+        }
+
+        console.log('📤 Calling Klarna API:', requestUrl);
+        console.log('📤 Headers:', JSON.stringify(headers, null, 2));
+        console.log('📤 Payload:', JSON.stringify(paymentRequest, null, 2));
+
+        const response = await axios.post(requestUrl, paymentRequest, { headers });
+        const klarnaData = response.data;
+
+        console.log('📥 Klarna API response:', JSON.stringify(klarnaData, null, 2));
+
+        const paymentRequestState = klarnaData.state;
+
+        if (paymentRequestState === "COMPLETED") {
+            return res.json({
+                status: "COMPLETED",
+                paymentRequestId: klarnaData.payment_request_id,
+                successUrl: returnUrl || `${req.protocol}://${req.get('host')}/payment-success`
+            });
+        }
+
+        const paymentRequestId = klarnaData.state_context?.customer_interaction?.payment_request_id;
+        const paymentRequestUrl = klarnaData.state_context?.customer_interaction?.payment_request_url;
+
+        return res.json({
+            status: "CREATED",
+            paymentRequestId: paymentRequestId,
+            paymentRequestUrl: paymentRequestUrl
+        });
+    } catch (error) {
+        console.error('❌ Payment request error:', error.response?.data || error.message);
+        res.status(error.response?.status || 500).json({
+            status: "ERROR",
+            message: error.response?.data?.error_message || error.message
+        });
+    }
+});
+
+// POST /api/klarna/payment-request - Create Klarna payment request (legacy endpoint)
 // NOTE: This endpoint exists but is currently unused. The frontend uses client-side payment request creation
 // via PaymentRequestData in the initiate callback. This endpoint is kept for potential server-side flow.
 app.post('/api/klarna/payment-request', async (req, res) => {
