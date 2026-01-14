@@ -382,16 +382,16 @@
             }
 
             // Create button configuration with initiate callback
-            // The initiate callback returns the payment request configuration directly
-            // The WebSDK will handle creating the payment request internally
+            // Matching the pattern from Val Town demo and kec-index.js
+            // The initiate callback returns the payment request configuration directly (not async)
             const buttonConfig = {
                 intents: ["PAY"],
-                initiationMode: "DEVICE_BEST", // SDK chooses the best method based on device
+                initiationMode: "ON_PAGE", // Changed from DEVICE_BEST to match working examples
                 locale: currentLocale, // Set button locale to match SDK initialization locale
-                // According to Klarna WebSDK docs:
-                // initiate can return Promise<PaymentRequestData> for client-side payment request creation
+                // According to Klarna WebSDK docs and working examples:
+                // initiate can return PaymentRequestData directly (not async Promise)
                 // https://docs.klarna.com/websdk/v2/interfaces/payment.KlarnaPaymentButtonConfig.html#initiate
-                initiate: async () => {
+                initiate: () => {
                     console.log('Button initiate called - returning PaymentRequestData');
                     console.log('Current origin:', window.location.origin);
                     
@@ -399,40 +399,39 @@
                     const paymentRef = `pay-ref-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
                     
                     // Get return URL (use current origin)
-                    // Using payment_token as per Klarna WebSDK documentation
-                    const returnUrl = `${window.location.origin}/payment-success?payment_request_id={klarna.payment_request.id}&state={klarna.payment_request.state}&payment_token={klarna.payment_request.payment_token}`;
+                    // Using camelCase paymentRequest format to match working examples
+                    const returnUrl = `${window.location.origin}/payment-success?id={klarna.paymentRequest.id}&token={klarna.paymentRequest.payment_token}`;
                     
-                    // PaymentRequestData structure according to Klarna WebSDK documentation
-                    // Returns Promise<PaymentRequestData> for client-side payment request creation
+                    // PaymentRequestData structure matching Val Town demo pattern
                     const paymentRequestData = {
                         currency: "EUR",
                         amount: 1590,
-                        paymentRequestReference: paymentRef,
+                        shippingConfig: {
+                            mode: "EDITABLE"
+                        },
+                        collectCustomerProfile: [
+                            "profile:email",
+                            "profile:name",
+                            "profile:phone",
+                            "profile:billing_address"
+                        ],
+                        supplementaryPurchaseData: {
+                            lineItems: [
+                                {
+                                    name: "Demo Product",
+                                    quantity: 1,
+                                    totalAmount: 1590
+                                }
+                            ]
+                        },
                         customerInteractionConfig: {
                             returnUrl: returnUrl
                         }
                     };
                     
-                    // Validate required PaymentRequestData fields
-                    // Note: customerInteractionConfig is optional per WebSDK spec, but we include it for returnUrl
-                    const requiredFields = ['currency', 'amount'];
-                    const missingFields = requiredFields.filter(field => !paymentRequestData[field]);
+                    console.log('📤 Returning PaymentRequestData to WebSDK:', JSON.stringify(paymentRequestData, null, 2));
                     
-                    if (missingFields.length > 0) {
-                        console.error('❌ Missing required PaymentRequestData fields:', missingFields);
-                        throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
-                    }
-                    
-                    // Validate returnUrl only if customerInteractionConfig is provided
-                    if (paymentRequestData.customerInteractionConfig && !paymentRequestData.customerInteractionConfig.returnUrl) {
-                        console.error('❌ Missing returnUrl in customerInteractionConfig');
-                        throw new Error('customerInteractionConfig.returnUrl is required when customerInteractionConfig is provided');
-                    }
-                    
-                    console.log('📤 Returning Promise<PaymentRequestData> to WebSDK:', JSON.stringify(paymentRequestData, null, 2));
-                    console.log('✅ PaymentRequestData validation passed');
-                    
-                    // Return Promise<PaymentRequestData> as per WebSDK documentation
+                    // Return PaymentRequestData directly (not async Promise)
                     return paymentRequestData;
                 }
             };
@@ -450,8 +449,31 @@
                         console.error('Error details:', JSON.stringify(error, null, 2));
                     });
                     
-                    klarnaPaymentButton.on('complete', (data) => {
-                        console.log('✅ Klarna button complete event:', data);
+                    klarnaPaymentButton.on('complete', (paymentRequest) => {
+                        console.log('✅ Klarna button complete event:', paymentRequest);
+                        console.log('📋 Full payment request data:', JSON.stringify(paymentRequest, null, 2));
+                        
+                        // Extract interoperability_token from stateContext
+                        // This token is needed to send to Paytrail for Klarna network integration
+                        const interoperabilityToken = paymentRequest?.stateContext?.interoperabilityToken;
+                        
+                        if (interoperabilityToken) {
+                            console.log('🔑 Interoperability Token:', interoperabilityToken);
+                            
+                            // Store in sessionStorage for later use (e.g., sending to Paytrail)
+                            try {
+                                sessionStorage.setItem('klarnaInteroperabilityToken', interoperabilityToken);
+                                console.log('✅ Interoperability token stored in sessionStorage');
+                            } catch (e) {
+                                console.warn('⚠️ Unable to store interoperability token:', e);
+                            }
+                            
+                            // TODO: Send interoperability_token to Paytrail API
+                            // The token should be sent as: providerDetails.klarna.networkSessionToken
+                            // Example: { providerDetails: { klarna: { networkSessionToken: interoperabilityToken } } }
+                        } else {
+                            console.warn('⚠️ No interoperability_token found in payment request stateContext');
+                        }
                     });
                     
                     klarnaPaymentButton.on('shippingaddresschange', (data) => {
